@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Sistem Informasi Data Generus" />
+    <meta property="og:description" content="Sistem Informasi Data Generus" />
+    <meta property="og:type" content="Elektronik Digital Data Generus" />
+    <meta
+      property="og:url"
+      content="https://datacenter.digitaldatagenerus.com"
+    />
+    <title>Digital Data Center</title>
+    <script>
+      // Prevent FOUC - set theme before React renders
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem("theme");
+          const theme = savedTheme || "light"; // Default to light theme
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {
+          // localStorage might be blocked in incognito/private mode
+          // Default to light theme
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
