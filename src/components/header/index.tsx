@@ -1,4 +1,11 @@
-const GlobalTopBar = ({ theme, toggleTheme }: any) => {
+type Theme = "light" | "dark";
+
+interface GlobalTopBarProps {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+
+const GlobalTopBar = ({ theme, toggleTheme }: GlobalTopBarProps) => {
   return (
     <nav className="p-2 flex flex-row items-center justify-between shadow-lg z-10 bg-[#1E88E5] dark:bg-gray-800 w-full fixed top-0 transition-all duration-300 ease-in-out">
       {/* Container untuk Button biar nggak mepet */}

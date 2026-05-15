@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 import {
   FiMessageCircle,
   FiSearch,
@@ -69,28 +70,9 @@ const banners = [
 ];
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme === "dark") {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -243,7 +225,7 @@ const HomePage = () => {
                     label="Buka Menu"
                     size="small"
                     outlined
-                    onClick={() => (window.location.href = menu.path)}
+                    onClick={() => navigate(menu.path)}
                   />
                 </div>
 

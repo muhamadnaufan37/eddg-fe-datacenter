@@ -1,11 +1,22 @@
+import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
+import { Toast } from "primereact/toast";
 import { useTheme } from "../contexts/ThemeContext";
+import { setToastRef } from "../services/toast";
 
 const Layout = () => {
   const { theme, toggleTheme } = useTheme();
+  const toastRef = useRef<Toast>(null);
+
+  useEffect(() => {
+    if (toastRef.current) {
+      setToastRef(toastRef.current);
+    }
+  }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+    <div className="flex min-h-screen flex-col bg-gray-100 transition-colors duration-200 dark:bg-gray-900">
+      <Toast ref={toastRef} />
       {/* Header */}
       <header className="p-2 flex flex-row items-center justify-between shadow-lg z-10 bg-[#1E88E5] dark:bg-gray-800 w-full fixed top-0 transition-all duration-300 ease-in-out">
         {/* Tombol Toggle Theme */}
@@ -51,8 +62,10 @@ const Layout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 pt-20">
-        <Outlet />
+      <main className="flex flex-1 w-full flex-col items-stretch justify-start px-4 py-6 pt-24 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

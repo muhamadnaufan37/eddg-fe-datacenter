@@ -1,5 +1,12 @@
 import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
+import CaiRegistrationPage from "../pages/data-center/cai/RegistrationPage";
+import CaiShowPage from "../pages/data-center/cai/ShowPage";
+import SensusRegistrationPage from "../pages/data-center/sensus/RegistrationPage";
+import SensusShowPage from "../pages/data-center/sensus/ShowPage";
+import PresensiPage from "../pages/data-center/presensi";
+import EticketPage from "../pages/data-center/eticket";
+import CekPajakKendaraanPage from "../pages/digital-data/sambara/CekPajakKendaraanPage";
 
 export const routes = [
   {
@@ -9,6 +16,34 @@ export const routes = [
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "digital-data/cai/registration",
+        element: <CaiRegistrationPage />,
+      },
+      {
+        path: "digital-data/cai/:kodeUuid",
+        element: <CaiShowPage />,
+      },
+      {
+        path: "digital-data/sensus/registration",
+        element: <SensusRegistrationPage />,
+      },
+      {
+        path: "digital-data/sensus/:kodeUuid",
+        element: <SensusShowPage />,
+      },
+      {
+        path: "digital-data/presensi",
+        element: <PresensiPage />,
+      },
+      {
+        path: "digital-data/eticket",
+        element: <EticketPage />,
+      },
+      {
+        path: "digital-data/sambara/cek-pajak-kendaraan",
+        element: <CekPajakKendaraanPage />,
       },
       {
         path: "*",
