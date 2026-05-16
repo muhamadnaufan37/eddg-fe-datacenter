@@ -182,7 +182,7 @@ export const fetchNamaPesertaReference = async (): Promise<
   ReferenceOption[]
 > => {
   const response = await api.get(
-    "/api/v1/data_center/reference/list-nama-peserta",
+    "/api/v1/data_center/reference/list-nama-peserta-sensus",
   );
   return normalizeReferenceList(response.data);
 };
@@ -221,9 +221,13 @@ export const submitEticket = async (payload: {
   appendIfPresent(formData, "nama_kelompok", payload.nama_kelompok);
   appendIfPresent(formData, "lampiran", payload.lampiran ?? undefined);
 
-  const response = await api.post("/api/v1/data_center/etiket", formData, {
-    headers: multipartHeaders,
-  });
+  const response = await api.post(
+    "/api/v1/data_center/pengaduan/eticket",
+    formData,
+    {
+      headers: multipartHeaders,
+    },
+  );
 
   return response.data;
 };

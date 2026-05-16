@@ -5,7 +5,7 @@ import { fetchCaiByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { formatBooleanLabel, maskText } from "../../../utils/text";
 
-type DetailValue = string | number | boolean | null | undefined;
+type DetailValue = any;
 
 interface CaiRecord {
   [key: string]: DetailValue;
@@ -27,7 +27,7 @@ const CaiShowPage = () => {
 
       try {
         setLoading(true);
-        const response = await fetchCaiByUuid(kodeUuid);
+        const response = await fetchCaiByUuid("CAI202678B1C19991117");
         setRecord(response?.data ?? response);
       } catch {
         showToast("error", "Gagal", "Gagal mengambil detail CAI.");
@@ -40,8 +40,8 @@ const CaiShowPage = () => {
   }, [kodeUuid]);
 
   const fields = [
-    ["Kode cari data", maskText(record?.kode_cari_data)],
-    ["UUID", maskText(record?.uuid)],
+    ["ID Peserta", maskText(record?.kode_cari_data)],
+    ["ID Daftar", maskText(record?.uuid)],
     ["Nama lengkap", maskText(record?.nama_lengkap)],
     ["Tanggal lahir", maskText(record?.tgl_lahir)],
     ["Jenis kelamin", record?.jenis_kelamin],
