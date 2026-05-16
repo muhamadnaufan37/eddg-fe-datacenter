@@ -262,9 +262,10 @@ export const searchSensusData = async (payload: {
 };
 
 export const searchPengaduanData = async (payload: { kontak: string }) => {
-  const response = await api.get("/api/v1/data_center/pengaduan/search", {
-    params: payload,
-  });
+  const response = await api.post(
+    "/api/v1/data_center/pengaduan/search",
+    payload,
+  );
   return response.data;
 };
 
