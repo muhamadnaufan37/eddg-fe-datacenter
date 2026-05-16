@@ -146,7 +146,7 @@ const CekPajakKendaraanPage = () => {
   }, [result]);
 
   return (
-    <div className="w-full max-w-6xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-start justify-between">
           <div>
@@ -243,14 +243,14 @@ const CekPajakKendaraanPage = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                     {label}
                   </p>
-                  <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-white">
+                  <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900 dark:text-white">
                     {value ?? "-"}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex min-h-[20rem] items-center justify-center rounded-3xl border border-dashed border-slate-300 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            <div className="flex min-h-80 items-center justify-center rounded-3xl border border-dashed border-slate-300 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
               Isi data kendaraan lalu tekan tombol cek pajak.
             </div>
           )}

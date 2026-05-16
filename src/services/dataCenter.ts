@@ -27,6 +27,7 @@ type ReferenceEntry = {
   id?: string | number;
   uuid?: string;
   kode_uuid?: string;
+  kode_cari_data?: string;
   value?: string | number;
   label?: string;
   nama_lengkap?: string;
@@ -54,6 +55,7 @@ const normalizeReferenceList = (payload: unknown) => {
   return items.map((item) => {
     const entry = isRecord(item) ? (item as ReferenceEntry) : {};
     const value =
+      entry.kode_cari_data ??
       entry.id ??
       entry.uuid ??
       entry.kode_uuid ??
@@ -71,11 +73,43 @@ const normalizeReferenceList = (payload: unknown) => {
       entry.label ??
       entry.nm_peserta ??
       entry.name ??
-      String(value);
+      (entry.kode_cari_data
+        ? `${entry.nama_lengkap ?? entry.nm_peserta ?? entry.name ?? entry.kode_cari_data} (${entry.kode_cari_data})`
+        : String(value));
 
     return {
       label: String(label),
       value: String(value),
+    };
+  });
+};
+
+const normalizeNamaPesertaReference = (payload: unknown) => {
+  const source =
+    (payload as { data?: unknown })?.data ??
+    (payload as { result?: unknown })?.result ??
+    payload;
+
+  const items = Array.isArray(source)
+    ? source
+    : Array.isArray((source as { data?: unknown[] })?.data)
+      ? (source as { data: unknown[] }).data
+      : [];
+
+  return items.map((item) => {
+    const entry = isRecord(item) ? (item as ReferenceEntry) : {};
+    const namaLengkap =
+      entry.nama_lengkap ?? entry.nm_peserta ?? entry.name ?? "";
+    const kodeCariData = entry.kode_cari_data ?? entry.id ?? entry.uuid ?? "";
+
+    const label =
+      kodeCariData && namaLengkap
+        ? `${namaLengkap}`
+        : namaLengkap || kodeCariData || "";
+
+    return {
+      label: String(label),
+      value: String(namaLengkap),
     };
   });
 };
@@ -103,7 +137,7 @@ export const submitCaiRegistration = async (payload: {
   const formData = new FormData();
 
   appendIfPresent(formData, "nama_lengkap", payload.nama_lengkap);
-  appendIfPresent(formData, "tgl_lahir", payload.tgl_lahir);
+  appendIfPresent(formData, "tanggal_lahir", payload.tgl_lahir);
   appendIfPresent(formData, "jenis_kelamin", payload.jenis_kelamin);
   appendIfPresent(formData, "tmpt_daerah", payload.tmpt_daerah);
   appendIfPresent(formData, "tmpt_desa", payload.tmpt_desa);
@@ -184,7 +218,54 @@ export const fetchNamaPesertaReference = async (): Promise<
   const response = await api.get(
     "/api/v1/data_center/reference/list-nama-peserta-sensus",
   );
-  return normalizeReferenceList(response.data);
+  return normalizeNamaPesertaReference(response.data);
+};
+
+export const fetchNamaPesertaCaiReference = async (): Promise<
+  ReferenceOption[]
+> => {
+  const response = await api.get(
+    "/api/v1/data_center/reference/list-nama-peserta-cai",
+  );
+  return normalizeNamaPesertaReference(response.data);
+};
+
+export const fetchNamaPesertaSensusReference = async (): Promise<
+  ReferenceOption[]
+> => {
+  const response = await api.get(
+    "/api/v1/data_center/reference/list-nama-peserta-sensus",
+  );
+  return normalizeNamaPesertaReference(response.data);
+};
+
+export const searchCaiData = async (payload: {
+  nama_lengkap: string;
+  tgl_lahir: string;
+  jenis_kelamin: string;
+}) => {
+  const response = await api.get("/api/v1/data_center/cai/search", {
+    params: payload,
+  });
+  return response.data;
+};
+
+export const searchSensusData = async (payload: {
+  nama_lengkap: string;
+  tanggal_lahir: string;
+  nama_ortu: string;
+}) => {
+  const response = await api.get("/api/v1/data_center/sensus/search", {
+    params: payload,
+  });
+  return response.data;
+};
+
+export const searchPengaduanData = async (payload: { kontak: string }) => {
+  const response = await api.get("/api/v1/data_center/pengaduan/search", {
+    params: payload,
+  });
+  return response.data;
 };
 
 export const submitPresensi = async (payload: {
@@ -193,6 +274,7 @@ export const submitPresensi = async (payload: {
   add_by_petugas: string;
   latitude: string;
   longitude: string;
+  status_presensi: string;
   radius_meter: number;
 }) => {
   const response = await api.post(

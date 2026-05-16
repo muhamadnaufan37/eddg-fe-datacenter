@@ -5,10 +5,20 @@ import { fetchCaiByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { formatBooleanLabel, maskText } from "../../../utils/text";
 
-type DetailValue = any;
+type DetailValue = string | number | null | undefined;
 
 interface CaiRecord {
-  [key: string]: DetailValue;
+  kode_cari_data?: string;
+  uuid?: string;
+  nama_lengkap?: string;
+  tgl_lahir?: string;
+  jenis_kelamin?: string;
+  utusan?: string;
+  nm_daerah?: string;
+  nm_desa?: string;
+  nm_kelompok?: string;
+  tahun?: number;
+  is_active?: boolean;
   img_url?: string;
 }
 
@@ -27,7 +37,7 @@ const CaiShowPage = () => {
 
       try {
         setLoading(true);
-        const response = await fetchCaiByUuid("CAI202678B1C19991117");
+        const response = await fetchCaiByUuid(kodeUuid);
         setRecord(response?.data ?? response);
       } catch {
         showToast("error", "Gagal", "Gagal mengambil detail CAI.");
@@ -39,10 +49,10 @@ const CaiShowPage = () => {
     void loadRecord();
   }, [kodeUuid]);
 
-  const fields = [
+  const fields: Array<[string, DetailValue]> = [
     ["ID Peserta", maskText(record?.kode_cari_data)],
     ["ID Daftar", maskText(record?.uuid)],
-    ["Nama lengkap", maskText(record?.nama_lengkap)],
+    ["Nama lengkap", record?.nama_lengkap],
     ["Tanggal lahir", maskText(record?.tgl_lahir)],
     ["Jenis kelamin", record?.jenis_kelamin],
     ["Utusan", record?.utusan],
@@ -54,7 +64,7 @@ const CaiShowPage = () => {
   ];
 
   return (
-    <div className="w-full max-w-6xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -101,7 +111,7 @@ const CaiShowPage = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                     {label}
                   </p>
-                  <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-white">
+                  <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900 dark:text-white">
                     {value ?? "-"}
                   </p>
                 </div>

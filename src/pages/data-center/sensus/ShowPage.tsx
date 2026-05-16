@@ -5,10 +5,29 @@ import { fetchSensusByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { formatBooleanLabel, maskText } from "../../../utils/text";
 
-type DetailValue = string | number | boolean | null | undefined;
+type DetailValue = string | number | null | undefined;
 
 interface SensusRecord {
-  [key: string]: DetailValue;
+  kode_cari_data?: string;
+  nama_lengkap?: string;
+  nama_panggilan?: string;
+  tempat_lahir?: string;
+  tanggal_lahir?: string;
+  umur?: number;
+  alamat?: string;
+  jenis_kelamin?: string;
+  no_telepon?: string;
+  nama_ayah?: string;
+  nama_ibu?: string;
+  hoby?: string;
+  nm_pekerjaan?: string;
+  usia_menikah?: string;
+  kriteria_pasangan?: string;
+  status_pernikahan?: boolean;
+  status_sambung?: string;
+  nm_daerah?: string;
+  nm_desa?: string;
+  nm_kelompok?: string;
   img_url?: string;
 }
 
@@ -39,10 +58,10 @@ const SensusShowPage = () => {
     void loadRecord();
   }, [kodeUuid]);
 
-  const fields = [
+  const fields: Array<[string, DetailValue]> = [
     ["Kode cari data", maskText(record?.kode_cari_data)],
     ["Nama lengkap", maskText(record?.nama_lengkap)],
-    ["Nama panggilan", maskText(record?.nama_panggilan)],
+    ["Nama panggilan", record?.nama_panggilan],
     ["Tempat lahir", maskText(record?.tempat_lahir)],
     ["Tanggal lahir", maskText(record?.tanggal_lahir)],
     ["Umur", record?.umur],
@@ -63,7 +82,7 @@ const SensusShowPage = () => {
   ];
 
   return (
-    <div className="w-full max-w-6xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -110,7 +129,7 @@ const SensusShowPage = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                     {label}
                   </p>
-                  <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-white">
+                  <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900 dark:text-white">
                     {value ?? "-"}
                   </p>
                 </div>

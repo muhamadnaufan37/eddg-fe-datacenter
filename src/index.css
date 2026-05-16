@@ -1,18 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
-@import "tailwindcss";
+@import "tailwindcss/theme" layer(tailwind-base);
+@import "tailwindcss/preflight" layer(tailwind-base);
+@import "tailwindcss/utilities" layer(tailwind-utilities);
 @layer tailwind-base, primereact, tailwind-utilities;
 
 @import "primereact/resources/themes/lara-light-blue/theme.css";
-
-@layer tailwind-base {
-  @tailwind base;
-}
-
-@layer tailwind-utilities {
-  @tailwind components;
-  @tailwind utilities;
-}
 
 @theme {
   --color-scheme: light dark;
@@ -36,8 +29,21 @@
 }
 
 :root {
-  /* 2. Ubah font-family menjadi Roboto */
   font-family: "Roboto", sans-serif;
+  color-scheme: light;
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-surface-elevated: #ffffff;
+  --app-surface-muted: #f1f5f9;
+  --app-border: #dbe3ee;
+  --app-text: #0f172a;
+  --app-text-muted: #475569;
+  --app-primary: #0ea5e9;
+  --app-primary-strong: #0284c7;
+  --app-primary-contrast: #ffffff;
+  --app-hover: #e0f2fe;
+  --app-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+  --app-overlay: rgba(15, 23, 42, 0.55);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -45,21 +51,160 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root.dark,
+.dark {
+  color-scheme: dark;
+  --app-bg: #020617;
+  --app-surface: #0f172a;
+  --app-surface-elevated: #111827;
+  --app-surface-muted: #1e293b;
+  --app-border: #334155;
+  --app-text: #e2e8f0;
+  --app-text-muted: #94a3b8;
+  --app-primary: #38bdf8;
+  --app-primary-strong: #0ea5e9;
+  --app-primary-contrast: #020617;
+  --app-hover: #1e293b;
+  --app-shadow: 0 24px 48px rgba(2, 6, 23, 0.55);
+  --app-overlay: rgba(2, 6, 23, 0.72);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--app-primary-strong);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--app-primary);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
+.p-inputtext,
+.p-password input,
+.p-inputnumber-input,
+.p-calendar input,
+.p-dropdown,
+.p-multiselect {
+  background: var(--app-surface);
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+.p-inputtext:enabled:focus,
+.p-password input:enabled:focus,
+.p-inputnumber-input:enabled:focus,
+.p-calendar input:enabled:focus,
+.p-dropdown.p-focus,
+.p-multiselect.p-focus {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-primary) 16%, transparent);
+}
+
+.p-button {
+  border-radius: 1rem;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined) {
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+  color: var(--app-primary-contrast);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):enabled:hover {
+  background: var(--app-primary-strong);
+  border-color: var(--app-primary-strong);
+}
+
+.p-button.p-button-text,
+.p-button.p-button-outlined {
+  color: var(--app-text);
+  border-color: var(--app-border);
+}
+
+.p-button.p-button-text:enabled:hover,
+.p-button.p-button-outlined:enabled:hover {
+  background: var(--app-hover);
+  color: var(--app-text);
+}
+
+.p-toast .p-toast-message {
+  background: var(--app-surface-elevated);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.p-toast .p-toast-message .p-toast-message-content {
+  color: inherit;
+}
+
+.p-toast .p-toast-message .p-toast-icon-close {
+  color: var(--app-text-muted);
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  border-left: 4px solid #22c55e;
+}
+
+.p-toast .p-toast-message.p-toast-message-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  border-left: 4px solid #f59e0b;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  border-left: 4px solid #ef4444;
+}
+
+.p-datepicker {
+  background: var(--app-surface-elevated);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+.p-datepicker .p-datepicker-header {
+  background: var(--app-surface-elevated);
+  color: var(--app-text);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.p-datepicker .p-datepicker-header .p-datepicker-title {
+  color: var(--app-text);
+}
+
+.p-datepicker table th {
+  color: var(--app-text-muted);
+}
+
+.p-datepicker table td > span {
+  color: var(--app-text);
+}
+
+.p-datepicker table td.p-datepicker-today > span {
+  background: var(--app-hover);
+}
+
+.p-component-overlay {
+  background: var(--app-overlay);
 }

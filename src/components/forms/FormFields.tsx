@@ -10,9 +10,12 @@ import type {
 import { getIn } from "formik";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
+import type { InputNumberProps } from "primereact/inputnumber";
 import { Password } from "primereact/password";
+import { Calendar } from "primereact/calendar";
 import Select from "react-select";
-import type { SingleValue, MultiValue } from "react-select";
+import type { SingleValue, MultiValue, StylesConfig } from "react-select";
+import { useTheme } from "../../contexts/ThemeContext";
 
 type FormikBag = {
   values: Record<string, unknown>;
@@ -60,6 +63,12 @@ const fieldError = "mt-1 text-xs font-medium text-rose-600 dark:text-rose-400";
 const fieldLabel =
   "mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200";
 
+const primeFieldClass =
+  "w-full p-inputtext-sm rounded-2xl border border-slate-200 bg-slate-50 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500";
+
+const primeFieldErrorClass =
+  "border-rose-500 focus:border-rose-500 focus:ring-rose-500/10 dark:border-rose-400";
+
 const shouldShowError = (formik: FormikBag, name: string) => {
   return Boolean(getIn(formik.touched, name) || formik.submitCount > 0);
 };
@@ -72,6 +81,21 @@ const getFieldError = (formik: FormikBag, name: string) => {
   }
 
   return String(error);
+};
+
+const formatLocalDate = (value: Date) => {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parseLocalDate = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
+    return null;
+  }
+  return new Date(year, month - 1, day);
 };
 
 export const TextField = ({
@@ -379,6 +403,7 @@ export const PrimeInputText = ({
   helperText,
   className,
   required = false,
+  type,
   ...inputProps
 }: CommonFieldProps &
   Omit<
@@ -386,6 +411,45 @@ export const PrimeInputText = ({
     "name" | "value" | "onChange" | "onBlur"
   >) => {
   const error = getFieldError(formik, name);
+  const value =
+    (getIn(formik.values, name) as string | number | undefined) ?? "";
+  const isDateField = type === "date";
+  const inputValue = String(value);
+
+  if (isDateField) {
+    return (
+      <label className={className}>
+        <span className={fieldLabel}>
+          {label} {required ? <span className="text-rose-500">*</span> : null}
+        </span>
+        <Calendar
+          name={name}
+          value={
+            typeof value === "string" && value ? parseLocalDate(value) : null
+          }
+          onChange={(e) => {
+            formik.setFieldValue(
+              name,
+              e.value && e.value instanceof Date
+                ? formatLocalDate(e.value)
+                : "",
+            );
+          }}
+          className={`w-full ${primeFieldClass} ${error ? "p-invalid" : ""}`}
+          onBlur={() => formik.setFieldTouched(name, true)}
+          inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
+          panelClassName="rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          touchUI
+        />
+        {helperText ? (
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {helperText}
+          </p>
+        ) : null}
+        {error ? <p className={fieldError}>{error}</p> : null}
+      </label>
+    );
+  }
 
   return (
     <label className={className}>
@@ -394,10 +458,9 @@ export const PrimeInputText = ({
       </span>
       <InputText
         {...inputProps}
+        type={type}
         name={name}
-        value={
-          (getIn(formik.values, name) as string | number | undefined) ?? ""
-        }
+        value={inputValue}
         onChange={(e) => {
           const event = {
             target: { name, value: e.target.value },
@@ -405,8 +468,7 @@ export const PrimeInputText = ({
           formik.handleChange(event);
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
-        className={`w-full ${error ? "p-invalid" : ""}`}
-        style={{ borderRadius: "1rem" }}
+        className={`${primeFieldClass} ${error ? "p-invalid" : ""}`}
       />
       {helperText ? (
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -427,11 +489,20 @@ export const PrimeInputNumber = ({
   required = false,
   ...numberProps
 }: CommonFieldProps &
-  Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    "name" | "value" | "onChange" | "onBlur"
-  >) => {
+  Omit<InputNumberProps, "name" | "value" | "onValueChange" | "onBlur">) => {
   const error = getFieldError(formik, name);
+  const rawValue = getIn(formik.values, name) as
+    | string
+    | number
+    | null
+    | undefined;
+  const normalizedNumber =
+    typeof rawValue === "number"
+      ? rawValue
+      : typeof rawValue === "string" && rawValue.trim() !== ""
+        ? Number(rawValue)
+        : null;
+  const numberValue = Number.isNaN(normalizedNumber) ? null : normalizedNumber;
 
   return (
     <label className={className}>
@@ -441,15 +512,13 @@ export const PrimeInputNumber = ({
       <InputNumber
         {...numberProps}
         name={name}
-        value={
-          (getIn(formik.values, name) as string | number | undefined) ?? ""
-        }
+        value={numberValue}
         onValueChange={(e) => {
           formik.setFieldValue(name, e.value ?? "");
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
         className={`w-full ${error ? "p-invalid" : ""}`}
-        style={{ borderRadius: "1rem" }}
+        inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
         useGrouping={false}
       />
       {helperText ? (
@@ -496,8 +565,7 @@ export const PrimePassword = ({
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
         className={`w-full ${error ? "p-invalid" : ""}`}
-        inputClassName="w-full"
-        style={{ borderRadius: "1rem" }}
+        inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
         feedback={false}
         toggleMask
       />
@@ -523,6 +591,7 @@ interface PrimeSelectProps extends CommonFieldProps {
   isSearchable?: boolean;
   isLoading?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export const PrimeSelect = ({
@@ -537,10 +606,13 @@ export const PrimeSelect = ({
   isClearable = true,
   isSearchable = true,
   isLoading = false,
+  disabled = false,
   placeholder = "Pilih opsi",
 }: PrimeSelectProps) => {
+  const { theme } = useTheme();
   const error = getFieldError(formik, name);
   const value = getIn(formik.values, name);
+  const isDarkMode = theme === "dark";
 
   const selectedOption = useMemo(() => {
     if (isMulti && Array.isArray(value)) {
@@ -552,18 +624,154 @@ export const PrimeSelect = ({
     return options.find((opt) => opt.value === value) || null;
   }, [value, options, isMulti]);
 
+  const selectStyles = useMemo<StylesConfig<ReactSelectOption, boolean>>(
+    () => ({
+      control: (base, state) => ({
+        ...base,
+        minHeight: "44px",
+        borderRadius: "1rem",
+        borderColor: error
+          ? "#ef4444"
+          : state.isFocused
+            ? "#0ea5e9"
+            : isDarkMode
+              ? "#334155"
+              : "#cbd5e1",
+        backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+        boxShadow: state.isFocused
+          ? `0 0 0 4px ${isDarkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(14, 165, 233, 0.12)"}`
+          : "none",
+        opacity: disabled ? 0.72 : 1,
+        transition: "all 150ms ease",
+        "&:hover": {
+          borderColor: error
+            ? "#ef4444"
+            : disabled
+              ? isDarkMode
+                ? "#334155"
+                : "#cbd5e1"
+              : "#0ea5e9",
+        },
+      }),
+      valueContainer: (base) => ({
+        ...base,
+        padding: "0.125rem 0.875rem",
+      }),
+      singleValue: (base) => ({
+        ...base,
+        color: isDarkMode ? "#e2e8f0" : "#0f172a",
+      }),
+      input: (base) => ({
+        ...base,
+        color: isDarkMode ? "#e2e8f0" : "#0f172a",
+      }),
+      placeholder: (base) => ({
+        ...base,
+        color: isDarkMode ? "#94a3b8" : "#64748b",
+      }),
+      indicatorSeparator: (base) => ({
+        ...base,
+        backgroundColor: isDarkMode ? "#334155" : "#cbd5e1",
+      }),
+      dropdownIndicator: (base, state) => ({
+        ...base,
+        color: state.isFocused ? "#0ea5e9" : isDarkMode ? "#94a3b8" : "#64748b",
+        "&:hover": {
+          color: "#0ea5e9",
+        },
+      }),
+      clearIndicator: (base) => ({
+        ...base,
+        color: isDarkMode ? "#94a3b8" : "#64748b",
+        "&:hover": {
+          color: "#ef4444",
+        },
+      }),
+      menu: (base) => ({
+        ...base,
+        zIndex: 9999,
+        marginTop: "0.5rem",
+        overflow: "hidden",
+        borderRadius: "1rem",
+        border: `1px solid ${isDarkMode ? "#334155" : "#e2e8f0"}`,
+        backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+        boxShadow: isDarkMode
+          ? "0 24px 48px rgba(2, 6, 23, 0.55)"
+          : "0 24px 48px rgba(15, 23, 42, 0.12)",
+      }),
+      menuPortal: (base) => ({
+        ...base,
+        zIndex: 9999,
+      }),
+      menuList: (base) => ({
+        ...base,
+        padding: "0.5rem",
+      }),
+      option: (base, state) => ({
+        ...base,
+        borderRadius: "0.75rem",
+        margin: "0.125rem 0",
+        backgroundColor: state.isSelected
+          ? "#0ea5e9"
+          : state.isFocused
+            ? isDarkMode
+              ? "#1e293b"
+              : "#f1f5f9"
+            : isDarkMode
+              ? "#0f172a"
+              : "#ffffff",
+        color: state.isSelected
+          ? "#ffffff"
+          : isDarkMode
+            ? "#e2e8f0"
+            : "#0f172a",
+        cursor: state.isDisabled ? "not-allowed" : "pointer",
+        "&:active": {
+          backgroundColor: state.isSelected
+            ? "#0284c7"
+            : isDarkMode
+              ? "#334155"
+              : "#e2e8f0",
+        },
+      }),
+      multiValue: (base) => ({
+        ...base,
+        borderRadius: "9999px",
+        backgroundColor: isDarkMode ? "#1e293b" : "#e2e8f0",
+      }),
+      multiValueLabel: (base) => ({
+        ...base,
+        color: isDarkMode ? "#e2e8f0" : "#0f172a",
+      }),
+      multiValueRemove: (base) => ({
+        ...base,
+        color: isDarkMode ? "#94a3b8" : "#64748b",
+        "&:hover": {
+          color: "#ffffff",
+          backgroundColor: "#ef4444",
+          borderRadius: "9999px",
+        },
+      }),
+      noOptionsMessage: (base) => ({
+        ...base,
+        color: isDarkMode ? "#94a3b8" : "#64748b",
+      }),
+    }),
+    [disabled, error, isDarkMode],
+  );
+
   const handleChange = (
     newValue: SingleValue<ReactSelectOption> | MultiValue<ReactSelectOption>,
   ) => {
-    if (isMulti && Array.isArray(newValue)) {
+    if (isMulti) {
+      const multiValue = Array.isArray(newValue) ? newValue : [];
       formik.setFieldValue(
         name,
-        newValue.map((opt) => opt.value),
+        multiValue.map((opt) => opt.value),
       );
-    } else if (!isMulti && newValue && !Array.isArray(newValue)) {
-      formik.setFieldValue(name, newValue.value);
     } else {
-      formik.setFieldValue(name, isMulti ? [] : null);
+      const singleValue = newValue as SingleValue<ReactSelectOption>;
+      formik.setFieldValue(name, singleValue?.value ?? null);
     }
     formik.setFieldTouched(name, true);
   };
@@ -582,41 +790,13 @@ export const PrimeSelect = ({
         isClearable={isClearable}
         isSearchable={isSearchable}
         isLoading={isLoading}
+        isDisabled={disabled}
         placeholder={placeholder}
-        className={`rounded-2xl ${error ? "border-rose-500" : ""}`}
-        styles={{
-          control: (base) => ({
-            ...base,
-            borderRadius: "1rem",
-            borderColor: error ? "#e11d48" : "#cbd5e1",
-            backgroundColor: "white",
-            minHeight: "44px",
-            "&:hover": {
-              borderColor: error ? "#e11d48" : "#cbd5e1",
-            },
-            "&:focus": {
-              borderColor: "#0ea5e9",
-              outline: "none",
-            },
-          }),
-          option: (base, state) => ({
-            ...base,
-            borderRadius: "0.5rem",
-            backgroundColor: state.isSelected
-              ? "#0ea5e9"
-              : state.isFocused
-                ? "#f1f5f9"
-                : "white",
-            color: state.isSelected ? "white" : "#1e293b",
-            cursor: "pointer",
-          }),
-          menu: (base) => ({
-            ...base,
-            borderRadius: "1rem",
-            marginTop: "0.5rem",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          }),
-        }}
+        className="w-full"
+        styles={selectStyles}
+        menuPortalTarget={
+          typeof document !== "undefined" ? document.body : null
+        }
       />
       {helperText ? (
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">

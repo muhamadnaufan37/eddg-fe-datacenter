@@ -205,7 +205,7 @@ const SensusRegistrationPage = () => {
   }, [isLoadingPekerjaan, pekerjaanOptions.length]);
 
   return (
-    <div className="w-full max-w-6xl space-y-6">
+    <div className="w-full space-y-6">
       <StepperHeader
         title="Registrasi Sensus"
         description="Form registrasi sensus menggunakan stepper agar lebih mudah dipakai di perangkat mobile. Semua field wajib diisi, kecuali usia menikah dan kriteria pasangan yang bersifat opsional."
@@ -223,7 +223,7 @@ const SensusRegistrationPage = () => {
           </h2>
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/digital-data/sensus")}
             className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             ← Kembali

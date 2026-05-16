@@ -162,7 +162,7 @@ const CaiRegistrationPage = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl space-y-6">
+    <div className="w-full space-y-6">
       <StepperHeader
         title="Registrasi CAI"
         description="Form registrasi CAI dibuat bertahap agar lebih nyaman di perangkat mobile dan desktop. Semua input wajib diisi sesuai aturan utusan yang dipilih."
@@ -180,7 +180,7 @@ const CaiRegistrationPage = () => {
           </h2>
           <button
             type="button"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/digital-data/cai")}
             className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             ← Kembali

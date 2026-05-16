@@ -2,10 +2,16 @@ import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
 import CaiRegistrationPage from "../pages/data-center/cai/RegistrationPage";
 import CaiShowPage from "../pages/data-center/cai/ShowPage";
+import CaiMenuPage from "../pages/data-center/cai";
+import CaiSearchPage from "../pages/data-center/cai/SearchPage";
+import PengaduanMenuPage from "../pages/data-center/pengaduan";
+import PengaduanSearchPage from "../pages/data-center/pengaduan/SearchPage";
 import SensusRegistrationPage from "../pages/data-center/sensus/RegistrationPage";
+import SensusMenuPage from "../pages/data-center/sensus";
+import SensusSearchPage from "../pages/data-center/sensus/SearchPage";
 import SensusShowPage from "../pages/data-center/sensus/ShowPage";
 import PresensiPage from "../pages/data-center/presensi";
-import EticketPage from "../pages/data-center/eticket";
+import EticketPage from "../pages/data-center/pengaduan/eticket";
 import CekPajakKendaraanPage from "../pages/digital-data/sambara/CekPajakKendaraanPage";
 
 export const routes = [
@@ -18,27 +24,51 @@ export const routes = [
         element: <HomePage />,
       },
       {
+        path: "digital-data/cai",
+        element: <CaiMenuPage />,
+      },
+      {
         path: "digital-data/cai/registration",
         element: <CaiRegistrationPage />,
+      },
+      {
+        path: "digital-data/cai/search",
+        element: <CaiSearchPage />,
       },
       {
         path: "digital-data/cai/:kodeUuid",
         element: <CaiShowPage />,
       },
       {
+        path: "digital-data/sensus",
+        element: <SensusMenuPage />,
+      },
+      {
         path: "digital-data/sensus/registration",
         element: <SensusRegistrationPage />,
+      },
+      {
+        path: "digital-data/sensus/search",
+        element: <SensusSearchPage />,
       },
       {
         path: "digital-data/sensus/:kodeUuid",
         element: <SensusShowPage />,
       },
       {
+        path: "digital-data/pengaduan",
+        element: <PengaduanMenuPage />,
+      },
+      {
+        path: "digital-data/pengaduan/search",
+        element: <PengaduanSearchPage />,
+      },
+      {
         path: "digital-data/presensi",
         element: <PresensiPage />,
       },
       {
-        path: "digital-data/eticket",
+        path: "digital-data/pengaduan/eticket",
         element: <EticketPage />,
       },
       {

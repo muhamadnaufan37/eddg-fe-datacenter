@@ -10,32 +10,27 @@ import {
 
 import { AiFillCar } from "react-icons/ai";
 
-import { MdAppRegistration, MdOutlineEventAvailable } from "react-icons/md";
+import { MdOutlineEventAvailable } from "react-icons/md";
+import { BiUser, BiWater } from "react-icons/bi";
 
 const menus = [
   {
-    title: "Cari Data Generus",
-    description: "Menu untuk melakukan pencarian data generus / sensus.",
-    icon: <FiSearch size={22} />,
-    path: "/digital-data/sensus/search",
+    title: "Menu Sensus",
+    description: "Masuk ke menu sensus untuk memilih cari data atau buat data.",
+    icon: <BiUser size={22} />,
+    path: "/digital-data/sensus",
   },
   {
-    title: "Cari Data Peserta CAI",
-    description: "Menu untuk melakukan pencarian data peserta CAI.",
-    icon: <FiSearch size={22} />,
-    path: "/digital-data/cai/search",
+    title: "Menu CAI",
+    description: "Masuk ke menu CAI untuk memilih cari data atau buat data.",
+    icon: <BiWater size={22} />,
+    path: "/digital-data/cai",
   },
   {
-    title: "Registrasi Data Sensus",
-    description: "Menu pendaftaran data sensus.",
-    icon: <MdAppRegistration size={22} />,
-    path: "/digital-data/sensus/registration",
-  },
-  {
-    title: "Registrasi Data Peserta CAI",
-    description: "Menu pendaftaran data peserta CAI.",
-    icon: <MdAppRegistration size={22} />,
-    path: "/digital-data/cai/registration",
+    title: "Menu Pengaduan",
+    description: "Masuk ke menu pengaduan untuk cari data atau buat data.",
+    icon: <FiMessageCircle size={22} />,
+    path: "/digital-data/pengaduan",
   },
   {
     title: "Absensi Online",
@@ -43,12 +38,6 @@ const menus = [
       "Menu untuk melakukan absensi online untuk kegiatan dan acara tertentu.",
     icon: <MdOutlineEventAvailable size={22} />,
     path: "/digital-data/presensi",
-  },
-  {
-    title: "E-TICKET",
-    description: "Menu untuk melakukan aduan, saran, atau pertanyaan lainnya.",
-    icon: <FiMessageCircle size={22} />,
-    path: "/digital-data/eticket",
   },
   {
     title: "Cek Pajak Kendaraan",
