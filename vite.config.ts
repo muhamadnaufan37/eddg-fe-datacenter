@@ -8,14 +8,14 @@ export default defineConfig({
   // Use absolute base so built assets are referenced from site root.
   // This avoids requests for ./assets/... under nested client routes
   // which can cause the server to return index.html (text/html).
-  base: "/",
-  build: {
-    outDir: "dist",
-    assetsDir: "assets",
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-    },
-  },
+  // base: "/",
+  // build: {
+  //   outDir: "dist",
+  //   assetsDir: "assets",
+  //   rollupOptions: {
+  //     output: {
+  //       manualChunks: undefined,
+  //     },
+  //   },
+  // },
 });
