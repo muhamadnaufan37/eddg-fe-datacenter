@@ -84,15 +84,15 @@ const PengaduanSearchPage = () => {
           "Berhasil",
           response?.message ?? "Data pengaduan ditemukan.",
         );
-      } catch (error) {
+      } catch (error: any) {
         setResults([]);
         setSearched(true);
         showToast(
           "error",
           "Gagal",
-          error instanceof Error
-            ? error.message
-            : "Gagal mencari data pengaduan.",
+          error?.response?.data?.message ||
+            error?.message ||
+            "Gagal mencari data pengaduan.",
         );
       } finally {
         setIsSearching(false);

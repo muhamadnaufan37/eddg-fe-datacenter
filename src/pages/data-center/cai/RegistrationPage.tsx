@@ -129,13 +129,13 @@ const CaiRegistrationPage = () => {
         if (nextUuid) {
           navigate(`/digital-data/cai/${nextUuid}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         showToast(
           "error",
           "Gagal",
-          error instanceof Error
-            ? error.message
-            : "Gagal menyimpan registrasi CAI.",
+          error?.response?.data?.message ||
+            error?.message ||
+            "Gagal registrasi CAI.",
         );
       } finally {
         setIsSubmitting(false);

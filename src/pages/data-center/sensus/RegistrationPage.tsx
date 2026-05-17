@@ -159,13 +159,13 @@ const SensusRegistrationPage = () => {
         );
         helpers.resetForm();
         setActiveStep(0);
-      } catch (error) {
+      } catch (error: any) {
         showToast(
           "error",
           "Gagal",
-          error instanceof Error
-            ? error.message
-            : "Gagal menyimpan registrasi sensus.",
+          error?.response?.data?.message ||
+            error?.message ||
+            "Gagal menyimpan registrasi sensus.",
         );
       } finally {
         setIsSubmitting(false);

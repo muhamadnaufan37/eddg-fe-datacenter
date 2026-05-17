@@ -109,13 +109,15 @@ const SensusSearchPage = () => {
           "Berhasil",
           response?.message ?? "Data berhasil ditemukan.",
         );
-      } catch (error) {
+      } catch (error: any) {
         setResults([]);
         setSearched(true);
         showToast(
           "error",
           "Gagal",
-          error instanceof Error ? error.message : "Gagal mencari data sensus.",
+          error?.response?.data?.message ||
+            error?.message ||
+            "Gagal mencari data sensus.",
         );
       } finally {
         setIsSearching(false);

@@ -75,6 +75,10 @@ body,
   min-height: 100%;
 }
 
+.p-component {
+  font-family: "Roboto", sans-serif !important;
+}
+
 body {
   background: var(--app-bg);
   color: var(--app-text);
@@ -207,4 +211,24 @@ a:hover {
 
 .p-component-overlay {
   background: var(--app-overlay);
+}
+
+.p-toast {
+  max-width: 20rem !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  border-radius: 12px !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  border-radius: 12px !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  border-radius: 12px !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  border-radius: 12px !important;
 }
