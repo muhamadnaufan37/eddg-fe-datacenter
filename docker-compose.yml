@@ -5,6 +5,16 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - 5003:80
+      - 80:80
+      - 443:443
+    volumes:
+      # Mount Let's Encrypt certificates
+      - letsencrypt-data:/etc/letsencrypt
+      - ./nginx-custom.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      - DOMAIN=datacenter.digitaldatagenerus.com
     env_file:
       - .env
+
+volumes:
+  letsencrypt-data:
