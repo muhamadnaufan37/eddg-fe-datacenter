@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchSensusByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { formatBooleanLabel, maskText } from "../../../utils/text";
+import Sensitive from "../../../components/Sensitive";
 
 type DetailValue = string | number | null | undefined;
 
@@ -130,7 +131,7 @@ const SensusShowPage = () => {
                     {label}
                   </p>
                   <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900 dark:text-white">
-                    {value ?? "-"}
+                    <Sensitive value={value} />
                   </p>
                 </div>
               ))}

@@ -14,6 +14,7 @@ import {
 } from "../../../services/dataCenter";
 import type { ReferenceOption } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
+import Sensitive from "../../../components/Sensitive";
 import { extractArrayResult } from "../../../utils/response";
 
 type SensusSearchValues = {
@@ -204,7 +205,9 @@ const SensusSearchPage = () => {
                         Hasil Sensus
                       </p>
                       <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
-                        {record.nama_lengkap ?? "Data sensus"}
+                        <Sensitive
+                          value={record.nama_lengkap ?? "Data sensus"}
+                        />
                       </h3>
                     </div>
                     {detailCode ? (
@@ -223,7 +226,7 @@ const SensusSearchPage = () => {
                         Kode cari data
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.kode_cari_data ?? "-"}
+                        <Sensitive value={record.kode_cari_data} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
@@ -231,7 +234,7 @@ const SensusSearchPage = () => {
                         Tanggal lahir
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.tanggal_lahir ?? "-"}
+                        <Sensitive value={record.tanggal_lahir} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
@@ -239,7 +242,7 @@ const SensusSearchPage = () => {
                         Jenis kelamin
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.jenis_kelamin ?? "-"}
+                        <Sensitive value={record.jenis_kelamin} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
@@ -247,7 +250,7 @@ const SensusSearchPage = () => {
                         Kelompok
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.nm_kelompok ?? "-"}
+                        <Sensitive value={record.nm_kelompok} />
                       </p>
                     </div>
                   </div>

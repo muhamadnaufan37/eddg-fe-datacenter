@@ -53,8 +53,15 @@ const banners = [
     title: "Sistem Informasi Pengelolaan Data",
     description:
       "SIPANDA adalah platform yang dirancang untuk memudahkan pengelolaan data sensus, CAI, absensi online, e-ticket, dan cek pajak kendaraan dengan antarmuka yang intuitif dan fitur lengkap.",
-    button: "Mulai Sekarang",
+    // button: "Mulai Sekarang",
     gradient: "from-blue-600 to-cyan-500",
+  },
+  {
+    title: "Dilarang Menggunakan Auto Translate",
+    description:
+      "Saat menggunakan SIPANDA, harap hindari penggunaan fitur auto translate pada browser Anda. Hal ini dapat menyebabkan tampilan dan fungsi aplikasi menjadi tidak optimal. Untuk pengalaman terbaik, gunakan aplikasi dalam bahasa aslinya.",
+    // button: "Mulai Sekarang",
+    gradient: "from-red-600 to-orange-500",
   },
 ];
 

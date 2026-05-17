@@ -435,6 +435,7 @@ export const PrimeInputText = ({
                 : "",
             );
           }}
+          dateFormat="dd/mm/yy"
           className={`w-full ${primeFieldClass} ${error ? "p-invalid" : ""}`}
           onBlur={() => formik.setFieldTouched(name, true)}
           inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}

@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { useTheme } from "../contexts/ThemeContext";
 import { setToastRef } from "../services/toast";
+import { InspectProvider } from "../contexts/InspectContext";
+import { useInspectDetect } from "../utils/useInspectDetect";
 
 const Layout = () => {
   const { theme, toggleTheme } = useTheme();
@@ -13,6 +15,8 @@ const Layout = () => {
       setToastRef(toastRef.current);
     }
   }, []);
+
+  const { isInspectOpen } = useInspectDetect();
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100 transition-colors duration-200 dark:bg-gray-900">
@@ -64,7 +68,9 @@ const Layout = () => {
       {/* Main Content */}
       <main className="flex flex-1 w-full flex-col items-stretch justify-start px-4 py-6 pt-24 sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-          <Outlet />
+          <InspectProvider value={{ isInspectOpen }}>
+            <Outlet />
+          </InspectProvider>
         </div>
       </main>
     </div>

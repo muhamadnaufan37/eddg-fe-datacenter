@@ -14,6 +14,7 @@ import {
 } from "../../../services/dataCenter";
 import type { ReferenceOption } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
+import Sensitive from "../../../components/Sensitive";
 import { extractArrayResult } from "../../../utils/response";
 
 type CaiSearchValues = {
@@ -194,7 +195,7 @@ const CaiSearchPage = () => {
                         Hasil CAI
                       </p>
                       <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
-                        {record.nama_lengkap ?? "Data CAI"}
+                        <Sensitive value={record.nama_lengkap ?? "Data CAI"} />
                       </h3>
                     </div>
                     {detailCode ? (
@@ -213,7 +214,7 @@ const CaiSearchPage = () => {
                         Kode cari data
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.kode_cari_data ?? "-"}
+                        <Sensitive value={record.kode_cari_data} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
@@ -221,7 +222,7 @@ const CaiSearchPage = () => {
                         Tanggal lahir
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.tgl_lahir ?? "-"}
+                        <Sensitive value={record.tgl_lahir} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
@@ -229,7 +230,7 @@ const CaiSearchPage = () => {
                         Jenis kelamin
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.jenis_kelamin ?? "-"}
+                        <Sensitive value={record.jenis_kelamin} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">

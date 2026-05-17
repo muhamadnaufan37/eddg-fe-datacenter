@@ -12,7 +12,8 @@ import SensusSearchPage from "../pages/data-center/sensus/SearchPage";
 import SensusShowPage from "../pages/data-center/sensus/ShowPage";
 import PresensiPage from "../pages/data-center/presensi";
 import EticketPage from "../pages/data-center/pengaduan/eticket";
-import CekPajakKendaraanPage from "../pages/digital-data/sambara/CekPajakKendaraanPage";
+import CekPajakKendaraanPage from "../pages/data-center/sambara/CekPajakKendaraanPage";
+import ResultInfoPajakKendaraan from "../pages/data-center/sambara/result";
 
 export const routes = [
   {
@@ -74,6 +75,10 @@ export const routes = [
       {
         path: "digital-data/sambara/cek-pajak-kendaraan",
         element: <CekPajakKendaraanPage />,
+      },
+      {
+        path: "digital-data/sambara/cek-pajak-kendaraan/result",
+        element: <ResultInfoPajakKendaraan />,
       },
       {
         path: "*",
