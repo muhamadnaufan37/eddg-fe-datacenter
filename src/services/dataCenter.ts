@@ -109,7 +109,9 @@ const normalizeNamaPesertaReference = (payload: unknown) => {
 
     return {
       label: String(label),
-      value: String(namaLengkap),
+      // Use kode_cari_data (or id/uuid) as the option value so selections
+      // submit the participant identifier instead of the display name.
+      value: String(kodeCariData ?? namaLengkap ?? ""),
     };
   });
 };
