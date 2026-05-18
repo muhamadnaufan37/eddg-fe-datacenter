@@ -61,7 +61,7 @@ const SensusShowPage = () => {
 
   const fields: Array<[string, DetailValue]> = [
     ["Kode cari data", maskText(record?.kode_cari_data)],
-    ["Nama lengkap", maskText(record?.nama_lengkap)],
+    ["Nama lengkap", record?.nama_lengkap],
     ["Nama panggilan", record?.nama_panggilan],
     ["Tempat lahir", maskText(record?.tempat_lahir)],
     ["Tanggal lahir", maskText(record?.tanggal_lahir)],
