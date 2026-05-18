@@ -7,6 +7,7 @@ import {
   PrimeInputText,
   PrimeSelect,
   StepperHeader,
+  TextareaField,
 } from "../../../components/forms/FormFields";
 import {
   fetchNamaPesertaCaiReference,
@@ -21,6 +22,7 @@ type PresensiFormValues = {
   latitude: string;
   longitude: string;
   status_presensi: string;
+  keterangan: string;
 };
 
 interface ReactSelectOption {
@@ -71,6 +73,7 @@ const PresensiPage = () => {
       latitude: locationDefault,
       longitude: locationDefault,
       status_presensi: "",
+      keterangan: "",
     },
     validationSchema: Yup.object({
       kode_kegiatan: Yup.string().required("Kode kegiatan wajib diisi"),
@@ -78,7 +81,14 @@ const PresensiPage = () => {
       latitude: Yup.string().required("Lokasi harus dicari terlebih dahulu"),
       longitude: Yup.string().required("Lokasi harus dicari terlebih dahulu"),
       status_presensi: Yup.string().required("Status kehadiran wajib diisi"),
+      keterangan: Yup.string().when("status_presensi", {
+        is: (val: string) => val === "sakit" || val === "izin",
+        then: (schema) => schema.required("Keterangan wajib diisi"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     }),
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: async (values, helpers) => {
       try {
         setIsSubmitting(true);
@@ -112,29 +122,78 @@ const PresensiPage = () => {
 
   const searchCurrentLocation = () => {
     if (!navigator.geolocation) {
-      showToast("error", "Gagal", "Browser tidak mendukung geolocation.");
+      showToast(
+        "error",
+        "Gagal",
+        "Browser Anda tidak mendukung fitur geolocation.",
+      );
+      return;
+    }
+
+    // Check if using HTTPS (required for geolocation in modern browsers)
+    if (
+      window.location.protocol !== "https:" &&
+      window.location.hostname !== "localhost"
+    ) {
+      showToast(
+        "error",
+        "Gagal",
+        "Geolocation memerlukan koneksi HTTPS. Gunakan HTTPS atau localhost untuk testing.",
+      );
       return;
     }
 
     setSearchingLocation(true);
+
+    // For Safari and other browsers, use a longer timeout and more flexible settings
+    const timeoutDuration = 30000; // 30 seconds for better compatibility
+    const options = {
+      enableHighAccuracy: true,
+      timeout: timeoutDuration,
+      maximumAge: 0,
+    };
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         formik.setFieldValue("latitude", position.coords.latitude.toFixed(6));
         formik.setFieldValue("longitude", position.coords.longitude.toFixed(6));
+        formik.setFieldTouched("latitude", true);
+        formik.setFieldTouched("longitude", true);
         setLocationAccuracy(
           `Akurasi sekitar ${Math.round(position.coords.accuracy)} meter`,
         );
         setSearchingLocation(false);
+        showToast(
+          "success",
+          "Berhasil",
+          "Lokasi berhasil diambil dari perangkat.",
+        );
       },
-      () => {
+      (error) => {
         setSearchingLocation(false);
-        showToast("error", "Gagal", "Gagal mengambil lokasi saat ini.");
+        let errorMessage = "Gagal mengambil lokasi saat ini.";
+
+        // Handle specific geolocation errors
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage =
+              "Izin akses lokasi ditolak. Aktifkan izin lokasi di pengaturan browser Anda. Untuk Safari: Buka Preferences > Privacy > Location Services, atau coba di browser lain.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage =
+              "Informasi lokasi tidak tersedia. Pastikan GPS aktif atau koneksi internet stabil.";
+            break;
+          case error.TIMEOUT:
+            errorMessage =
+              "Waktu pencarian lokasi habis. Coba lagi atau pastikan koneksi GPS aktif. Untuk Safari, coba di area terbuka.";
+            break;
+          default:
+            errorMessage = `Gagal mengambil lokasi: ${error.message || "Kesalahan tidak diketahui"}`;
+        }
+
+        showToast("error", "Gagal", errorMessage);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
+      options,
     );
   };
 
@@ -290,6 +349,17 @@ const PresensiPage = () => {
                   { label: "Sakit", value: "sakit" },
                 ]}
               />
+              {(formik.values.status_presensi === "sakit" ||
+                formik.values.status_presensi === "izin") && (
+                <TextareaField
+                  label="Keterangan"
+                  name="keterangan"
+                  formik={formik}
+                  required
+                  className="md:col-span-2"
+                  rows={4}
+                />
+              )}
             </div>
 
             <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
