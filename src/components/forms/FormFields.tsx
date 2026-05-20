@@ -7,7 +7,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
-import { getIn } from "formik";
+import { getIn, setIn, ErrorMessage, FormikProvider } from "formik";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import type { InputNumberProps } from "primereact/inputnumber";
@@ -73,14 +73,31 @@ const shouldShowError = (formik: FormikBag, name: string) => {
   return Boolean(getIn(formik.touched, name) || formik.submitCount > 0);
 };
 
-const getFieldError = (formik: FormikBag, name: string) => {
-  const error = getIn(formik.errors, name);
-
-  if (!error || !shouldShowError(formik, name)) {
+const FormikErrorText = ({
+  formik,
+  name,
+}: {
+  formik: FormikBag;
+  name: string;
+}) => {
+  if (!shouldShowError(formik, name)) {
     return null;
   }
 
-  return String(error);
+  const errorFormik = getIn(formik.touched, name)
+    ? formik
+    : {
+        ...formik,
+        touched: setIn(formik.touched, name, true),
+      };
+
+  return (
+    <FormikProvider value={errorFormik as any}>
+      <ErrorMessage name={name}>
+        {(errorMessage: string) => <p className={fieldError}>{errorMessage}</p>}
+      </ErrorMessage>
+    </FormikProvider>
+  );
 };
 
 const formatLocalDate = (value: Date) => {
@@ -111,8 +128,6 @@ export const TextField = ({
     InputHTMLAttributes<HTMLInputElement>,
     "name" | "value" | "onChange" | "onBlur"
   >) => {
-  const error = getFieldError(formik, name);
-
   return (
     <label className={className}>
       <span className={fieldLabel}>
@@ -124,7 +139,9 @@ export const TextField = ({
         value={
           (getIn(formik.values, name) as string | number | undefined) ?? ""
         }
-        onChange={formik.handleChange}
+        onChange={(event) => {
+          formik.setFieldValue(name, event.target.value, true);
+        }}
         onBlur={formik.handleBlur}
         className={fieldShell}
       />
@@ -133,7 +150,7 @@ export const TextField = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -154,8 +171,6 @@ export const SelectField = ({
   > & {
     children: ReactNode;
   }) => {
-  const error = getFieldError(formik, name);
-
   return (
     <label className={className}>
       <span className={fieldLabel}>
@@ -167,7 +182,9 @@ export const SelectField = ({
         value={
           (getIn(formik.values, name) as string | number | undefined) ?? ""
         }
-        onChange={formik.handleChange}
+        onChange={(event) => {
+          formik.setFieldValue(name, event.target.value, true);
+        }}
         onBlur={formik.handleBlur}
         className={fieldShell}
       >
@@ -178,7 +195,7 @@ export const SelectField = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -197,8 +214,6 @@ export const TextareaField = ({
     TextareaHTMLAttributes<HTMLTextAreaElement>,
     "name" | "value" | "onChange" | "onBlur"
   >) => {
-  const error = getFieldError(formik, name);
-
   return (
     <label className={className}>
       <span className={fieldLabel}>
@@ -209,7 +224,9 @@ export const TextareaField = ({
         name={name}
         rows={rows}
         value={(getIn(formik.values, name) as string | undefined) ?? ""}
-        onChange={formik.handleChange}
+        onChange={(event) => {
+          formik.setFieldValue(name, event.target.value, true);
+        }}
         onBlur={formik.handleBlur}
         className={`${fieldShell} resize-none`}
       />
@@ -218,7 +235,7 @@ export const TextareaField = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -243,7 +260,6 @@ export const PhotoField = ({
     | string
     | null
     | undefined;
-  const error = getFieldError(formik, name);
   const previewUrl = useMemo(() => {
     if (!(fileValue instanceof File)) {
       return null;
@@ -274,7 +290,7 @@ export const PhotoField = ({
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0] ?? null;
-    formik.setFieldValue(name, file);
+    formik.setFieldValue(name, file, true);
     formik.setFieldTouched(name, true, false);
   };
 
@@ -317,7 +333,7 @@ export const PhotoField = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </div>
   );
 };
@@ -410,7 +426,9 @@ export const PrimeInputText = ({
     InputHTMLAttributes<HTMLInputElement>,
     "name" | "value" | "onChange" | "onBlur"
   >) => {
-  const error = getFieldError(formik, name);
+  const hasError = Boolean(
+    getIn(formik.errors, name) && shouldShowError(formik, name),
+  );
   const value =
     (getIn(formik.values, name) as string | number | undefined) ?? "";
   const isDateField = type === "date";
@@ -433,12 +451,13 @@ export const PrimeInputText = ({
               e.value && e.value instanceof Date
                 ? formatLocalDate(e.value)
                 : "",
+              true,
             );
           }}
           dateFormat="dd/mm/yy"
-          className={`w-full ${primeFieldClass} ${error ? "p-invalid" : ""}`}
+          className={`w-full ${primeFieldClass} ${hasError ? "p-invalid" : ""}`}
           onBlur={() => formik.setFieldTouched(name, true)}
-          inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
+          inputClassName={`${primeFieldClass} ${hasError ? primeFieldErrorClass : ""}`}
           panelClassName="rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
           touchUI
         />
@@ -447,7 +466,7 @@ export const PrimeInputText = ({
             {helperText}
           </p>
         ) : null}
-        {error ? <p className={fieldError}>{error}</p> : null}
+        <FormikErrorText formik={formik} name={name} />
       </label>
     );
   }
@@ -463,20 +482,17 @@ export const PrimeInputText = ({
         name={name}
         value={inputValue}
         onChange={(e) => {
-          const event = {
-            target: { name, value: e.target.value },
-          } as unknown as ChangeEvent<HTMLInputElement>;
-          formik.handleChange(event);
+          formik.setFieldValue(name, e.target.value, true);
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
-        className={`${primeFieldClass} ${error ? "p-invalid" : ""}`}
+        className={`${primeFieldClass} ${hasError ? "p-invalid" : ""}`}
       />
       {helperText ? (
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -491,7 +507,9 @@ export const PrimeInputNumber = ({
   ...numberProps
 }: CommonFieldProps &
   Omit<InputNumberProps, "name" | "value" | "onValueChange" | "onBlur">) => {
-  const error = getFieldError(formik, name);
+  const hasError = Boolean(
+    getIn(formik.errors, name) && shouldShowError(formik, name),
+  );
   const rawValue = getIn(formik.values, name) as
     | string
     | number
@@ -515,11 +533,11 @@ export const PrimeInputNumber = ({
         name={name}
         value={numberValue}
         onValueChange={(e) => {
-          formik.setFieldValue(name, e.value ?? "");
+          formik.setFieldValue(name, e.value ?? "", true);
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
-        className={`w-full ${error ? "p-invalid" : ""}`}
-        inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
+        className={`w-full ${hasError ? "p-invalid" : ""}`}
+        inputClassName={`${primeFieldClass} ${hasError ? primeFieldErrorClass : ""}`}
         useGrouping={false}
       />
       {helperText ? (
@@ -527,7 +545,7 @@ export const PrimeInputNumber = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -545,7 +563,9 @@ export const PrimePassword = ({
     InputHTMLAttributes<HTMLInputElement>,
     "name" | "value" | "onChange" | "onBlur"
   >) => {
-  const error = getFieldError(formik, name);
+  const hasError = Boolean(
+    getIn(formik.errors, name) && shouldShowError(formik, name),
+  );
 
   return (
     <label className={className}>
@@ -559,14 +579,11 @@ export const PrimePassword = ({
           (getIn(formik.values, name) as string | number | undefined) ?? ""
         }
         onChange={(e) => {
-          const event = {
-            target: { name, value: e.target.value },
-          } as unknown as ChangeEvent<HTMLInputElement>;
-          formik.handleChange(event);
+          formik.setFieldValue(name, e.target.value, true);
         }}
         onBlur={() => formik.setFieldTouched(name, true)}
-        className={`w-full ${error ? "p-invalid" : ""}`}
-        inputClassName={`${primeFieldClass} ${error ? primeFieldErrorClass : ""}`}
+        className={`w-full ${hasError ? "p-invalid" : ""}`}
+        inputClassName={`${primeFieldClass} ${hasError ? primeFieldErrorClass : ""}`}
         feedback={false}
         toggleMask
       />
@@ -575,7 +592,7 @@ export const PrimePassword = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };
@@ -611,7 +628,9 @@ export const PrimeSelect = ({
   placeholder = "Pilih opsi",
 }: PrimeSelectProps) => {
   const { theme } = useTheme();
-  const error = getFieldError(formik, name);
+  const hasError = Boolean(
+    getIn(formik.errors, name) && shouldShowError(formik, name),
+  );
   const value = getIn(formik.values, name);
   const isDarkMode = theme === "dark";
 
@@ -631,7 +650,7 @@ export const PrimeSelect = ({
         ...base,
         minHeight: "44px",
         borderRadius: "1rem",
-        borderColor: error
+        borderColor: hasError
           ? "#ef4444"
           : state.isFocused
             ? "#0ea5e9"
@@ -645,7 +664,7 @@ export const PrimeSelect = ({
         opacity: disabled ? 0.72 : 1,
         transition: "all 150ms ease",
         "&:hover": {
-          borderColor: error
+          borderColor: hasError
             ? "#ef4444"
             : disabled
               ? isDarkMode
@@ -758,7 +777,7 @@ export const PrimeSelect = ({
         color: isDarkMode ? "#94a3b8" : "#64748b",
       }),
     }),
-    [disabled, error, isDarkMode],
+    [disabled, hasError, isDarkMode],
   );
 
   const handleChange = (
@@ -769,12 +788,13 @@ export const PrimeSelect = ({
       formik.setFieldValue(
         name,
         multiValue.map((opt) => opt.value),
+        true,
       );
     } else {
       const singleValue = newValue as SingleValue<ReactSelectOption>;
-      formik.setFieldValue(name, singleValue?.value ?? null);
+      formik.setFieldValue(name, singleValue?.value ?? null, true);
     }
-    formik.setFieldTouched(name, true);
+    formik.setFieldTouched(name, true, false);
   };
 
   return (
@@ -804,7 +824,7 @@ export const PrimeSelect = ({
           {helperText}
         </p>
       ) : null}
-      {error ? <p className={fieldError}>{error}</p> : null}
+      <FormikErrorText formik={formik} name={name} />
     </label>
   );
 };

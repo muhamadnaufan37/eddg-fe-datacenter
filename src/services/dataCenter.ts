@@ -31,8 +31,18 @@ type ReferenceEntry = {
   value?: string | number;
   label?: string;
   nama_lengkap?: string;
-  nm_pekerjaan?: string;
+  nama_pekerjaan?: string;
   nm_peserta?: string;
+  name?: string;
+};
+
+type TempatSambungEntry = {
+  id?: string | number;
+  nama_daerah?: string;
+  nama_desa?: string;
+  nama_kelomopok?: string;
+  nama_kelompok?: string;
+  label?: string;
   name?: string;
 };
 
@@ -62,13 +72,13 @@ const normalizeReferenceList = (payload: unknown) => {
       entry.value ??
       entry.label ??
       entry.nama_lengkap ??
-      entry.nm_pekerjaan ??
+      entry.nama_pekerjaan ??
       entry.nm_peserta ??
       entry.name ??
       "";
 
     const label =
-      entry.nm_pekerjaan ??
+      entry.nama_pekerjaan ??
       entry.nama_lengkap ??
       entry.label ??
       entry.nm_peserta ??
@@ -116,6 +126,42 @@ const normalizeNamaPesertaReference = (payload: unknown) => {
   });
 };
 
+const normalizeTempatSambungReference = (
+  payload: unknown,
+  labelKeys: Array<keyof TempatSambungEntry>,
+) => {
+  const source =
+    (payload as { data_tempat_sambung?: unknown })?.data_tempat_sambung ??
+    (payload as { data?: unknown })?.data ??
+    (payload as { result?: unknown })?.result ??
+    payload;
+
+  const items = Array.isArray(source)
+    ? source
+    : Array.isArray(
+          (source as { data_tempat_sambung?: unknown[] })?.data_tempat_sambung,
+        )
+      ? (source as { data_tempat_sambung: unknown[] }).data_tempat_sambung
+      : Array.isArray((source as { data?: unknown[] })?.data)
+        ? (source as { data: unknown[] }).data
+        : [];
+
+  return items.map((item) => {
+    const entry = isRecord(item) ? (item as TempatSambungEntry) : {};
+    const labelValue =
+      labelKeys.map((key) => entry[key]).find((value) => Boolean(value)) ??
+      entry.label ??
+      entry.name ??
+      entry.id ??
+      "";
+
+    return {
+      label: String(labelValue),
+      value: String(entry.id ?? labelValue ?? ""),
+    };
+  });
+};
+
 export type ReferenceOption = {
   label: string;
   value: string;
@@ -123,6 +169,16 @@ export type ReferenceOption = {
 
 export const fetchCaiByUuid = async (kodeUuid: string) => {
   const response = await api.get(`/api/v1/data_center/cai/${kodeUuid}`);
+  return response.data;
+};
+
+export const recoverCaiYear = async (payload: {
+  nama_lengkap: string;
+  from_year: number;
+  to_year: number;
+}) => {
+  const response = await api.post("/api/v1/data_center/cai/recover", payload);
+
   return response.data;
 };
 
@@ -139,7 +195,7 @@ export const submitCaiRegistration = async (payload: {
   const formData = new FormData();
 
   appendIfPresent(formData, "nama_lengkap", payload.nama_lengkap);
-  appendIfPresent(formData, "tanggal_lahir", payload.tgl_lahir);
+  appendIfPresent(formData, "tgl_lahir", payload.tgl_lahir);
   appendIfPresent(formData, "jenis_kelamin", payload.jenis_kelamin);
   appendIfPresent(formData, "tmpt_daerah", payload.tmpt_daerah);
   appendIfPresent(formData, "tmpt_desa", payload.tmpt_desa);
@@ -163,7 +219,7 @@ export const submitSensusRegistration = async (payload: {
   nama_lengkap: string;
   nama_panggilan: string;
   tempat_lahir: string;
-  tanggal_lahir: string;
+  tgl_lahir: string;
   alamat: string;
   jenis_kelamin: string;
   no_telepon: string;
@@ -183,7 +239,7 @@ export const submitSensusRegistration = async (payload: {
   appendIfPresent(formData, "nama_lengkap", payload.nama_lengkap);
   appendIfPresent(formData, "nama_panggilan", payload.nama_panggilan);
   appendIfPresent(formData, "tempat_lahir", payload.tempat_lahir);
-  appendIfPresent(formData, "tanggal_lahir", payload.tanggal_lahir);
+  appendIfPresent(formData, "tgl_lahir", payload.tgl_lahir);
   appendIfPresent(formData, "alamat", payload.alamat);
   appendIfPresent(formData, "jenis_kelamin", payload.jenis_kelamin);
   appendIfPresent(formData, "no_telepon", payload.no_telepon);
@@ -214,6 +270,35 @@ export const fetchPekerjaanReference = async (): Promise<ReferenceOption[]> => {
   return normalizeReferenceList(response.data);
 };
 
+export const fetchDaerahReference = async (): Promise<ReferenceOption[]> => {
+  const response = await api.get("/api/v1/data_center/reference/list-daerah");
+  return normalizeTempatSambungReference(response.data, ["nama_daerah"]);
+};
+
+export const fetchDesaReference = async (
+  daerahId: string,
+): Promise<ReferenceOption[]> => {
+  const response = await api.get("/api/v1/data_center/reference/list-desa", {
+    params: { daerah_id: daerahId },
+  });
+  return normalizeTempatSambungReference(response.data, ["nama_desa"]);
+};
+
+export const fetchKelompokReference = async (
+  desaId: string,
+): Promise<ReferenceOption[]> => {
+  const response = await api.get(
+    "/api/v1/data_center/reference/list-kelompok",
+    {
+      params: { desa_id: desaId },
+    },
+  );
+  return normalizeTempatSambungReference(response.data, [
+    "nama_kelomopok",
+    "nama_kelompok",
+  ]);
+};
+
 export const fetchNamaPesertaReference = async (): Promise<
   ReferenceOption[]
 > => {
@@ -223,11 +308,14 @@ export const fetchNamaPesertaReference = async (): Promise<
   return normalizeNamaPesertaReference(response.data);
 };
 
-export const fetchNamaPesertaCaiReference = async (): Promise<
-  ReferenceOption[]
-> => {
+export const fetchNamaPesertaCaiReference = async (
+  tahun?: number,
+): Promise<ReferenceOption[]> => {
   const response = await api.get(
     "/api/v1/data_center/reference/list-nama-peserta-cai",
+    {
+      params: typeof tahun === "number" ? { tahun } : undefined,
+    },
   );
   return normalizeNamaPesertaReference(response.data);
 };

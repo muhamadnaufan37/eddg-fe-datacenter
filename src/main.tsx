@@ -11,29 +11,29 @@ const router = createBrowserRouter(routes, {
   basename: "/",
 });
 
-const setupAntiInspect = () => {
-  const preventContextMenu = (event: MouseEvent) => {
-    event.preventDefault();
-  };
+// const setupAntiInspect = () => {
+//   const preventContextMenu = (event: MouseEvent) => {
+//     event.preventDefault();
+//   };
 
-  const preventDevtoolsShortcuts = (event: KeyboardEvent) => {
-    const key = event.key.toLowerCase();
-    const blocked =
-      key === "f12" ||
-      (event.ctrlKey && event.shiftKey && ["i", "j", "c", "k"].includes(key)) ||
-      (event.ctrlKey && key === "u");
+//   const preventDevtoolsShortcuts = (event: KeyboardEvent) => {
+//     const key = event.key.toLowerCase();
+//     const blocked =
+//       key === "f12" ||
+//       (event.ctrlKey && event.shiftKey && ["i", "j", "c", "k"].includes(key)) ||
+//       (event.ctrlKey && key === "u");
 
-    if (blocked) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  };
+//     if (blocked) {
+//       event.preventDefault();
+//       event.stopPropagation();
+//     }
+//   };
 
-  document.addEventListener("contextmenu", preventContextMenu);
-  document.addEventListener("keydown", preventDevtoolsShortcuts);
-};
+//   document.addEventListener("contextmenu", preventContextMenu);
+//   document.addEventListener("keydown", preventDevtoolsShortcuts);
+// };
 
-setupAntiInspect();
+// setupAntiInspect();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

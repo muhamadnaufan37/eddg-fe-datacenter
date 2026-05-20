@@ -12,6 +12,9 @@ import {
 } from "../../../components/forms/FormFields";
 import {
   fetchPekerjaanReference,
+  fetchDaerahReference,
+  fetchDesaReference,
+  fetchKelompokReference,
   submitSensusRegistration,
 } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
@@ -20,7 +23,7 @@ type SensusFormValues = {
   nama_lengkap: string;
   nama_panggilan: string;
   tempat_lahir: string;
-  tanggal_lahir: string;
+  tgl_lahir: string;
   alamat: string;
   jenis_kelamin: string;
   no_telepon: string;
@@ -59,7 +62,7 @@ const stepSchemas = [
     nama_lengkap: Yup.string().required("Nama lengkap wajib diisi"),
     nama_panggilan: Yup.string().required("Nama panggilan wajib diisi"),
     tempat_lahir: Yup.string().required("Tempat lahir wajib diisi"),
-    tanggal_lahir: Yup.string().required("Tanggal lahir wajib diisi"),
+    tgl_lahir: Yup.string().required("Tanggal lahir wajib diisi"),
     jenis_kelamin: Yup.string().required("Jenis kelamin wajib dipilih"),
     no_telepon: Yup.string()
       .required("Nomor telepon wajib diisi")
@@ -91,7 +94,15 @@ const SensusRegistrationPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingPekerjaan, setIsLoadingPekerjaan] = useState(true);
+  const [isLoadingDaerah, setIsLoadingDaerah] = useState(true);
+  const [isLoadingDesa, setIsLoadingDesa] = useState(false);
+  const [isLoadingKelompok, setIsLoadingKelompok] = useState(false);
   const [pekerjaanOptions, setPekerjaanOptions] = useState<ReactSelectOption[]>(
+    [],
+  );
+  const [daerahOptions, setDaerahOptions] = useState<ReactSelectOption[]>([]);
+  const [desaOptions, setDesaOptions] = useState<ReactSelectOption[]>([]);
+  const [kelompokOptions, setKelompokOptions] = useState<ReactSelectOption[]>(
     [],
   );
 
@@ -100,28 +111,12 @@ const SensusRegistrationPage = () => {
     { label: "PEREMPUAN", value: "PEREMPUAN" },
   ];
 
-  useEffect(() => {
-    const loadPekerjaan = async () => {
-      try {
-        setIsLoadingPekerjaan(true);
-        const options = await fetchPekerjaanReference();
-        setPekerjaanOptions(options);
-      } catch {
-        showToast("error", "Gagal", "Gagal memuat referensi pekerjaan.");
-      } finally {
-        setIsLoadingPekerjaan(false);
-      }
-    };
-
-    void loadPekerjaan();
-  }, []);
-
   const formik = useFormik<SensusFormValues>({
     initialValues: {
       nama_lengkap: "",
       nama_panggilan: "",
       tempat_lahir: "",
-      tanggal_lahir: "",
+      tgl_lahir: "",
       alamat: "",
       jenis_kelamin: "",
       no_telepon: "62",
@@ -173,6 +168,103 @@ const SensusRegistrationPage = () => {
     },
   });
 
+  useEffect(() => {
+    const loadPekerjaan = async () => {
+      try {
+        setIsLoadingPekerjaan(true);
+        const options = await fetchPekerjaanReference();
+        setPekerjaanOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi pekerjaan.");
+      } finally {
+        setIsLoadingPekerjaan(false);
+      }
+    };
+
+    void loadPekerjaan();
+  }, []);
+
+  useEffect(() => {
+    const loadDaerah = async () => {
+      try {
+        setIsLoadingDaerah(true);
+        const options = await fetchDaerahReference();
+        setDaerahOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi daerah.");
+      } finally {
+        setIsLoadingDaerah(false);
+      }
+    };
+
+    void loadDaerah();
+  }, []);
+
+  useEffect(() => {
+    if (!formik.values.tmpt_daerah) {
+      setDesaOptions([]);
+      setKelompokOptions([]);
+
+      if (formik.values.tmpt_desa) {
+        formik.setFieldValue("tmpt_desa", "", false);
+      }
+
+      if (formik.values.tmpt_kelompok) {
+        formik.setFieldValue("tmpt_kelompok", "", false);
+      }
+
+      return;
+    }
+
+    const loadDesa = async () => {
+      try {
+        setIsLoadingDesa(true);
+        const options = await fetchDesaReference(formik.values.tmpt_daerah);
+        setDesaOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi desa.");
+      } finally {
+        setIsLoadingDesa(false);
+      }
+    };
+
+    void loadDesa();
+
+    if (formik.values.tmpt_desa) {
+      formik.setFieldValue("tmpt_desa", "", false);
+    }
+
+    if (formik.values.tmpt_kelompok) {
+      formik.setFieldValue("tmpt_kelompok", "", false);
+    }
+  }, [formik.values.tmpt_daerah]);
+
+  useEffect(() => {
+    if (!formik.values.tmpt_desa) {
+      setKelompokOptions([]);
+
+      if (formik.values.tmpt_kelompok) {
+        formik.setFieldValue("tmpt_kelompok", "", false);
+      }
+
+      return;
+    }
+
+    const loadKelompok = async () => {
+      try {
+        setIsLoadingKelompok(true);
+        const options = await fetchKelompokReference(formik.values.tmpt_desa);
+        setKelompokOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi kelompok.");
+      } finally {
+        setIsLoadingKelompok(false);
+      }
+    };
+
+    void loadKelompok();
+  }, [formik.values.tmpt_desa]);
+
   const isLastStep = activeStep === steps.length - 1;
 
   const handleNext = async () => {
@@ -200,7 +292,7 @@ const SensusRegistrationPage = () => {
     }
 
     return pekerjaanOptions.length > 0
-      ? "Pilih pekerjaan dari referensi."
+      ? "Pilih pekerjaan."
       : "Referensi pekerjaan kosong.";
   }, [isLoadingPekerjaan, pekerjaanOptions.length]);
 
@@ -252,7 +344,7 @@ const SensusRegistrationPage = () => {
             />
             <PrimeInputText
               label="Tanggal lahir"
-              name="tanggal_lahir"
+              name="tgl_lahir"
               formik={formik}
               required
               type="date"
@@ -324,23 +416,49 @@ const SensusRegistrationPage = () => {
                 rows={5}
               />
             </div>
-            <PrimeInputText
+            <PrimeSelect
               label="Tempat daerah"
               name="tmpt_daerah"
               formik={formik}
               required
+              options={daerahOptions}
+              isLoading={isLoadingDaerah}
+              placeholder={isLoadingDaerah ? "Memuat data..." : "Pilih daerah"}
+              helperText="Dipakai untuk memuat referensi desa."
             />
-            <PrimeInputText
+            <PrimeSelect
               label="Tempat desa"
               name="tmpt_desa"
               formik={formik}
               required
+              options={desaOptions}
+              isLoading={isLoadingDesa}
+              placeholder={
+                formik.values.tmpt_daerah
+                  ? isLoadingDesa
+                    ? "Memuat data..."
+                    : "Pilih desa"
+                  : "Pilih daerah dulu"
+              }
+              helperText="Dipakai untuk memuat referensi kelompok."
+              disabled={!formik.values.tmpt_daerah}
             />
-            <PrimeInputText
+            <PrimeSelect
               label="Tempat kelompok"
               name="tmpt_kelompok"
               formik={formik}
               required
+              options={kelompokOptions}
+              isLoading={isLoadingKelompok}
+              placeholder={
+                formik.values.tmpt_desa
+                  ? isLoadingKelompok
+                    ? "Memuat data..."
+                    : "Pilih kelompok"
+                  : "Pilih desa dulu"
+              }
+              helperText="Lengkapi lokasi sesuai referensi."
+              disabled={!formik.values.tmpt_desa}
             />
             <div className="md:col-span-2">
               <PhotoField

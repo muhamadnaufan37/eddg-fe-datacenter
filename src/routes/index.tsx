@@ -37,7 +37,7 @@ export const routes = [
         element: <CaiSearchPage />,
       },
       {
-        path: "digital-data/cai/:kodeUuid",
+        path: "digital-data/cai/search/:kodeUuid",
         element: <CaiShowPage />,
       },
       {
@@ -53,7 +53,7 @@ export const routes = [
         element: <SensusSearchPage />,
       },
       {
-        path: "digital-data/sensus/:kodeUuid",
+        path: "digital-data/sensus/search/:kodeUuid",
         element: <SensusShowPage />,
       },
       {

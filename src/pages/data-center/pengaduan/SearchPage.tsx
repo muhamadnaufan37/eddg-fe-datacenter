@@ -53,7 +53,7 @@ const PengaduanSearchPage = () => {
   const [searched, setSearched] = useState(false);
 
   const formik = useFormik<PengaduanSearchValues>({
-    initialValues: { kontak: "" },
+    initialValues: { kontak: "62" },
     validationSchema: Yup.object({
       kontak: Yup.string()
         .required("Kontak wajib diisi")
@@ -105,7 +105,7 @@ const PengaduanSearchPage = () => {
       <StepperHeader
         title="Cari Data Pengaduan"
         description="Masukkan kontak pelapor untuk melihat status pengaduan dan balasan admin bila sudah ada."
-        steps={["Form Cari Data", "Hasil"]}
+        steps={["Form Cari Data"]}
         activeStep={0}
       />
 

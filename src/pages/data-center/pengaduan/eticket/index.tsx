@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
@@ -11,7 +11,7 @@ import {
   TextareaField,
 } from "../../../../components/forms/FormFields";
 import {
-  fetchNamaPesertaReference,
+  fetchNamaPesertaCaiReference,
   submitEticket,
 } from "../../../../services/dataCenter";
 import { showToast } from "../../../../services/toast";
@@ -31,7 +31,7 @@ interface ReactSelectOption {
   value: string;
 }
 
-const steps = ["Pelapor", "Aduan"];
+const steps = ["Jenis Pengaduan", "Pelapor", "Aduan"];
 
 const imageSchema = Yup.mixed<File>()
   .nullable()
@@ -46,19 +46,21 @@ const imageSchema = Yup.mixed<File>()
 
 const stepSchemas = [
   Yup.object({
+    jenis_pengaduan: Yup.string().required("Jenis pengaduan wajib dipilih"),
+  }),
+  Yup.object({
     kontak: Yup.string()
       .required("Kontak wajib diisi")
       .test("phone", "Format nomor telepon tidak valid", (value) => {
         if (!value) return false;
         return /^62\d{9,12}$/.test(value);
       }),
-    jenis_pengaduan: Yup.string().required("Jenis pengaduan wajib dipilih"),
     nama_lengkap: Yup.string().required("Nama wajib diisi"),
+    nama_kelompok: Yup.string().required("Nama kelompok wajib diisi"),
   }),
   Yup.object({
     subjek: Yup.string().required("Subjek wajib diisi"),
     isi_pengaduan: Yup.string().required("Isi pengaduan wajib diisi"),
-    nama_kelompok: Yup.string().required("Nama kelompok wajib diisi"),
     lampiran: imageSchema,
   }),
 ];
@@ -100,11 +102,13 @@ const EticketPage = () => {
         helpers.resetForm();
         setActiveStep(0);
         setNameOptions([]);
-      } catch (error) {
+      } catch (error: any) {
         showToast(
           "error",
           "Gagal",
-          error instanceof Error ? error.message : "Gagal mengirim e-ticket.",
+          error?.response?.data?.message ||
+            error?.message ||
+            "Gagal msengirim e-ticket.",
         );
       } finally {
         setIsSubmitting(false);
@@ -112,24 +116,26 @@ const EticketPage = () => {
     },
   });
 
-  const requiresReferenceName = useMemo(
-    () =>
-      ["keluhan_data_cai", "keluhan_data_sensus"].includes(
-        formik.values.jenis_pengaduan,
-      ),
-    [formik.values.jenis_pengaduan],
-  );
+  const { setFieldValue, setFieldTouched, values } = formik;
+
+  const requiresCaiReferenceName = values.jenis_pengaduan === "keluhan_data_cai";
+
+  useEffect(() => {
+    setFieldValue("nama_lengkap", "", false);
+    setFieldTouched("nama_lengkap", false, false);
+    setNameOptions([]);
+  }, [setFieldTouched, setFieldValue, values.jenis_pengaduan]);
 
   useEffect(() => {
     const loadNames = async () => {
-      if (!requiresReferenceName) {
+      if (!requiresCaiReferenceName) {
         setNameOptions([]);
         return;
       }
 
       try {
         setIsLoadingNames(true);
-        const options = await fetchNamaPesertaReference();
+        const options = await fetchNamaPesertaCaiReference();
         setNameOptions(options);
       } catch {
         showToast("error", "Gagal", "Gagal memuat referensi nama peserta.");
@@ -139,7 +145,7 @@ const EticketPage = () => {
     };
 
     void loadNames();
-  }, [requiresReferenceName]);
+  }, [requiresCaiReferenceName]);
 
   const handleNext = async () => {
     const schema = stepSchemas[activeStep];
@@ -161,7 +167,7 @@ const EticketPage = () => {
   };
 
   const renderNamaLengkapField = () => {
-    if (!requiresReferenceName) {
+    if (!requiresCaiReferenceName) {
       return (
         <PrimeInputText
           label="Nama lengkap"
@@ -194,7 +200,7 @@ const EticketPage = () => {
     <div className="w-full space-y-6">
       <StepperHeader
         title="E-Ticket"
-        description="Form ini dipakai untuk keluhan data, kritik, dan saran. Jika jenis pengaduan terkait data CAI atau sensus, nama pelapor diambil dari reference list nama peserta."
+        description="Form ini dipakai untuk keluhan data, kritik, dan saran. Jika jenis pengaduan terkait data CAI, nama pelapor diambil dari reference list nama peserta CAI."
         steps={steps}
         activeStep={activeStep}
       />
@@ -218,6 +224,29 @@ const EticketPage = () => {
 
         {activeStep === 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <PrimeSelect
+                label="Jenis pengaduan"
+                name="jenis_pengaduan"
+                formik={formik}
+                required
+                options={[
+                  { label: "Keluhan Data CAI", value: "keluhan_data_cai" },
+                  {
+                    label: "Keluhan Data Sensus",
+                    value: "keluhan_data_sensus",
+                  },
+                  {
+                    label: "Keluhan Data Absensi",
+                    value: "keluhan_data_absensi",
+                  },
+                  { label: "Kritik Saran", value: "kritik_saran" },
+                ]}
+              />
+            </div>
+          </div>
+        ) : activeStep === 1 ? (
+          <div className="grid gap-4 md:grid-cols-2">
             {renderNamaLengkapField()}
             <PrimeInputText
               label="Kontak"
@@ -226,21 +255,6 @@ const EticketPage = () => {
               required
               placeholder="Masukkan nomor (default 62)"
               helperText="Nomor akan disimpan dengan prefix 62"
-            />
-            <PrimeSelect
-              label="Jenis pengaduan"
-              name="jenis_pengaduan"
-              formik={formik}
-              required
-              options={[
-                { label: "Keluhan Data CAI", value: "keluhan_data_cai" },
-                { label: "Keluhan Data Sensus", value: "keluhan_data_sensus" },
-                {
-                  label: "Keluhan Data Absensi",
-                  value: "keluhan_data_absensi",
-                },
-                { label: "Kritik Saran", value: "kritik_saran" },
-              ]}
             />
             <PrimeInputText
               label="Nama kelompok"

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { fetchCaiByUuid } from "../../../services/dataCenter";
+import { fetchCaiByUuid, recoverCaiYear } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { formatBooleanLabel, maskText } from "../../../utils/text";
 import Sensitive from "../../../components/Sensitive";
@@ -27,7 +27,11 @@ const CaiShowPage = () => {
   const { kodeUuid } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [isRecovering, setIsRecovering] = useState(false);
   const [record, setRecord] = useState<CaiRecord | null>(null);
+
+  const currentYear = new Date().getFullYear();
+  const isRecoverable = record?.tahun !== currentYear;
 
   useEffect(() => {
     const loadRecord = async () => {
@@ -49,6 +53,38 @@ const CaiShowPage = () => {
 
     void loadRecord();
   }, [kodeUuid]);
+
+  const handleRecover = async () => {
+    if (!record) {
+      return;
+    }
+
+    try {
+      setIsRecovering(true);
+
+      const response = await recoverCaiYear({
+        nama_lengkap: record.kode_cari_data ?? "",
+        from_year: record.tahun ?? currentYear,
+        to_year: currentYear,
+      });
+
+      showToast(
+        "success",
+        "Berhasil",
+        response?.message ?? "Data CAI berhasil dipulihkan.",
+      );
+    } catch (error: any) {
+      showToast(
+        "error",
+        "Gagal",
+        error?.response?.data?.message ||
+          error?.message ||
+          "Gagal memulihkan data CAI.",
+      );
+    } finally {
+      setIsRecovering(false);
+    }
+  };
 
   const fields: Array<[string, DetailValue]> = [
     ["ID Peserta", maskText(record?.kode_cari_data)],
@@ -81,10 +117,18 @@ const CaiShowPage = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/digital-data/cai")}
               className="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-sky-500 hover:text-sky-600 dark:border-slate-600 dark:text-slate-200"
             >
               ← Kembali
+            </button>
+            <button
+              type="button"
+              onClick={handleRecover}
+              disabled={!isRecoverable || isRecovering}
+              className="inline-flex items-center justify-center rounded-2xl border border-emerald-300 px-5 py-3 text-sm font-semibold text-emerald-700 transition hover:border-emerald-500 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-700 dark:text-emerald-300"
+            >
+              {isRecovering ? "Memulihkan..." : "Pulihkan Data Tahun"}
             </button>
             <Link
               to="/digital-data/cai/registration"

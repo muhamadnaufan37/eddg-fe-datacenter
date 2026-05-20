@@ -99,7 +99,7 @@ const SensusShowPage = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/digital-data/sensus")}
               className="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-sky-500 hover:text-sky-600 dark:border-slate-600 dark:text-slate-200"
             >
               ← Kembali

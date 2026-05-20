@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,12 @@ import {
   PrimeSelect,
   StepperHeader,
 } from "../../../components/forms/FormFields";
-import { submitCaiRegistration } from "../../../services/dataCenter";
+import {
+  fetchDaerahReference,
+  fetchDesaReference,
+  fetchKelompokReference,
+  submitCaiRegistration,
+} from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 
 type CaiFormValues = {
@@ -36,10 +41,22 @@ const jenisKelaminOptions: ReactSelectOption[] = [
 ];
 
 const utsusanOptions: ReactSelectOption[] = [
+  { label: "Daerah", value: "daerah" },
   { label: "Desa", value: "desa" },
   { label: "Kelompok", value: "kelompok" },
+  { label: "Pengurus", value: "pengurus" },
+  { label: "Pondok", value: "pondok" },
   { label: "Perorangan", value: "perorangan" },
 ];
+
+const locationUtusanValues = {
+  daerah: "daerah",
+  desa: "desa",
+  kelompok: "kelompok",
+  pengurus: "pengurus",
+  pondok: "pondok",
+  perorangan: "perorangan",
+} as const;
 
 const baseImageSchema = Yup.mixed<File>()
   .required("Foto wajib diunggah")
@@ -52,6 +69,21 @@ const baseImageSchema = Yup.mixed<File>()
     return file instanceof File && file.size <= 5 * 1024 * 1024;
   });
 
+const isUtusan = (
+  value: string,
+  expected: keyof typeof locationUtusanValues,
+) => {
+  return value === locationUtusanValues[expected];
+};
+
+const requiresAllLocations = (value: string) => {
+  return [
+    locationUtusanValues.pengurus,
+    locationUtusanValues.pondok,
+    locationUtusanValues.perorangan,
+  ].includes(value as (typeof locationUtusanValues)["pengurus"]);
+};
+
 const stepSchemas = [
   Yup.object({
     nama_lengkap: Yup.string().required("Nama lengkap wajib diisi"),
@@ -60,14 +92,21 @@ const stepSchemas = [
     utusan: Yup.string().required("Utusan wajib dipilih"),
   }),
   Yup.object({
-    tmpt_daerah: Yup.string().required("Tempat daerah wajib diisi"),
+    tmpt_daerah: Yup.string().when("utusan", {
+      is: (value: string) =>
+        isUtusan(value, "daerah") || requiresAllLocations(value),
+      then: (schema) => schema.required("Tempat daerah wajib diisi"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     tmpt_desa: Yup.string().when("utusan", {
-      is: (value: string) => value === "desa" || value === "kelompok",
+      is: (value: string) =>
+        isUtusan(value, "desa") || requiresAllLocations(value),
       then: (schema) => schema.required("Tempat desa wajib diisi"),
       otherwise: (schema) => schema.notRequired(),
     }),
     tmpt_kelompok: Yup.string().when("utusan", {
-      is: (value: string) => value === "kelompok",
+      is: (value: string) =>
+        isUtusan(value, "kelompok") || requiresAllLocations(value),
       then: (schema) => schema.required("Tempat kelompok wajib diisi"),
       otherwise: (schema) => schema.notRequired(),
     }),
@@ -79,6 +118,14 @@ const CaiRegistrationPage = () => {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingDaerah, setIsLoadingDaerah] = useState(true);
+  const [isLoadingDesa, setIsLoadingDesa] = useState(false);
+  const [isLoadingKelompok, setIsLoadingKelompok] = useState(false);
+  const [daerahOptions, setDaerahOptions] = useState<ReactSelectOption[]>([]);
+  const [desaOptions, setDesaOptions] = useState<ReactSelectOption[]>([]);
+  const [kelompokOptions, setKelompokOptions] = useState<ReactSelectOption[]>(
+    [],
+  );
 
   const formik = useFormik<CaiFormValues>({
     initialValues: {
@@ -142,6 +189,104 @@ const CaiRegistrationPage = () => {
       }
     },
   });
+
+  useEffect(() => {
+    const loadDaerah = async () => {
+      try {
+        setIsLoadingDaerah(true);
+        const options = await fetchDaerahReference();
+        setDaerahOptions(options);
+        console.log(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi daerah.");
+      } finally {
+        setIsLoadingDaerah(false);
+      }
+    };
+
+    void loadDaerah();
+  }, []);
+
+  useEffect(() => {
+    if (formik.values.tmpt_daerah) {
+      return;
+    }
+
+    setDesaOptions([]);
+    setKelompokOptions([]);
+
+    if (formik.values.tmpt_desa) {
+      formik.setFieldValue("tmpt_desa", "", false);
+    }
+
+    if (formik.values.tmpt_kelompok) {
+      formik.setFieldValue("tmpt_kelompok", "", false);
+    }
+  }, [formik.values.tmpt_daerah]);
+
+  useEffect(() => {
+    const loadDesa = async () => {
+      if (!formik.values.tmpt_daerah) {
+        return;
+      }
+
+      try {
+        setIsLoadingDesa(true);
+        const options = await fetchDesaReference(formik.values.tmpt_daerah);
+        setDesaOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi desa.");
+      } finally {
+        setIsLoadingDesa(false);
+      }
+    };
+
+    void loadDesa();
+  }, [formik.values.tmpt_daerah]);
+
+  useEffect(() => {
+    if (formik.values.tmpt_desa) {
+      return;
+    }
+
+    setKelompokOptions([]);
+
+    if (formik.values.tmpt_kelompok) {
+      formik.setFieldValue("tmpt_kelompok", "", false);
+    }
+  }, [formik.values.tmpt_desa]);
+
+  useEffect(() => {
+    const loadKelompok = async () => {
+      if (!formik.values.tmpt_desa) {
+        return;
+      }
+
+      try {
+        setIsLoadingKelompok(true);
+        const options = await fetchKelompokReference(formik.values.tmpt_desa);
+        setKelompokOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi kelompok.");
+      } finally {
+        setIsLoadingKelompok(false);
+      }
+    };
+
+    void loadKelompok();
+  }, [formik.values.tmpt_desa]);
+
+  useEffect(() => {
+    if (!formik.values.utusan) {
+      return;
+    }
+
+    formik.setFieldValue("tmpt_daerah", "", false);
+    formik.setFieldValue("tmpt_desa", "", false);
+    formik.setFieldValue("tmpt_kelompok", "", false);
+    setDesaOptions([]);
+    setKelompokOptions([]);
+  }, [formik.values.utusan]);
 
   const handleNext = async () => {
     const schema = stepSchemas[activeStep];
@@ -220,34 +365,76 @@ const CaiRegistrationPage = () => {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            <PrimeInputText
-              label="Tempat daerah"
-              name="tmpt_daerah"
-              formik={formik}
-              required
-              placeholder="Isi tempat daerah"
-            />
-            {formik.values.utusan !== "daerah" ? (
-              <PrimeInputText
+            {(isUtusan(formik.values.utusan, "daerah") ||
+              requiresAllLocations(formik.values.utusan) ||
+              isUtusan(formik.values.utusan, "desa") ||
+              isUtusan(formik.values.utusan, "kelompok") ||
+              isUtusan(formik.values.utusan, "pengurus") ||
+              isUtusan(formik.values.utusan, "pondok") ||
+              isUtusan(formik.values.utusan, "perorangan")) && (
+              <PrimeSelect
+                label="Tempat daerah"
+                name="tmpt_daerah"
+                formik={formik}
+                required={
+                  isUtusan(formik.values.utusan, "daerah") ||
+                  requiresAllLocations(formik.values.utusan)
+                }
+                options={daerahOptions}
+                isLoading={isLoadingDaerah}
+                placeholder={
+                  isLoadingDaerah ? "Memuat data..." : "Pilih daerah"
+                }
+                helperText="Dipakai untuk memuat referensi desa."
+              />
+            )}
+            {(formik.values.utusan === "desa" ||
+              formik.values.utusan === "kelompok" ||
+              requiresAllLocations(formik.values.utusan)) && (
+              <PrimeSelect
                 label="Tempat desa"
                 name="tmpt_desa"
                 formik={formik}
                 required={
                   formik.values.utusan === "desa" ||
-                  formik.values.utusan === "kelompok"
+                  requiresAllLocations(formik.values.utusan)
                 }
-                placeholder="Isi tempat desa"
+                options={desaOptions}
+                isLoading={isLoadingDesa}
+                placeholder={
+                  formik.values.tmpt_daerah
+                    ? isLoadingDesa
+                      ? "Memuat data..."
+                      : "Pilih desa"
+                    : "Pilih daerah dulu"
+                }
+                helperText="Dipakai untuk memuat referensi kelompok."
+                disabled={!formik.values.tmpt_daerah}
               />
-            ) : null}
-            {formik.values.utusan === "kelompok" ? (
-              <PrimeInputText
+            )}
+            {(formik.values.utusan === "kelompok" ||
+              requiresAllLocations(formik.values.utusan)) && (
+              <PrimeSelect
                 label="Tempat kelompok"
                 name="tmpt_kelompok"
                 formik={formik}
-                required
-                placeholder="Isi tempat kelompok"
+                required={
+                  formik.values.utusan === "kelompok" ||
+                  requiresAllLocations(formik.values.utusan)
+                }
+                options={kelompokOptions}
+                isLoading={isLoadingKelompok}
+                placeholder={
+                  formik.values.tmpt_desa
+                    ? isLoadingKelompok
+                      ? "Memuat data..."
+                      : "Pilih kelompok"
+                    : "Pilih desa dulu"
+                }
+                helperText="Dipakai untuk melengkapi data lokasi."
+                disabled={!formik.values.tmpt_desa}
               />
-            ) : null}
+            )}
 
             <div className="md:col-span-2">
               <PhotoField

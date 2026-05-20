@@ -44,6 +44,7 @@ const PresensiPage = () => {
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [locationAccuracy, setLocationAccuracy] = useState<string | null>(null);
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     if (!attendanceType) return;
@@ -53,7 +54,7 @@ const PresensiPage = () => {
         setLoadingParticipants(true);
         const options =
           attendanceType === "cai"
-            ? await fetchNamaPesertaCaiReference()
+            ? await fetchNamaPesertaCaiReference(currentYear)
             : await fetchNamaPesertaSensusReference();
         setParticipantOptions(options);
       } catch {
