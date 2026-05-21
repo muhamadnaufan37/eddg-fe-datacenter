@@ -219,7 +219,7 @@ export const submitSensusRegistration = async (payload: {
   nama_lengkap: string;
   nama_panggilan: string;
   tempat_lahir: string;
-  tgl_lahir: string;
+  tanggal_lahir: string;
   alamat: string;
   jenis_kelamin: string;
   no_telepon: string;
@@ -239,7 +239,7 @@ export const submitSensusRegistration = async (payload: {
   appendIfPresent(formData, "nama_lengkap", payload.nama_lengkap);
   appendIfPresent(formData, "nama_panggilan", payload.nama_panggilan);
   appendIfPresent(formData, "tempat_lahir", payload.tempat_lahir);
-  appendIfPresent(formData, "tgl_lahir", payload.tgl_lahir);
+  appendIfPresent(formData, "tanggal_lahir", payload.tanggal_lahir);
   appendIfPresent(formData, "alamat", payload.alamat);
   appendIfPresent(formData, "jenis_kelamin", payload.jenis_kelamin);
   appendIfPresent(formData, "no_telepon", payload.no_telepon);

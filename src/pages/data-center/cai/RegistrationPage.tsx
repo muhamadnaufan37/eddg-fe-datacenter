@@ -174,7 +174,7 @@ const CaiRegistrationPage = () => {
         setActiveStep(0);
 
         if (nextUuid) {
-          navigate(`/digital-data/cai/${nextUuid}`);
+          navigate(`/digital-data/cai/search/${nextUuid}`);
         }
       } catch (error: any) {
         showToast(
@@ -196,7 +196,6 @@ const CaiRegistrationPage = () => {
         setIsLoadingDaerah(true);
         const options = await fetchDaerahReference();
         setDaerahOptions(options);
-        console.log(options);
       } catch {
         showToast("error", "Gagal", "Gagal memuat referensi daerah.");
       } finally {

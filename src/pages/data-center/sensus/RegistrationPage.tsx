@@ -23,7 +23,7 @@ type SensusFormValues = {
   nama_lengkap: string;
   nama_panggilan: string;
   tempat_lahir: string;
-  tgl_lahir: string;
+  tanggal_lahir: string;
   alamat: string;
   jenis_kelamin: string;
   no_telepon: string;
@@ -62,7 +62,7 @@ const stepSchemas = [
     nama_lengkap: Yup.string().required("Nama lengkap wajib diisi"),
     nama_panggilan: Yup.string().required("Nama panggilan wajib diisi"),
     tempat_lahir: Yup.string().required("Tempat lahir wajib diisi"),
-    tgl_lahir: Yup.string().required("Tanggal lahir wajib diisi"),
+    tanggal_lahir: Yup.string().required("Tanggal lahir wajib diisi"),
     jenis_kelamin: Yup.string().required("Jenis kelamin wajib dipilih"),
     no_telepon: Yup.string()
       .required("Nomor telepon wajib diisi")
@@ -116,7 +116,7 @@ const SensusRegistrationPage = () => {
       nama_lengkap: "",
       nama_panggilan: "",
       tempat_lahir: "",
-      tgl_lahir: "",
+      tanggal_lahir: "",
       alamat: "",
       jenis_kelamin: "",
       no_telepon: "62",
@@ -344,7 +344,7 @@ const SensusRegistrationPage = () => {
             />
             <PrimeInputText
               label="Tanggal lahir"
-              name="tgl_lahir"
+              name="tanggal_lahir"
               formik={formik}
               required
               type="date"
