@@ -16,6 +16,7 @@ import type { ReferenceOption } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import Sensitive from "../../../components/Sensitive";
 import { extractArrayResult } from "../../../utils/response";
+import { maskText } from "../../../utils/text";
 
 type SensusSearchValues = {
   nama_lengkap: string;
@@ -228,7 +229,7 @@ const SensusSearchPage = () => {
                         Kode cari data
                       </p>
                       <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        <Sensitive value={record.kode_cari_data} />
+                        <Sensitive value={maskText(record.kode_cari_data)} />
                       </p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">

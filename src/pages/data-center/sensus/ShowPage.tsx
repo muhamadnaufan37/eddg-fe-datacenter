@@ -40,6 +40,7 @@ const SensusShowPage = () => {
   const { kodeUuid } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [record, setRecord] = useState<SensusRecord | null>(null);
 
   useEffect(() => {
@@ -75,10 +76,10 @@ const SensusShowPage = () => {
     ["No telepon", maskText(record?.no_telepon, 3, 2)],
     ["Nama ayah", maskText(record?.nama_ayah)],
     ["Nama ibu", maskText(record?.nama_ibu)],
-    ["Hoby", record?.hoby],
+    ["Hoby", maskText(record?.hoby)],
     ["Pekerjaan", record?.nm_pekerjaan],
-    ["Usia menikah", record?.usia_menikah || "-"],
-    ["Kriteria pasangan", record?.kriteria_pasangan || "-"],
+    ["Usia menikah", maskText(record?.usia_menikah || "-")],
+    ["Kriteria pasangan", maskText(record?.kriteria_pasangan || "-")],
     ["Daerah", record?.nm_daerah],
     ["Desa", record?.nm_desa],
     ["Kelompok", record?.nm_kelompok],
@@ -90,6 +91,31 @@ const SensusShowPage = () => {
 
   return (
     <div className="w-full space-y-6">
+      {isImagePreviewOpen && imageUrl ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setIsImagePreviewOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-5xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsImagePreviewOpen(false)}
+              className="absolute -top-12 right-0 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+            >
+              Tutup
+            </button>
+            <img
+              src={imageUrl}
+              alt="Preview foto sensus"
+              className="max-h-[85vh] w-full rounded-3xl object-contain shadow-2xl"
+            />
+          </div>
+        </div>
+      ) : null}
+
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -149,11 +175,17 @@ const SensusShowPage = () => {
               Foto
             </p>
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="Foto sensus"
-                className="mt-4 h-80 w-full rounded-3xl object-cover"
-              />
+              <button
+                type="button"
+                onClick={() => setIsImagePreviewOpen(true)}
+                className="mt-4 block w-full overflow-hidden rounded-3xl text-left transition hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-sky-500/20"
+              >
+                <img
+                  src={imageUrl}
+                  alt="Foto sensus"
+                  className="h-80 w-full rounded-3xl object-cover"
+                />
+              </button>
             ) : (
               <div className="mt-4 flex h-80 items-center justify-center rounded-3xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
                 Foto tidak tersedia
