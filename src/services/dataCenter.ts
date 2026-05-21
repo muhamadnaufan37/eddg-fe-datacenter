@@ -232,6 +232,7 @@ export const submitSensusRegistration = async (payload: {
   tmpt_daerah: string;
   tmpt_desa: string;
   tmpt_kelompok: string;
+  status_persetujuan: number;
   img: File;
 }) => {
   const formData = new FormData();
@@ -252,6 +253,7 @@ export const submitSensusRegistration = async (payload: {
   appendIfPresent(formData, "tmpt_daerah", payload.tmpt_daerah);
   appendIfPresent(formData, "tmpt_desa", payload.tmpt_desa);
   appendIfPresent(formData, "tmpt_kelompok", payload.tmpt_kelompok);
+  appendIfPresent(formData, "status_persetujuan", payload.status_persetujuan);
   appendIfPresent(formData, "img", payload.img);
 
   const response = await api.post(

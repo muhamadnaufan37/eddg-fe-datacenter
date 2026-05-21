@@ -3,7 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { fetchSensusByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
-import { formatBooleanLabel, maskText } from "../../../utils/text";
+import {
+  formatBooleanLabel,
+  maskText,
+  resolveImageUrl,
+} from "../../../utils/text";
 import Sensitive from "../../../components/Sensitive";
 
 type DetailValue = string | number | null | undefined;
@@ -82,6 +86,8 @@ const SensusShowPage = () => {
     ["Status sambung", record?.status_sambung],
   ];
 
+  const imageUrl = resolveImageUrl(record?.img_url);
+
   return (
     <div className="w-full space-y-6">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -142,9 +148,9 @@ const SensusShowPage = () => {
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Foto
             </p>
-            {record?.img_url ? (
+            {imageUrl ? (
               <img
-                src={record.img_url}
+                src={imageUrl}
                 alt="Foto sensus"
                 className="mt-4 h-80 w-full rounded-3xl object-cover"
               />

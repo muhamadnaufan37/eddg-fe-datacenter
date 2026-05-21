@@ -36,6 +36,7 @@ type SensusFormValues = {
   tmpt_daerah: string;
   tmpt_desa: string;
   tmpt_kelompok: string;
+  status_persetujuan: number;
   img: File | null;
 };
 
@@ -45,6 +46,22 @@ interface ReactSelectOption {
 }
 
 const steps = ["Identitas", "Keluarga", "Alamat & Foto"];
+
+const agreementItems = [
+  "Nama lengkap",
+  "Tanggal Lahir",
+  "Alamat",
+  "Nomor telepon",
+  "Nama Orang Tua Kandung",
+  "Data Kriteria",
+  "Foto",
+];
+
+const agreementParagraphs = [
+  "Dengan ini saya menyatakan bahwa data pribadi yang saya berikan kepada sistem adalah benar, lengkap, dan dapat dipertanggungjawabkan. Saya memberikan persetujuan kepada pengelola sistem untuk mengumpulkan, menyimpan, mengelola, memproses, dan menggunakan data pribadi tersebut sesuai dengan kebutuhan layanan, administrasi, verifikasi, pelaporan, serta keperluan lain yang berkaitan dengan operasional sistem.",
+  "Data pribadi yang dimaksud dapat meliputi, namun tidak terbatas pada:",
+  "Pengelola sistem berkomitmen untuk menjaga kerahasiaan dan keamanan data pribadi sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, serta tidak akan menyalahgunakan data untuk kepentingan di luar layanan tanpa persetujuan pengguna.",
+];
 
 const imageSchema = Yup.mixed<File>()
   .required("Foto wajib diunggah")
@@ -85,14 +102,73 @@ const stepSchemas = [
     tmpt_daerah: Yup.string().required("Tempat daerah wajib diisi"),
     tmpt_desa: Yup.string().required("Tempat desa wajib diisi"),
     tmpt_kelompok: Yup.string().required("Tempat kelompok wajib diisi"),
+    status_persetujuan: Yup.number()
+      .oneOf([1], "Persetujuan wajib dicentang")
+      .required("Persetujuan wajib dicentang"),
     img: imageSchema,
   }),
 ];
+
+const ConsentModal = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-6"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4 dark:border-slate-700">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">
+              Persetujuan
+            </p>
+            <h3 className="mt-2 text-xl font-black text-slate-900 dark:text-white">
+              Persetujuan Penyimpanan dan Penggunaan Data Pribadi
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            Tutup
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4 text-sm leading-7 text-slate-700 dark:text-slate-300">
+          <p>{agreementParagraphs[0]}</p>
+          <div>
+            <p className="mb-2">{agreementParagraphs[1]}</p>
+            <ol className="list-decimal space-y-1 pl-5">
+              {agreementItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </div>
+          <p>{agreementParagraphs[2]}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SensusRegistrationPage = () => {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConsentOpen, setIsConsentOpen] = useState(false);
   const [isLoadingPekerjaan, setIsLoadingPekerjaan] = useState(true);
   const [isLoadingDaerah, setIsLoadingDaerah] = useState(true);
   const [isLoadingDesa, setIsLoadingDesa] = useState(false);
@@ -129,6 +205,7 @@ const SensusRegistrationPage = () => {
       tmpt_daerah: "",
       tmpt_desa: "",
       tmpt_kelompok: "",
+      status_persetujuan: 0,
       img: null,
     },
     validateOnBlur: true,
@@ -145,6 +222,7 @@ const SensusRegistrationPage = () => {
         const response = await submitSensusRegistration({
           ...values,
           img: values.img,
+          status_persetujuan: values.status_persetujuan,
         });
 
         showToast(
@@ -300,9 +378,14 @@ const SensusRegistrationPage = () => {
     <div className="w-full space-y-6">
       <StepperHeader
         title="Registrasi Sensus"
-        description="Form registrasi sensus menggunakan stepper agar lebih mudah dipakai di perangkat mobile. Semua field wajib diisi, kecuali usia menikah dan kriteria pasangan yang bersifat opsional."
+        description="Form registrasi sensus menggunakan stepper agar lebih mudah dipakai di perangkat mobile. Semua field wajib diisi, kecuali usia menikah dan kriteria pasangan yang bersifat opsional. Pada langkah terakhir, persetujuan penyimpanan dan penggunaan data pribadi wajib dicentang."
         steps={steps}
         activeStep={activeStep}
+      />
+
+      <ConsentModal
+        isOpen={isConsentOpen}
+        onClose={() => setIsConsentOpen(false)}
       />
 
       <form
@@ -468,6 +551,52 @@ const SensusRegistrationPage = () => {
                 required
                 helperText="Unggah foto saja, ukuran maksimal 5 MB."
               />
+            </div>
+            <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+              <div className="flex items-start gap-3">
+                <input
+                  id="status_persetujuan"
+                  name="status_persetujuan"
+                  type="checkbox"
+                  aria-label="Persetujuan penyimpanan dan penggunaan data pribadi"
+                  checked={formik.values.status_persetujuan === 1}
+                  onChange={(event) => {
+                    formik.setFieldValue(
+                      "status_persetujuan",
+                      event.target.checked ? 1 : 0,
+                      true,
+                    );
+                  }}
+                  onBlur={formik.handleBlur}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                />
+                <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsConsentOpen(true)}
+                    className="block text-left text-sm font-medium leading-6 text-slate-700 transition hover:text-sky-700 dark:text-slate-200"
+                  >
+                    Dengan tombol &quot;ceklis&quot; atau melanjutkan proses
+                    penggunaan layanan, saya dianggap telah membaca, memahami,
+                    dan menyetujui ketentuan penyimpanan dan penggunaan data
+                    pribadi ini.
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsConsentOpen(true)}
+                    className="mt-2 text-left text-sm font-semibold text-sky-600 underline decoration-sky-400 decoration-2 underline-offset-4 transition hover:text-sky-700"
+                  >
+                    Lihat persetujuan lengkap
+                  </button>
+                  {(formik.submitCount > 0 ||
+                    formik.touched.status_persetujuan) &&
+                  typeof formik.errors.status_persetujuan === "string" ? (
+                    <p className="mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {formik.errors.status_persetujuan}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             </div>
           </div>
         )}

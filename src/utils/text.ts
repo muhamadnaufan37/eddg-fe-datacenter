@@ -30,3 +30,22 @@ export const formatBooleanLabel = (value: boolean | null | undefined) => {
 
   return value ? "Ya" : "Tidak";
 };
+
+export const resolveImageUrl = (value: string | null | undefined) => {
+  if (!value) {
+    return "";
+  }
+
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:")) {
+    return value;
+  }
+
+  const baseUrl = import.meta.env.VITE_PUBLIC_REACT_APP_BASE_URL_API;
+
+  if (!baseUrl) {
+    return value;
+  }
+
+  const apiOrigin = new URL(baseUrl, window.location.origin).origin;
+  return new URL(value, apiOrigin).toString();
+};

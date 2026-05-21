@@ -3,7 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { fetchCaiByUuid, recoverCaiYear } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
-import { formatBooleanLabel, maskText } from "../../../utils/text";
+import {
+  formatBooleanLabel,
+  maskText,
+  resolveImageUrl,
+} from "../../../utils/text";
 import Sensitive from "../../../components/Sensitive";
 
 type DetailValue = string | number | null | undefined;
@@ -13,6 +17,7 @@ interface CaiRecord {
   uuid?: string;
   nama_lengkap?: string;
   tgl_lahir?: string;
+  umur?: string;
   jenis_kelamin?: string;
   utusan?: string;
   nm_daerah?: string;
@@ -87,18 +92,21 @@ const CaiShowPage = () => {
   };
 
   const fields: Array<[string, DetailValue]> = [
-    ["ID Peserta", maskText(record?.kode_cari_data)],
-    ["ID Daftar", maskText(record?.uuid)],
+    ["ID Peserta", maskText(record?.kode_cari_data || "-")],
+    ["ID Daftar", maskText(record?.uuid || "-")],
     ["Nama lengkap", record?.nama_lengkap],
-    ["Tanggal lahir", maskText(record?.tgl_lahir)],
+    ["Tanggal lahir", maskText(record?.tgl_lahir || "-")],
+    ["Umur", record?.umur || "-"],
     ["Jenis kelamin", record?.jenis_kelamin],
-    ["Utusan", record?.utusan],
-    ["Daerah", record?.nm_daerah],
-    ["Desa", record?.nm_desa],
-    ["Kelompok", record?.nm_kelompok],
-    ["Tahun", record?.tahun],
+    ["Utusan", record?.utusan || "-"],
+    ["Daerah", record?.nm_daerah || "-"],
+    ["Desa", record?.nm_desa || "-"],
+    ["Kelompok", record?.nm_kelompok || "-"],
+    ["Tahun", record?.tahun || "-"],
     ["Aktif", formatBooleanLabel(record?.is_active)],
   ];
+
+  const imageUrl = resolveImageUrl(record?.img_url);
 
   return (
     <div className="w-full space-y-6">
@@ -168,9 +176,9 @@ const CaiShowPage = () => {
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Foto
             </p>
-            {record?.img_url ? (
+            {imageUrl ? (
               <img
-                src={record.img_url}
+                src={imageUrl}
                 alt="Foto CAI"
                 className="mt-4 h-80 w-full rounded-3xl object-cover"
               />
