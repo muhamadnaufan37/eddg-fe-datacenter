@@ -233,7 +233,7 @@ const PresensiPage = () => {
                 Absen CAI
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Absensi untuk peserta CAI (Calon Anggota Inti).
+                Absensi untuk peserta CAI.
               </p>
             </button>
 
