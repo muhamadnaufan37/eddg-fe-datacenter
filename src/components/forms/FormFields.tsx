@@ -14,7 +14,12 @@ import type { InputNumberProps } from "primereact/inputnumber";
 import { Password } from "primereact/password";
 import { Calendar } from "primereact/calendar";
 import Select from "react-select";
-import type { SingleValue, MultiValue, StylesConfig } from "react-select";
+import type {
+  InputActionMeta,
+  SingleValue,
+  MultiValue,
+  StylesConfig,
+} from "react-select";
 import { useTheme } from "../../contexts/ThemeContext";
 
 type FormikBag = {
@@ -610,6 +615,10 @@ interface PrimeSelectProps extends CommonFieldProps {
   isLoading?: boolean;
   placeholder?: string;
   disabled?: boolean;
+  onInputChange?: (
+    newValue: string,
+    actionMeta: InputActionMeta,
+  ) => string | void;
 }
 
 export const PrimeSelect = ({
@@ -626,6 +635,7 @@ export const PrimeSelect = ({
   isLoading = false,
   disabled = false,
   placeholder = "Pilih opsi",
+  onInputChange,
 }: PrimeSelectProps) => {
   const { theme } = useTheme();
   const hasError = Boolean(
@@ -807,6 +817,7 @@ export const PrimeSelect = ({
         options={options}
         value={selectedOption}
         onChange={handleChange}
+        onInputChange={onInputChange}
         isMulti={isMulti}
         isClearable={isClearable}
         isSearchable={isSearchable}

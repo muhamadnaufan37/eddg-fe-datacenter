@@ -310,23 +310,30 @@ export const fetchNamaPesertaReference = async (): Promise<
   return normalizeNamaPesertaReference(response.data);
 };
 
-export const fetchNamaPesertaCaiReference = async (
-  tahun?: number,
-): Promise<ReferenceOption[]> => {
+export const fetchNamaPesertaCaiReference = async (params?: {
+  tahun?: number;
+  search?: string;
+}): Promise<ReferenceOption[]> => {
   const response = await api.get(
     "/api/v1/data_center/reference/list-nama-peserta-cai",
     {
-      params: typeof tahun === "number" ? { tahun } : undefined,
+      params: {
+        ...(typeof params?.tahun === "number" ? { tahun: params.tahun } : {}),
+        search: params?.search ?? "",
+      },
     },
   );
   return normalizeNamaPesertaReference(response.data);
 };
 
-export const fetchNamaPesertaSensusReference = async (): Promise<
-  ReferenceOption[]
-> => {
+export const fetchNamaPesertaSensusReference = async (params?: {
+  search?: string;
+}): Promise<ReferenceOption[]> => {
   const response = await api.get(
     "/api/v1/data_center/reference/list-nama-peserta-sensus",
+    {
+      params: { search: params?.search ?? "" },
+    },
   );
   return normalizeNamaPesertaReference(response.data);
 };
@@ -369,6 +376,7 @@ export const submitPresensi = async (payload: {
   longitude: string;
   status_presensi: string;
   radius_meter: number;
+  category: string | null;
 }) => {
   const response = await api.post(
     "/api/v1/data_center/presensi/create",

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import type { InputActionMeta } from "react-select";
 
 import {
   PrimeInputText,
@@ -57,25 +58,45 @@ const SensusSearchPage = () => {
   const [searched, setSearched] = useState(false);
   const [namaOptions, setNamaOptions] = useState<ReferenceOption[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  const [namaSearchTerm, setNamaSearchTerm] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadNamaOptions = async () => {
       try {
         setLoadingOptions(true);
-        const options = await fetchNamaPesertaSensusReference();
-        setNamaOptions(options);
+        const options = await fetchNamaPesertaSensusReference({
+          search: namaSearchTerm,
+        });
+
+        if (!cancelled) {
+          setNamaOptions(options);
+        }
       } catch {
-        showToast(
-          "error",
-          "Gagal",
-          "Gagal memuat referensi nama peserta sensus.",
-        );
+        if (!cancelled) {
+          showToast(
+            "error",
+            "Gagal",
+            "Gagal memuat referensi nama peserta sensus.",
+          );
+        }
       } finally {
-        setLoadingOptions(false);
+        if (!cancelled) {
+          setLoadingOptions(false);
+        }
       }
     };
-    loadNamaOptions();
-  }, []);
+
+    const timeoutId = window.setTimeout(() => {
+      void loadNamaOptions();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [namaSearchTerm]);
 
   const formik = useFormik<SensusSearchValues>({
     initialValues: {
@@ -160,6 +181,16 @@ const SensusSearchPage = () => {
             required
             options={namaOptions}
             disabled={loadingOptions}
+            onInputChange={(
+              inputValue: string,
+              actionMeta: InputActionMeta,
+            ) => {
+              if (actionMeta.action === "input-change") {
+                setNamaSearchTerm(inputValue);
+              }
+
+              return inputValue;
+            }}
           />
           <PrimeInputText
             label="Tanggal lahir"

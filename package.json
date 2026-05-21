@@ -13,6 +13,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.3",
+    "device-uuid": "^3.0.3",
     "formik": "^2.4.9",
     "primereact": "^10.9.8",
     "react": "^19.2.0",

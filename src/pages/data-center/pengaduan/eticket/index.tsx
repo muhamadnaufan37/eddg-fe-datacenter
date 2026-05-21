@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import type { InputActionMeta } from "react-select";
 
 import {
   PhotoField,
@@ -71,6 +72,7 @@ const EticketPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingNames, setIsLoadingNames] = useState(false);
   const [nameOptions, setNameOptions] = useState<ReactSelectOption[]>([]);
+  const [nameSearchTerm, setNameSearchTerm] = useState("");
 
   const formik = useFormik<EticketFormValues>({
     initialValues: {
@@ -118,34 +120,54 @@ const EticketPage = () => {
 
   const { setFieldValue, setFieldTouched, values } = formik;
 
-  const requiresCaiReferenceName = values.jenis_pengaduan === "keluhan_data_cai";
+  const requiresCaiReferenceName =
+    values.jenis_pengaduan === "keluhan_data_cai";
 
   useEffect(() => {
     setFieldValue("nama_lengkap", "", false);
     setFieldTouched("nama_lengkap", false, false);
     setNameOptions([]);
+    setNameSearchTerm("");
   }, [setFieldTouched, setFieldValue, values.jenis_pengaduan]);
 
   useEffect(() => {
-    const loadNames = async () => {
-      if (!requiresCaiReferenceName) {
-        setNameOptions([]);
-        return;
-      }
+    if (!requiresCaiReferenceName) {
+      setNameOptions([]);
+      return;
+    }
 
+    let cancelled = false;
+
+    const loadNames = async () => {
       try {
         setIsLoadingNames(true);
-        const options = await fetchNamaPesertaCaiReference();
-        setNameOptions(options);
+        const options = await fetchNamaPesertaCaiReference({
+          search: nameSearchTerm,
+        });
+
+        if (!cancelled) {
+          setNameOptions(options);
+        }
       } catch {
-        showToast("error", "Gagal", "Gagal memuat referensi nama peserta.");
+        if (!cancelled) {
+          showToast("error", "Gagal", "Gagal memuat referensi nama peserta.");
+        }
       } finally {
-        setIsLoadingNames(false);
+        if (!cancelled) {
+          setIsLoadingNames(false);
+        }
       }
     };
 
-    void loadNames();
-  }, [requiresCaiReferenceName]);
+    const timeoutId = window.setTimeout(() => {
+      void loadNames();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [requiresCaiReferenceName, nameSearchTerm]);
 
   const handleNext = async () => {
     const schema = stepSchemas[activeStep];
@@ -192,6 +214,13 @@ const EticketPage = () => {
             ? "Memuat referensi nama..."
             : "Dipilih dari referensi peserta."
         }
+        onInputChange={(inputValue: string, actionMeta: InputActionMeta) => {
+          if (actionMeta.action === "input-change") {
+            setNameSearchTerm(inputValue);
+          }
+
+          return inputValue;
+        }}
       />
     );
   };

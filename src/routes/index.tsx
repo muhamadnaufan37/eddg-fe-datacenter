@@ -14,6 +14,7 @@ import PresensiPage from "../pages/data-center/presensi";
 import EticketPage from "../pages/data-center/pengaduan/eticket";
 import CekPajakKendaraanPage from "../pages/data-center/sambara/CekPajakKendaraanPage";
 import ResultInfoPajakKendaraan from "../pages/data-center/sambara/result";
+import DeviceIdPage from "../pages/data-center/device-id";
 
 export const routes = [
   {
@@ -67,6 +68,10 @@ export const routes = [
       {
         path: "digital-data/presensi",
         element: <PresensiPage />,
+      },
+      {
+        path: "digital-data/device-id",
+        element: <DeviceIdPage />,
       },
       {
         path: "digital-data/pengaduan/eticket",

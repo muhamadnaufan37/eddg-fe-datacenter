@@ -12,6 +12,7 @@ import { AiFillCar } from "react-icons/ai";
 
 import { MdOutlineEventAvailable } from "react-icons/md";
 import { BiUser, BiWater } from "react-icons/bi";
+import { FiSmartphone } from "react-icons/fi";
 
 const menus = [
   {
@@ -46,6 +47,13 @@ const menus = [
     icon: <AiFillCar size={22} />,
     path: "/digital-data/sambara/cek-pajak-kendaraan",
   },
+  // {
+  //   title: "Device ID Checker",
+  //   description:
+  //     "Lihat device_id browser saat ini untuk kebutuhan validasi perangkat.",
+  //   icon: <FiSmartphone size={22} />,
+  //   path: "/digital-data/device-id",
+  // },
 ];
 
 const banners = [

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import type { InputActionMeta } from "react-select";
 
 import {
   PrimeInputText,
@@ -30,6 +31,54 @@ interface ReactSelectOption {
   value: string;
 }
 
+const attendanceOptions = [
+  {
+    value: "hadir",
+    label: "Hadir",
+    description: "Datang dan mengikuti kegiatan sesuai jadwal.",
+    accent:
+      "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    ),
+  },
+  {
+    value: "izin",
+    label: "Izin",
+    description: "Berhalangan hadir dan menyampaikan alasan.",
+    accent:
+      "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 8v4m0 4h.01M10.293 3.293l-7 7A1 1 0 003 11v6a1 1 0 001 1h16a1 1 0 001-1v-6a1 1 0 00-.293-.707l-7-7a1 1 0 00-1.414 0z"
+      />
+    ),
+  },
+  {
+    value: "sakit",
+    label: "Sakit",
+    description: "Tidak dapat hadir karena kondisi kesehatan.",
+    accent:
+      "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 8v4m0 4h.01M5.07 19H18.93a2 2 0 001.74-3L13.74 5a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z"
+      />
+    ),
+  },
+] as const;
+
 const locationDefault = "";
 
 const PresensiPage = () => {
@@ -44,28 +93,50 @@ const PresensiPage = () => {
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [locationAccuracy, setLocationAccuracy] = useState<string | null>(null);
+  const [participantSearchTerm, setParticipantSearchTerm] = useState("");
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     if (!attendanceType) return;
+
+    let cancelled = false;
 
     const loadParticipants = async () => {
       try {
         setLoadingParticipants(true);
         const options =
           attendanceType === "cai"
-            ? await fetchNamaPesertaCaiReference(currentYear)
-            : await fetchNamaPesertaSensusReference();
-        setParticipantOptions(options);
+            ? await fetchNamaPesertaCaiReference({
+                tahun: currentYear,
+                search: participantSearchTerm,
+              })
+            : await fetchNamaPesertaSensusReference({
+                search: participantSearchTerm,
+              });
+
+        if (!cancelled) {
+          setParticipantOptions(options);
+        }
       } catch {
-        showToast("error", "Gagal", "Gagal memuat referensi peserta.");
+        if (!cancelled) {
+          showToast("error", "Gagal", "Gagal memuat referensi peserta.");
+        }
       } finally {
-        setLoadingParticipants(false);
+        if (!cancelled) {
+          setLoadingParticipants(false);
+        }
       }
     };
 
-    void loadParticipants();
-  }, [attendanceType]);
+    const timeoutId = window.setTimeout(() => {
+      void loadParticipants();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [attendanceType, currentYear, participantSearchTerm]);
 
   const formik = useFormik<PresensiFormValues>({
     initialValues: {
@@ -97,7 +168,8 @@ const PresensiPage = () => {
         const response = await submitPresensi({
           ...values,
           add_by_petugas: "124fe53d-64da-4647-8c30-87aea6ac23bd",
-          radius_meter: 100,
+          radius_meter: 500,
+          category: attendanceType,
         });
 
         showToast(
@@ -324,32 +396,122 @@ const PresensiPage = () => {
                     ? "Memuat peserta..."
                     : "Pilih Nama Peserta"
                 }
+                onInputChange={(
+                  inputValue: string,
+                  actionMeta: InputActionMeta,
+                ) => {
+                  if (actionMeta.action === "input-change") {
+                    setParticipantSearchTerm(inputValue);
+                  }
+
+                  return inputValue;
+                }}
               />
-              <PrimeInputText
-                label="Latitude"
-                name="latitude"
-                formik={formik}
-                readOnly
-                required
-              />
-              <PrimeInputText
-                label="Longitude"
-                name="longitude"
-                formik={formik}
-                readOnly
-                required
-              />
-              <PrimeSelect
-                label="Kehadiran"
-                name="status_presensi"
-                formik={formik}
-                required
-                options={[
-                  { label: "Hadir", value: "hadir" },
-                  { label: "Izin", value: "izin" },
-                  { label: "Sakit", value: "sakit" },
-                ]}
-              />
+              <div className="hidden">
+                <PrimeInputText
+                  label="Latitude"
+                  name="latitude"
+                  formik={formik}
+                  readOnly
+                  required
+                />
+                <PrimeInputText
+                  label="Longitude"
+                  name="longitude"
+                  formik={formik}
+                  readOnly
+                  required
+                />
+              </div>
+              <div className="md:col-span-2">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Kehadiran <span className="text-rose-500">*</span>
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Pilih salah satu status presensi di bawah ini.
+                    </p>
+                  </div>
+                  {formik.touched.status_presensi &&
+                  formik.errors.status_presensi ? (
+                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {formik.errors.status_presensi}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {attendanceOptions.map((option) => {
+                    const isActive =
+                      formik.values.status_presensi === option.value;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          formik.setFieldValue(
+                            "status_presensi",
+                            option.value,
+                            true,
+                          );
+                          formik.setFieldTouched(
+                            "status_presensi",
+                            true,
+                            false,
+                          );
+                        }}
+                        className={`group flex h-full flex-col gap-3 rounded-3xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/10 ${
+                          isActive
+                            ? `${option.accent} border-current shadow-md`
+                            : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                        }`}
+                        aria-pressed={isActive}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 shadow-sm ring-1 ring-inset ring-slate-200 dark:bg-slate-800/80 dark:ring-slate-700">
+                            <svg
+                              className="h-5 w-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              {option.icon}
+                            </svg>
+                          </div>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+                              isActive
+                                ? "bg-white/70 text-current"
+                                : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
+                            }`}
+                          >
+                            {isActive ? "Dipilih" : "Pilih"}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h3 className="text-base font-bold">
+                            {option.label}
+                          </h3>
+                          <p className="text-sm leading-relaxed opacity-90">
+                            {option.description}
+                          </p>
+                        </div>
+
+                        <div
+                          className={`mt-auto h-1.5 w-full rounded-full ${
+                            isActive
+                              ? "bg-current"
+                              : "bg-slate-200 dark:bg-slate-700"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               {(formik.values.status_presensi === "sakit" ||
                 formik.values.status_presensi === "izin") && (
                 <TextareaField
@@ -392,8 +554,13 @@ const PresensiPage = () => {
             <div className="flex justify-end border-t border-slate-200 pt-5 dark:border-slate-700">
               <button
                 type="submit"
-                disabled={isSubmitting}
                 className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={
+                  isSubmitting ||
+                  searchingLocation ||
+                  formik.values.latitude === locationDefault ||
+                  formik.values.longitude === locationDefault
+                }
               >
                 {isSubmitting ? "Menyimpan..." : "Simpan Presensi"}
               </button>
