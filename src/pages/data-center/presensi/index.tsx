@@ -168,7 +168,7 @@ const PresensiPage = () => {
         const response = await submitPresensi({
           ...values,
           add_by_petugas: "124fe53d-64da-4647-8c30-87aea6ac23bd",
-          radius_meter: 500,
+          radius_meter: 3540,
           category: attendanceType,
         });
 
