@@ -12,7 +12,7 @@ import { AiFillCar } from "react-icons/ai";
 
 import { MdOutlineEventAvailable } from "react-icons/md";
 import { BiUser, BiWater } from "react-icons/bi";
-import { FiSmartphone } from "react-icons/fi";
+// import { FiSmartphone } from "react-icons/fi";
 
 const menus = [
   {
@@ -151,14 +151,14 @@ const HomePage = () => {
         {/* CONTROL */}
         <button
           onClick={prevBanner}
-          className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur transition hover:bg-white/30"
+          className="absolute hidden left-4 top-1/2 h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white backdrop-blur transition hover:bg-white/30"
         >
           <FiChevronLeft />
         </button>
 
         <button
           onClick={nextBanner}
-          className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur transition hover:bg-white/30"
+          className="absolute hidden right-4 top-1/2 h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white backdrop-blur transition hover:bg-white/30"
         >
           <FiChevronRight />
         </button>
