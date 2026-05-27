@@ -301,6 +301,18 @@ export const fetchKelompokReference = async (
   ]);
 };
 
+export const fetchAllKelompokReference = async (): Promise<
+  ReferenceOption[]
+> => {
+  const response = await api.get(
+    "/api/v1/data_center/reference/list-all-kelompok",
+  );
+  return normalizeTempatSambungReference(response.data, [
+    "nama_kelomopok",
+    "nama_kelompok",
+  ]);
+};
+
 export const fetchNamaPesertaReference = async (): Promise<
   ReferenceOption[]
 > => {
@@ -336,6 +348,57 @@ export const fetchNamaPesertaSensusReference = async (params?: {
     },
   );
   return normalizeNamaPesertaReference(response.data);
+};
+
+export type PresensiKegiatanVenue = {
+  id: number;
+  uuid?: string | null;
+  nama_daerah?: string;
+  nama_desa?: string;
+  nama_kelompok?: string;
+  alamat?: string;
+  latitude?: string;
+  longitude?: string;
+  img?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PresensiKegiatan = {
+  id: number;
+  kode_kegiatan: string;
+  nama_kegiatan: string;
+  tmpt_kegiatan: string;
+  type_kegiatan: string;
+  category: string;
+  usia_mode: string;
+  usia_min: number;
+  usia_max: number;
+  tgl_kegiatan: string;
+  jam_kegiatan: string;
+  expired_date_time: string;
+  is_expired: boolean;
+  status_kegiatan: string;
+  expired_message: string;
+  daerah?: PresensiKegiatanVenue | null;
+  desa?: PresensiKegiatanVenue | null;
+  kelompok?: PresensiKegiatanVenue | null;
+};
+
+export const searchKegiatanPresensi = async (kodeKegiatan: string) => {
+  const response = await api.get(
+    "/api/v1/data_center/presensi/search-kegiatan",
+    {
+      params: { kode_kegiatan: kodeKegiatan },
+    },
+  );
+
+  return response.data as {
+    success: boolean;
+    message: string;
+    data: PresensiKegiatan[];
+  };
 };
 
 export const searchCaiData = async (payload: {

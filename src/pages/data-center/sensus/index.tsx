@@ -9,7 +9,7 @@ const SensusMenuPage = () => {
     {
       title: "Cari Data",
       description:
-        "Cari data sensus menggunakan nama lengkap, tanggal lahir, dan jenis kelamin.",
+        "Cari data sensus menggunakan nama lengkap, tanggal lahir, dan nama orang tua kandung.",
       icon: <FiSearch size={22} />,
       path: "/digital-data/sensus/search",
     },

@@ -46,7 +46,7 @@ const utsusanOptions: ReactSelectOption[] = [
   { label: "Kelompok", value: "kelompok" },
   { label: "Pengurus", value: "pengurus" },
   { label: "Pondok", value: "pondok" },
-  { label: "Perorangan", value: "perorangan" },
+  { label: "Panitia", value: "panitia" },
 ];
 
 const locationUtusanValues = {
@@ -55,7 +55,7 @@ const locationUtusanValues = {
   kelompok: "kelompok",
   pengurus: "pengurus",
   pondok: "pondok",
-  perorangan: "perorangan",
+  panitia: "panitia",
 } as const;
 
 const baseImageSchema = Yup.mixed<File>()
@@ -80,7 +80,7 @@ const requiresAllLocations = (value: string) => {
   return [
     locationUtusanValues.pengurus,
     locationUtusanValues.pondok,
-    locationUtusanValues.perorangan,
+    locationUtusanValues.panitia,
   ].includes(value as (typeof locationUtusanValues)["pengurus"]);
 };
 
@@ -370,7 +370,7 @@ const CaiRegistrationPage = () => {
               isUtusan(formik.values.utusan, "kelompok") ||
               isUtusan(formik.values.utusan, "pengurus") ||
               isUtusan(formik.values.utusan, "pondok") ||
-              isUtusan(formik.values.utusan, "perorangan")) && (
+              isUtusan(formik.values.utusan, "panitia")) && (
               <PrimeSelect
                 label="Tempat daerah"
                 name="tmpt_daerah"

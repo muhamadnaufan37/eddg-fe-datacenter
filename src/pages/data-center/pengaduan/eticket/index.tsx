@@ -12,6 +12,7 @@ import {
   TextareaField,
 } from "../../../../components/forms/FormFields";
 import {
+  fetchAllKelompokReference,
   fetchNamaPesertaCaiReference,
   submitEticket,
 } from "../../../../services/dataCenter";
@@ -73,6 +74,10 @@ const EticketPage = () => {
   const [isLoadingNames, setIsLoadingNames] = useState(false);
   const [nameOptions, setNameOptions] = useState<ReactSelectOption[]>([]);
   const [nameSearchTerm, setNameSearchTerm] = useState("");
+  const [isLoadingKelompok, setIsLoadingKelompok] = useState(false);
+  const [kelompokOptions, setKelompokOptions] = useState<ReactSelectOption[]>(
+    [],
+  );
 
   const formik = useFormik<EticketFormValues>({
     initialValues: {
@@ -168,6 +173,22 @@ const EticketPage = () => {
       window.clearTimeout(timeoutId);
     };
   }, [requiresCaiReferenceName, nameSearchTerm]);
+
+  useEffect(() => {
+    const loadKelompok = async () => {
+      try {
+        setIsLoadingKelompok(true);
+        const options = await fetchAllKelompokReference();
+        setKelompokOptions(options);
+      } catch {
+        showToast("error", "Gagal", "Gagal memuat referensi kelompok.");
+      } finally {
+        setIsLoadingKelompok(false);
+      }
+    };
+
+    void loadKelompok();
+  }, []);
 
   const handleNext = async () => {
     const schema = stepSchemas[activeStep];
@@ -285,12 +306,14 @@ const EticketPage = () => {
               placeholder="Masukkan nomor (default 62)"
               helperText="Nomor akan disimpan dengan prefix 62"
             />
-            <PrimeInputText
-              label="Nama kelompok"
+            <PrimeSelect
+              label="Tempat kelompok"
               name="nama_kelompok"
               formik={formik}
-              required
-              placeholder="Isi nama kelompok"
+              options={kelompokOptions}
+              isLoading={isLoadingKelompok}
+              placeholder={"Pilih kelompok"}
+              helperText="Dipakai untuk melengkapi data lokasi."
             />
           </div>
         ) : (

@@ -66,7 +66,7 @@ const Layout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex flex-1 w-full flex-col items-stretch justify-start px-4 py-6 pt-24 sm:px-6 lg:px-8">
+      <main className="flex flex-1 w-full flex-col items-stretch justify-start px-4 py-6 pt-18 sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
           <InspectProvider value={{ isInspectOpen }}>
             <Outlet />
