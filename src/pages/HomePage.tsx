@@ -42,7 +42,7 @@ const menus = [
     path: "/digital-data/presensi",
   },
   {
-    title: "Cek Pajak Kendaraan",
+    title: "SAMBARA",
     description:
       "Kelola data pajak kendaraan dan informasi terkait dengan mudah dan cepat.",
     icon: <AiFillCar size={22} />,
