@@ -130,17 +130,18 @@ const HomePage = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/80">
                 <span className="h-2 w-2 rounded-full bg-white/80" />
-                SIPANDA
+                Menu layanan utama
               </div>
 
               <div className="max-w-2xl space-y-2">
                 <h1 className="text-3xl font-black leading-tight sm:text-4xl">
-                  Menu Layanan
+                  SIPANDA
                 </h1>
                 <p className="max-w-xl text-sm leading-relaxed text-white/88 sm:text-base">
-                  Pilih layanan yang ingin Anda gunakan. Struktur dibuat lebih
-                  lapang dan konsisten supaya tetap nyaman dipakai di mobile
-                  maupun desktop.
+                  SIPANDA adalah platform yang dirancang untuk memudahkan
+                  pengelolaan data sensus, CAI, absensi online, e-ticket, dan
+                  cek pajak kendaraan dengan antarmuka yang intuitif dan fitur
+                  lengkap.
                 </p>
               </div>
             </div>
