@@ -70,8 +70,10 @@ const CekPajakKendaraanPage = () => {
       );
 
       const result = response.data;
+      const isValidResult =
+        result?.success !== false && result?.data?.success !== false;
 
-      if (result?.success) {
+      if (isValidResult) {
         navigate(`/digital-data/sambara/cek-pajak-kendaraan/result`, {
           state: { detailData: result, values: values },
           replace: true,
@@ -80,7 +82,8 @@ const CekPajakKendaraanPage = () => {
         toastRef.current?.show({
           severity: "error",
           summary: "Gagal",
-          detail: result?.message || "Terjadi kesalahan saat mengirim data.",
+          detail:
+            result?.data?.message || "Terjadi kesalahan saat mengirim data.",
           life: 3000,
         });
       }
@@ -165,10 +168,6 @@ const CekPajakKendaraanPage = () => {
                 <div className="flex flex-col justify-between gap-4">
                   <main className="overflow-y-auto bottom-0 flex flex-col flex-1">
                     <div className="flex flex-col gap-2 bg-white dark:bg-slate-800 p-3 rounded-xl">
-                      <span className="text-sm leading-5 text-slate-700 dark:text-slate-300">
-                        Pilih warna plat, lalu masukan nomor plat
-                        <br /> kendaraan bermotor anda
-                      </span>
                       <div className="w-full">
                         <span className="font-semibold text-sm text-slate-700 dark:text-slate-200">
                           Nomor Polisi
@@ -373,7 +372,7 @@ const CekPajakKendaraanPage = () => {
                       </div>
                     </div>
                   </main>
-                  <footer className="sticky bottom-0 flex flex-col gap-2 p-4">
+                  <footer className="sticky bottom-0 flex gap-2 p-4">
                     <Button
                       type="submit"
                       className="w-full p-button-sm text-xs"

@@ -6,8 +6,15 @@ export function useInspectDetect() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+
     const detect = () => {
       try {
+        if (isTouchDevice) {
+          setIsInspectOpen(false);
+          return;
+        }
+
         const widthDiff = window.outerWidth - window.innerWidth;
         const heightDiff = window.outerHeight - window.innerHeight;
         const open = widthDiff > 160 || heightDiff > 160;
@@ -18,6 +25,8 @@ export function useInspectDetect() {
     };
 
     const onKey = (e: KeyboardEvent) => {
+      if (isTouchDevice) return;
+
       if (e.key === "F12") setIsInspectOpen(true);
       if (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i"))
         setIsInspectOpen(true);

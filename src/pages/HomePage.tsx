@@ -124,7 +124,7 @@ const HomePage = () => {
     <div className={pageShellClassName} role="main">
       <div className={pageBackdropClassName} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 p-3">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5">
         <section className="overflow-hidden rounded-4xl border border-white/30 bg-linear-to-br from-sky-500 via-cyan-500 to-blue-600 p-5 text-white shadow-[0_24px_60px_rgba(14,116,144,0.24)] dark:border-slate-700/40 dark:shadow-[0_24px_60px_rgba(2,6,23,0.55)] sm:p-6 lg:p-7">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
             <div className="space-y-4">
@@ -142,15 +142,6 @@ const HomePage = () => {
                   lapang dan konsisten supaya tetap nyaman dipakai di mobile
                   maupun desktop.
                 </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3 text-sm">
-                <div className="rounded-full bg-white/15 px-3 py-1 font-semibold backdrop-blur-sm">
-                  {filteredMenus.length} layanan aktif
-                </div>
-                {/* <div className="rounded-full bg-white/15 px-3 py-1 font-semibold backdrop-blur-sm">
-                  Dark mode ready
-                </div> */}
               </div>
             </div>
 
@@ -181,9 +172,6 @@ const HomePage = () => {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className={sectionHeadingClassName}>Informasi Menu</h2>
-              <p className={sectionBodyClassName}>
-                Anda memiliki {filteredMenus.length} layanan yang tersedia.
-              </p>
             </div>
           </div>
 
