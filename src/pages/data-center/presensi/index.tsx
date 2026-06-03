@@ -20,6 +20,7 @@ import {
   submitPresensi,
 } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
+import { resolveImageUrl } from "../../../utils/text";
 
 type PresensiFormValues = {
   kode_kegiatan: string;
@@ -105,6 +106,17 @@ const formatShortDate = (value: string) => {
 
   return new Intl.DateTimeFormat("id-ID", {
     dateStyle: "medium",
+  }).format(parsed);
+};
+
+const formatShortTime = (value: string) => {
+  if (!value) return "-";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  return new Intl.DateTimeFormat("id-ID", {
+    timeStyle: "long",
   }).format(parsed);
 };
 
@@ -217,15 +229,12 @@ const RowInfo = ({
 };
 
 const sectionCardClassName =
-  "overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/85";
+  "overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85";
 
 const PresensiPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const kodeKegiatanFromUrl =
-    searchParams.get("kode_kegiatan")?.trim() ??
-    searchParams.get("kdKegiatan")?.trim() ??
-    "";
+  const kodeKegiatanFromUrl = searchParams.get("no_kegiatan")?.trim() ?? "";
 
   const [activityData, setActivityData] = useState<PresensiKegiatan | null>(
     null,
@@ -245,6 +254,7 @@ const PresensiPage = () => {
   const [locationAccuracy, setLocationAccuracy] = useState<string | null>(null);
   const [participantSearchTerm, setParticipantSearchTerm] = useState("");
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
   const formik = useFormik<PresensiFormValues>({
@@ -507,11 +517,13 @@ const PresensiPage = () => {
   const isExpired = Boolean(activityData?.is_expired);
   const canFillAttendance = Boolean(activityData && !isExpired);
 
+  const imageUrl = resolveImageUrl(activityData?.daerah?.img_url);
+
   return (
     <div className="relative overflow-hidden text-slate-900 transition-colors duration-300 dark:text-white">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.14),transparent_42%),linear-gradient(to_bottom,rgba(248,250,252,0.92),rgba(248,250,252,0.4),transparent)] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_42%),linear-gradient(to_bottom,rgba(2,6,23,0.92),rgba(2,6,23,0.55),transparent)]" />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full flex-col gap-6 p-3">
         {activityLoading ? (
           <section className={`${sectionCardClassName} grid gap-4 p-5 sm:p-6`}>
             <div className="h-6 w-48 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
@@ -571,7 +583,7 @@ const PresensiPage = () => {
         ) : null}
 
         {activityData ? (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_20rem]">
+          <div className="grid gap-6">
             <div className="space-y-6">
               <section className={`${sectionCardClassName} p-5 sm:p-6`}>
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -601,25 +613,6 @@ const PresensiPage = () => {
                           ? ` ${activityData.usia_min}-${activityData.usia_max} tahun`
                           : ""}
                       </p>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                      <MiniDetail
-                        label="Tanggal"
-                        value={formatShortDate(activityData.tgl_kegiatan)}
-                      />
-                      <MiniDetail
-                        label="Jam"
-                        value={activityData.jam_kegiatan || "-"}
-                      />
-                      <MiniDetail
-                        label="Kode"
-                        value={activityData.kode_kegiatan}
-                      />
-                      <MiniDetail
-                        label="Status"
-                        value={activityData.status_kegiatan || "-"}
-                      />
                     </div>
                   </div>
 
@@ -653,7 +646,7 @@ const PresensiPage = () => {
                     <>
                       <StepperHeader
                         title="Absensi Online"
-                        description="Pilih jenis absensi yang ingin Anda lakukan. Kode kegiatan sudah terisi otomatis dari URL."
+                        description="Pilih jenis absensi yang ingin Anda lakukan. No. kegiatan sudah terisi otomatis dari URL."
                         steps={["Pilih Tipe", "Data Presensi"]}
                         activeStep={0}
                       />
@@ -769,18 +762,7 @@ const PresensiPage = () => {
                             </button>
                           </div>
 
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <div className="md:col-span-2">
-                              <div className="rounded-[1.75rem] border border-sky-100 bg-sky-50 p-4 text-sky-900 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-100">
-                                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700 dark:text-sky-300">
-                                  Kode Kegiatan Otomatis
-                                </p>
-                                <p className="mt-1 text-sm font-semibold">
-                                  {activityData?.kode_kegiatan ?? "-"}
-                                </p>
-                              </div>
-                            </div>
-
+                          <div className="grid gap-4 md:grid-cols-1">
                             <PrimeSelect
                               label="Nama peserta"
                               name="id_peserta"
@@ -982,53 +964,6 @@ const PresensiPage = () => {
                         <aside className="space-y-4 self-start lg:sticky lg:top-6">
                           <div className={`${sectionCardClassName} p-5`}>
                             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-                              Ringkasan
-                            </p>
-                            <div className="mt-4 space-y-3">
-                              <RowInfo
-                                label="Jenis"
-                                value={
-                                  attendanceType === "cai" ? "CAI" : "Muda/i"
-                                }
-                              />
-                              <RowInfo
-                                label="Kode"
-                                value={activityData?.kode_kegiatan ?? "-"}
-                              />
-                              <RowInfo
-                                label="Peserta"
-                                value={
-                                  formikRef.current.values.id_peserta ||
-                                  "Belum dipilih"
-                                }
-                              />
-                            </div>
-                          </div>
-
-                          <div className={`${sectionCardClassName} p-5`}>
-                            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-                              Lokasi
-                            </p>
-                            <div className="mt-4 space-y-3">
-                              <RowInfo
-                                label="Latitude"
-                                value={formikRef.current.values.latitude || "-"}
-                              />
-                              <RowInfo
-                                label="Longitude"
-                                value={
-                                  formikRef.current.values.longitude || "-"
-                                }
-                              />
-                              <RowInfo
-                                label="Akurasi"
-                                value={locationAccuracy || "Belum diambil"}
-                              />
-                            </div>
-                          </div>
-
-                          <div className={`${sectionCardClassName} p-5`}>
-                            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
                               Panduan
                             </p>
                             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -1053,59 +988,6 @@ const PresensiPage = () => {
                 </>
               ) : null}
             </div>
-
-            <aside className="space-y-4 self-start xl:sticky xl:top-6">
-              <div className={`${sectionCardClassName} p-5`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-                  Detail Cepat
-                </p>
-                <div className="mt-4 space-y-3">
-                  <RowInfo
-                    label="Tempat umum"
-                    value={activityData.tmpt_kegiatan || "-"}
-                  />
-                  <RowInfo
-                    label="Jadwal lengkap"
-                    value={formatDateTime(
-                      `${activityData.tgl_kegiatan} ${activityData.jam_kegiatan}`,
-                    )}
-                  />
-                  <RowInfo
-                    label="Expired"
-                    value={formatDateTime(activityData.expired_date_time)}
-                  />
-                </div>
-              </div>
-
-              <div className={`${sectionCardClassName} p-5`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-                  Lokasi Kegiatan
-                </p>
-                <div className="mt-4 space-y-3">
-                  <MiniDetail label={venue.label} value={venue.title} />
-                  <MiniDetail label="Alamat" value={venue.address} />
-                  <MiniDetail label="Latitude" value={venue.latitude} />
-                  <MiniDetail label="Longitude" value={venue.longitude} />
-                </div>
-              </div>
-
-              {isExpired ? (
-                <div className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-4 text-rose-800 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
-                  <div className="flex items-start gap-3">
-                    <FiAlertTriangle className="mt-1 shrink-0" />
-                    <div>
-                      <h4 className="text-base font-bold">
-                        Kegiatan sudah kedaluwarsa
-                      </h4>
-                      <p className="mt-1 text-sm leading-relaxed opacity-90">
-                        {activityData.expired_message ||
-                          "Kegiatan ini tidak lagi bisa dipakai untuk presensi."}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </aside>
           </div>
         ) : null}
 
@@ -1116,108 +998,164 @@ const PresensiPage = () => {
           modal
           dismissableMask
           blockScroll
-          contentStyle={{ maxHeight: "80vh", overflow: "auto" }}
-          className="w-[min(96vw,54rem)]"
+          contentStyle={{ overflow: "auto" }}
+          breakpoints={{
+            "768px": "100vw",
+            "640px": "100vw",
+          }}
+          className="activity-dialog w-[min(96vw,60rem)] max-md:w-screen max-md:h-screen max-md:max-w-none max-md:m-0"
         >
           {activityData ? (
-            <div className="space-y-5 p-1 sm:p-2">
-              <div className="rounded-3xl bg-linear-to-br from-sky-600 via-cyan-500 to-emerald-500 p-5 text-white shadow-[0_18px_50px_rgba(8,145,178,0.22)]">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]">
-                    {activityData.type_kegiatan}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
-                      isExpired
-                        ? "bg-rose-100 text-rose-700"
-                        : "bg-emerald-100 text-emerald-700"
-                    }`}
-                  >
-                    {isExpired ? "Kedaluwarsa" : "Aktif"}
-                  </span>
-                </div>
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/40">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                      Rincian Kegiatan
+                    </p>
+                  </div>
 
-                <h3 className="mt-3 text-2xl font-black leading-tight">
-                  {activityData.nama_kegiatan}
-                </h3>
-                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/90">
-                  Kode {activityData.kode_kegiatan} dan detail lokasi dimuat
-                  dari API secara otomatis.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <InfoPill
-                  icon={<FiCalendar />}
-                  label="Tanggal"
-                  value={formatShortDate(activityData.tgl_kegiatan)}
-                />
-                <InfoPill
-                  icon={<FiClock />}
-                  label="Jam"
-                  value={activityData.jam_kegiatan || "-"}
-                />
-                <InfoPill
-                  icon={<FiMapPin />}
-                  label="Kode"
-                  value={activityData.kode_kegiatan}
-                />
-                <InfoPill
-                  icon={<FiAlertTriangle />}
-                  label="Status"
-                  value={activityData.status_kegiatan || "-"}
-                />
-              </div>
-
-              <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                <div className="rounded-3xl bg-slate-50 p-4 dark:bg-slate-800/70">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
-                        Tempat Kegiatan
-                      </p>
-                      <h4 className="mt-1 text-base font-bold text-slate-900 dark:text-white">
-                        {venue.label}
-                      </h4>
-                    </div>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm dark:bg-slate-900 dark:text-slate-300">
-                      {activityData.type_kegiatan}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <MiniDetail label="Nama lokasi" value={venue.title} />
-                    <MiniDetail label="Alamat" value={venue.address} />
-                    <MiniDetail label="Latitude" value={venue.latitude} />
-                    <MiniDetail label="Longitude" value={venue.longitude} />
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/40">
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-                    Info Tambahan
-                  </p>
-                  <div className="mt-3 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-                    <RowInfo
-                      label="Tempat umum"
-                      value={activityData.tmpt_kegiatan || "-"}
-                    />
-                    <RowInfo
-                      label="Jadwal lengkap"
-                      value={formatDateTime(
-                        `${activityData.tgl_kegiatan} ${activityData.jam_kegiatan}`,
+                      {isImagePreviewOpen && imageUrl ? (
+                        <div
+                          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                          onClick={() => setIsImagePreviewOpen(false)}
+                        >
+                          <div
+                            className="relative w-full max-w-5xl"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setIsImagePreviewOpen(false)}
+                              className="absolute -top-12 right-0 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                            >
+                              Tutup
+                            </button>
+                            <img
+                              src={imageUrl}
+                              alt="Preview foto"
+                              className="max-h-[85vh] w-full rounded-3xl object-contain shadow-2xl"
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+                      {imageUrl ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsImagePreviewOpen(true)}
+                          className="mt-4 block w-full overflow-hidden rounded-3xl text-left transition hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-sky-500/20"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt="Foto CAI"
+                            className="h-80 w-full rounded-3xl object-cover"
+                          />
+                        </button>
+                      ) : (
+                        <div className="mt-4 flex h-80 items-center justify-center rounded-3xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                          Foto tidak tersedia
+                        </div>
                       )}
-                    />
-                    <RowInfo
-                      label="Expired"
-                      value={formatDateTime(activityData.expired_date_time)}
-                    />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <MiniDetail
+                        label="No. Kegiatan"
+                        value={activityData.kode_kegiatan}
+                      />
+                      <MiniDetail
+                        label="Nama Kegiatan"
+                        value={activityData.nama_kegiatan}
+                      />
+                      <MiniDetail
+                        label="Jenis Kegiatan"
+                        value={activityData.type_kegiatan}
+                      />
+                      <MiniDetail
+                        label="Alamat"
+                        value={
+                          activityData.daerah?.alamat ||
+                          activityData.desa?.alamat ||
+                          activityData.kelompok?.alamat
+                        }
+                      />
+                      <MiniDetail
+                        label="Tanggal Kegiatan"
+                        value={`${formatDateTime(activityData.jam_kegiatan)} s.d Selesai`}
+                      />
+                      <MiniDetail
+                        label="Batas Presensi"
+                        value={formatDateTime(activityData.expired_date_time)}
+                      />
+                    </div>
+
+                    <div>
+                      {(() => {
+                        const lon = Number(venue.longitude);
+                        const lat = Number(venue.latitude);
+                        const hasCoords =
+                          !Number.isNaN(lon) && !Number.isNaN(lat);
+
+                        if (!hasCoords) {
+                          return (
+                            <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-4 py-10 flex items-center justify-center text-sm text-gray-500">
+                              <FiMapPin className="h-4 w-4 mr-2" />
+                              Titik koordinat tidak tersedia
+                            </div>
+                          );
+                        }
+
+                        const delta = 0.005;
+                        const left = lon - delta;
+                        const right = lon + delta;
+                        const bottom = lat - delta;
+                        const top = lat + delta;
+                        const iframeSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${lat}%2C${lon}`;
+                        const openUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+
+                        return (
+                          <div>
+                            <div className="overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-700">
+                              <iframe
+                                title="Peta lokasi"
+                                src={iframeSrc}
+                                loading="lazy"
+                                className="w-full h-56 border-0"
+                              />
+                            </div>
+                            <div className="mt-2 text-xs text-gray-500">
+                              <a
+                                href={openUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="underline"
+                              >
+                                Buka Maps
+                              </a>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {isExpired ? (
-                <div className="rounded-3xl border border-rose-200 bg-rose-50 p-4 text-rose-800 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
+                <div
+                  className="
+    rounded-3xl
+    border
+    border-red-200
+    bg-red-50
+    text-red-800
+    dark:border-red-900
+    dark:bg-red-950/30
+    dark:text-red-300
+    p-4
+  "
+                >
                   <div className="flex items-start gap-3">
                     <FiAlertTriangle className="mt-1 shrink-0" />
                     <div>

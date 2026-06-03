@@ -232,3 +232,33 @@ a:hover {
 .p-toast .p-toast-message.p-toast-message-warn {
   border-radius: 12px !important;
 }
+
+.activity-dialog .p-dialog-header {
+  border-bottom: 1px solid transparent;
+}
+
+.activity-dialog .p-dialog-content,
+.activity-dialog .p-dialog-header {
+  background: white;
+  border-radius: 1rem;
+}
+
+.dark .activity-dialog .p-dialog-content,
+.dark .activity-dialog .p-dialog-header {
+  background: #212121;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .activity-dialog {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .activity-dialog .p-dialog-content {
+    height: calc(100vh - 70px);
+  }
+}

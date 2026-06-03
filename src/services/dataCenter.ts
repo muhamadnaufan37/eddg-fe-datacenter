@@ -360,6 +360,7 @@ export type PresensiKegiatanVenue = {
   latitude?: string;
   longitude?: string;
   img?: string | null;
+  img_url?: string | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
