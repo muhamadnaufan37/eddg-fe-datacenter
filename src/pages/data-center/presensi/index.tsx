@@ -299,7 +299,6 @@ const PresensiPage = () => {
           kegiatan.kode_kegiatan,
           false,
         );
-        setIsActivityModalOpen(true);
       } catch (error: any) {
         if (cancelled) return;
 
