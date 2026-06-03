@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import type { InputActionMeta } from "react-select";
 import { Dialog } from "primereact/dialog";
-import { FiAlertTriangle, FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
+import { FiAlertTriangle, FiMapPin } from "react-icons/fi";
 
 import {
   PrimeInputText,
@@ -98,28 +98,6 @@ const formatDateTime = (value: string) => {
   }).format(parsed);
 };
 
-const formatShortDate = (value: string) => {
-  if (!value) return "-";
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-
-  return new Intl.DateTimeFormat("id-ID", {
-    dateStyle: "medium",
-  }).format(parsed);
-};
-
-const formatShortTime = (value: string) => {
-  if (!value) return "-";
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-
-  return new Intl.DateTimeFormat("id-ID", {
-    timeStyle: "long",
-  }).format(parsed);
-};
-
 const getVenueDetails = (activity: PresensiKegiatan | null) => {
   if (!activity) {
     return {
@@ -162,34 +140,6 @@ const getVenueDetails = (activity: PresensiKegiatan | null) => {
   };
 };
 
-const InfoPill = ({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}) => {
-  return (
-    <div className="rounded-3xl border border-white/60 bg-white/80 p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 rounded-2xl bg-sky-50 p-2 text-sky-600 dark:bg-slate-700 dark:text-sky-300">
-          {icon}
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            {label}
-          </p>
-          <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
-            {value}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const MiniDetail = ({
   label,
   value,
@@ -205,25 +155,6 @@ const MiniDetail = ({
       <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
         {value}
       </p>
-    </div>
-  );
-};
-
-const RowInfo = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-slate-900">
-      <span className="text-sm text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
-      <span className="text-sm font-semibold text-slate-900 dark:text-white">
-        {value}
-      </span>
     </div>
   );
 };
