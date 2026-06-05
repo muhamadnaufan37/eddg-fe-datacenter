@@ -22,6 +22,8 @@ import {
 import { showToast } from "../../../services/toast";
 import { resolveImageUrl } from "../../../utils/text";
 
+type CaiAttendanceMode = "list" | "rfid";
+
 type PresensiFormValues = {
   kode_kegiatan: string;
   id_peserta: string;
@@ -162,6 +164,329 @@ const MiniDetail = ({
 const sectionCardClassName =
   "overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85";
 
+// ─── CAI Method Selector Card ────────────────────────────────────────────────
+const CAI_METHODS = [
+  {
+    value: "list" as CaiAttendanceMode,
+    title: "Daftar Nama",
+    description: "Cari dan pilih peserta dari daftar yang dimuat dari server.",
+    badge: "Paling cepat untuk operator",
+    accentActive:
+      "border-sky-500 bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300",
+    icon: (
+      <>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M17 20h5v-2a4 4 0 00-5-5m-4 7H2v-2a6 6 0 0112 0m0-5a4 4 0 100-8 4 4 0 000 8zm9 0h-3m1.5-1.5v3"
+        />
+      </>
+    ),
+  },
+  {
+    value: "rfid" as CaiAttendanceMode,
+    title: "Tapping RFID",
+    description: "Tap kartu ke reader — peserta teridentifikasi otomatis.",
+    badge: "Untuk perangkat reader",
+    accentActive:
+      "border-cyan-500 bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300",
+    icon: (
+      <>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"
+        />
+      </>
+    ),
+  },
+] as const;
+
+const CaiMethodCard = ({
+  active,
+  method,
+  onClick,
+}: {
+  active: boolean;
+  method: (typeof CAI_METHODS)[number];
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={`group relative overflow-hidden rounded-[1.75rem] border p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/10 ${
+      active
+        ? `${method.accentActive} shadow-md`
+        : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+    }`}
+  >
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 shadow-sm ring-1 ring-inset ring-slate-200 transition group-hover:scale-105 dark:bg-slate-800/90 dark:ring-slate-700">
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {method.icon}
+        </svg>
+      </div>
+      <span
+        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+          active
+            ? "bg-white/70 text-current"
+            : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
+        }`}
+      >
+        {active ? "Aktif" : "Pilih"}
+      </span>
+    </div>
+    <div className="mt-4 space-y-1.5">
+      <h3 className="text-base font-bold text-slate-900 dark:text-white">
+        {method.title}
+      </h3>
+      <p className="text-sm leading-relaxed opacity-90">{method.description}</p>
+    </div>
+    <div className="mt-4">
+      <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-current dark:bg-slate-800/80">
+        {method.badge}
+      </span>
+    </div>
+    <div
+      className={`mt-5 h-1.5 w-full rounded-full ${
+        active ? "bg-current" : "bg-slate-200 dark:bg-slate-700"
+      }`}
+    />
+  </button>
+);
+
+// ─── RFID Tapping Panel ───────────────────────────────────────────────────────
+type RfidScanState = "idle" | "ready" | "success" | "error";
+
+const RFID_SCAN_CONFIG: Record<
+  RfidScanState,
+  { ring: string; glow: string; label: string }
+> = {
+  idle: {
+    ring: "border-slate-300 dark:border-slate-600",
+    glow: "",
+    label: "Menunggu tap",
+  },
+  ready: {
+    ring: "border-cyan-400",
+    glow: "shadow-cyan-500/20",
+    label: "Siap membaca",
+  },
+  success: {
+    ring: "border-emerald-400",
+    glow: "shadow-emerald-500/20",
+    label: "Kartu terbaca",
+  },
+  error: {
+    ring: "border-rose-400",
+    glow: "shadow-rose-500/20",
+    label: "Kode tidak valid",
+  },
+};
+
+const RfidTappingPanel = ({
+  rfidCode,
+  scanState,
+  statusMessage,
+}: {
+  rfidCode: string;
+  scanState: RfidScanState;
+  statusMessage: string | null;
+}) => {
+  const cfg = RFID_SCAN_CONFIG[scanState];
+  return (
+    <div className="space-y-5">
+      {/* Status badge */}
+      <div className="flex items-center gap-2">
+        <div
+          className={`h-2.5 w-2.5 rounded-full ${
+            scanState === "success"
+              ? "bg-emerald-500"
+              : scanState === "error"
+                ? "bg-rose-500"
+                : scanState === "ready"
+                  ? "bg-cyan-500 animate-pulse"
+                  : "bg-slate-400"
+          }`}
+        />
+        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+          {cfg.label}
+        </span>
+      </div>
+
+      {/* Reader visual + input */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        {/* Radar circle */}
+        <div
+          className={`relative flex flex-col items-center justify-center gap-6 overflow-hidden rounded-[2rem] border p-8 shadow-xl transition-all duration-500 ${
+            cfg.ring
+          } ${cfg.glow} ${
+            scanState === "success"
+              ? "bg-emerald-50/60 dark:bg-emerald-500/5"
+              : scanState === "error"
+                ? "bg-rose-50/60 dark:bg-rose-500/5"
+                : scanState === "ready"
+                  ? "bg-cyan-50/60 dark:bg-cyan-500/5"
+                  : "bg-slate-50 dark:bg-slate-900"
+          }`}
+        >
+          {/* Decorative radial rings */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="h-56 w-56 rounded-full border border-slate-200/50 dark:border-slate-700/40" />
+            <div className="absolute h-40 w-40 rounded-full border border-slate-200/60 dark:border-slate-700/50" />
+            <div className="absolute h-24 w-24 rounded-full border border-dashed border-cyan-300/70 dark:border-cyan-500/30" />
+          </div>
+
+          {/* Center icon */}
+          <div
+            className={`relative z-9 flex h-24 w-24 items-center justify-center rounded-full border-2 shadow-lg transition-all duration-500 ${
+              scanState === "success"
+                ? "border-emerald-400 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300"
+                : scanState === "error"
+                  ? "border-rose-400 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300"
+                  : scanState === "ready"
+                    ? "border-cyan-400 bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-cyan-300"
+                    : "border-slate-300 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400"
+            }`}
+          >
+            {scanState === "success" ? (
+              <svg
+                className="h-10 w-10"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            ) : scanState === "error" ? (
+              <svg
+                className="h-10 w-10"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="h-10 w-10"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"
+                />
+              </svg>
+            )}
+          </div>
+
+          <div className="relative z-9 text-center">
+            <h4 className="text-base font-bold text-slate-900 dark:text-white">
+              {scanState === "success"
+                ? "RFID terhubung ke peserta"
+                : scanState === "error"
+                  ? "Kode belum valid"
+                  : "Tempel kartu pada reader"}
+            </h4>
+            <p className="mt-1 max-w-xs text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+              {scanState === "success"
+                ? "Lanjutkan mengisi status kehadiran dan lokasi."
+                : "Atau ketik kode RFID secara manual sebagai fallback."}
+            </p>
+          </div>
+
+          {statusMessage ? (
+            <p
+              className={`relative z-9 rounded-2xl px-4 py-2 text-sm font-semibold ${
+                scanState === "success"
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                  : scanState === "error"
+                    ? "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                    : "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300"
+              }`}
+            >
+              {statusMessage}
+            </p>
+          ) : null}
+        </div>
+
+        {/* Right column: input + checklist */}
+        <div className="flex flex-col gap-4">
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Auto Scan RFID
+            </p>
+            <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+              Tempel kartu ke reader. Kode akan terbaca otomatis tanpa input
+              manual.
+            </p>
+            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Kode terbaca terakhir
+              </p>
+              <p className="mt-2 min-h-6 break-all text-sm font-semibold tracking-[0.18em] text-slate-900 dark:text-white">
+                {rfidCode || "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Checklist
+            </p>
+            <ul className="space-y-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              {[
+                "Pastikan reader RFID aktif dan terhubung ke perangkat.",
+                "Tap kartu, tunggu bunyi konfirmasi, lalu tekan hubungkan.",
+                "Gunakan mode daftar nama jika reader tidak tersedia.",
+              ].map((tip) => (
+                <li key={tip} className="flex items-start gap-2">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-300">
+                    <svg
+                      className="h-2.5 w-2.5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PresensiPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -179,6 +504,13 @@ const PresensiPage = () => {
   const [attendanceType, setAttendanceType] = useState<"cai" | "sensus" | null>(
     null,
   );
+  const [caiAttendanceMode, setCaiAttendanceMode] =
+    useState<CaiAttendanceMode>("list");
+  const [rfidCode, setRfidCode] = useState("");
+  const [rfidScanState, setRfidScanState] = useState<RfidScanState>("idle");
+  const [rfidStatusMessage, setRfidStatusMessage] = useState<string | null>(
+    null,
+  );
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -187,6 +519,8 @@ const PresensiPage = () => {
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const currentYear = new Date().getFullYear();
+  const rfidBufferRef = useRef("");
+  const rfidBufferTimerRef = useRef<number | null>(null);
 
   const formik = useFormik<PresensiFormValues>({
     initialValues: {
@@ -265,6 +599,10 @@ const PresensiPage = () => {
       setParticipantSearchTerm("");
       setLocationAccuracy(null);
       setIsActivityModalOpen(false);
+      setCaiAttendanceMode("list");
+      setRfidCode("");
+      setRfidScanState("idle");
+      setRfidStatusMessage(null);
     };
 
     const loadKegiatan = async () => {
@@ -364,6 +702,85 @@ const PresensiPage = () => {
     };
   }, [attendanceType, currentYear, participantSearchTerm]);
 
+  const connectRfidCode = (rawCode: string) => {
+    const v = rawCode.trim().toUpperCase();
+    if (!v) {
+      setRfidScanState("error");
+      setRfidStatusMessage("Kode RFID tidak terbaca. Coba tap ulang.");
+      return;
+    }
+    setRfidCode(v);
+    formikRef.current.setFieldValue("id_peserta", v, true);
+    formikRef.current.setFieldTouched("id_peserta", true, false);
+    setRfidScanState("success");
+    setRfidStatusMessage(`RFID ${v} terbaca otomatis dan siap dipakai.`);
+  };
+
+  useEffect(() => {
+    const isRfidMode = attendanceType === "cai" && caiAttendanceMode === "rfid";
+    if (!isRfidMode) return;
+
+    const flushBuffer = () => {
+      const scanned = rfidBufferRef.current;
+      rfidBufferRef.current = "";
+      if (rfidBufferTimerRef.current) {
+        window.clearTimeout(rfidBufferTimerRef.current);
+        rfidBufferTimerRef.current = null;
+      }
+      if (scanned.trim()) {
+        connectRfidCode(scanned);
+      }
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+      const target = event.target as HTMLElement | null;
+      const isTypingField =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT" ||
+        target?.isContentEditable;
+
+      // Jangan menangkap ketikan normal pada field form lain.
+      if (isTypingField) return;
+
+      if (event.key === "Enter") {
+        if (rfidBufferRef.current.trim()) {
+          flushBuffer();
+        }
+        return;
+      }
+
+      if (event.key.length !== 1) return;
+
+      if (!rfidBufferRef.current) {
+        setRfidScanState("ready");
+        setRfidStatusMessage("Membaca kartu RFID...");
+      }
+
+      rfidBufferRef.current += event.key;
+
+      if (rfidBufferTimerRef.current) {
+        window.clearTimeout(rfidBufferTimerRef.current);
+      }
+
+      // Scanner umumnya mengirim burst cepat; jeda pendek menandai akhir data scan.
+      rfidBufferTimerRef.current = window.setTimeout(flushBuffer, 120);
+    };
+
+    window.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+      if (rfidBufferTimerRef.current) {
+        window.clearTimeout(rfidBufferTimerRef.current);
+        rfidBufferTimerRef.current = null;
+      }
+      rfidBufferRef.current = "";
+    };
+  }, [attendanceType, caiAttendanceMode]);
+
   const searchCurrentLocation = () => {
     if (!navigator.geolocation) {
       showToast(
@@ -452,7 +869,7 @@ const PresensiPage = () => {
   return (
     <>
       <div className="relative overflow-hidden text-slate-900 transition-colors duration-300 dark:text-white">
-        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.14),transparent_42%),linear-gradient(to_bottom,rgba(248,250,252,0.92),rgba(248,250,252,0.4),transparent)] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_42%),linear-gradient(to_bottom,rgba(2,6,23,0.92),rgba(2,6,23,0.55),transparent)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-9 h-96 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.14),transparent_42%),linear-gradient(to_bottom,rgba(248,250,252,0.92),rgba(248,250,252,0.4),transparent)] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_46%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_42%),linear-gradient(to_bottom,rgba(2,6,23,0.92),rgba(2,6,23,0.55),transparent)]" />
 
         <div className="mx-auto flex w-full flex-col gap-6 p-3">
           {activityLoading ? (
@@ -662,6 +1079,40 @@ const PresensiPage = () => {
                           activeStep={1}
                         />
 
+                        {/* CAI Method Selector — hanya tampil saat tipe CAI */}
+                        {attendanceType === "cai" && (
+                          <div className={sectionCardClassName}>
+                            <div className="p-5 sm:p-6">
+                              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+                                Metode presensi
+                              </p>
+                              <h3 className="mb-4 text-base font-bold text-slate-900 dark:text-white">
+                                Pilih cara mengidentifikasi peserta
+                              </h3>
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                {CAI_METHODS.map((method) => (
+                                  <CaiMethodCard
+                                    key={method.value}
+                                    method={method}
+                                    active={caiAttendanceMode === method.value}
+                                    onClick={() => {
+                                      setCaiAttendanceMode(method.value);
+                                      formikRef.current.setFieldValue(
+                                        "id_peserta",
+                                        "",
+                                        false,
+                                      );
+                                      setRfidCode("");
+                                      setRfidScanState("idle");
+                                      setRfidStatusMessage(null);
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem]">
                           <form
                             onSubmit={formik.handleSubmit}
@@ -697,29 +1148,38 @@ const PresensiPage = () => {
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-1">
-                              <PrimeSelect
-                                label="Nama peserta"
-                                name="id_peserta"
-                                formik={formikRef.current}
-                                required
-                                options={participantOptions}
-                                isLoading={loadingParticipants}
-                                placeholder={
-                                  loadingParticipants
-                                    ? "Memuat peserta..."
-                                    : "Pilih Nama Peserta"
-                                }
-                                onInputChange={(
-                                  inputValue: string,
-                                  actionMeta: InputActionMeta,
-                                ) => {
-                                  if (actionMeta.action === "input-change") {
-                                    setParticipantSearchTerm(inputValue);
+                              {attendanceType === "cai" &&
+                              caiAttendanceMode === "rfid" ? (
+                                <RfidTappingPanel
+                                  rfidCode={rfidCode}
+                                  scanState={rfidScanState}
+                                  statusMessage={rfidStatusMessage}
+                                />
+                              ) : (
+                                <PrimeSelect
+                                  label="Nama peserta"
+                                  name="id_peserta"
+                                  formik={formikRef.current}
+                                  required
+                                  options={participantOptions}
+                                  isLoading={loadingParticipants}
+                                  placeholder={
+                                    loadingParticipants
+                                      ? "Memuat peserta..."
+                                      : "Pilih Nama Peserta"
                                   }
+                                  onInputChange={(
+                                    inputValue: string,
+                                    actionMeta: InputActionMeta,
+                                  ) => {
+                                    if (actionMeta.action === "input-change") {
+                                      setParticipantSearchTerm(inputValue);
+                                    }
 
-                                  return inputValue;
-                                }}
-                              />
+                                    return inputValue;
+                                  }}
+                                />
+                              )}
 
                               <div className="hidden">
                                 <PrimeInputText

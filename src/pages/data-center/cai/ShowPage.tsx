@@ -14,6 +14,7 @@ type DetailValue = string | number | null | undefined;
 
 interface CaiRecord {
   kode_cari_data?: string;
+  id_card?: string;
   uuid?: string;
   nama_lengkap?: string;
   tgl_lahir?: string;
@@ -94,6 +95,7 @@ const CaiShowPage = () => {
 
   const fields: Array<[string, DetailValue]> = [
     ["ID Peserta", maskText(record?.kode_cari_data || "-")],
+    ["ID Card", maskText(record?.id_card || "-")],
     ["ID Daftar", maskText(record?.uuid || "-")],
     ["Nama lengkap", record?.nama_lengkap],
     ["Tanggal lahir", maskText(record?.tgl_lahir || "-")],
