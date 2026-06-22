@@ -24,7 +24,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (e) {
       // localStorage might be blocked in incognito/private mode
       showToast(
-        "warning",
+        "warn",
         "Peringatan",
         e instanceof Error
           ? e.message
@@ -42,7 +42,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (e) {
       // localStorage might be blocked in incognito/private mode
       showToast(
-        "warning",
+        "warn",
         "Peringatan",
         e instanceof Error
           ? e.message
