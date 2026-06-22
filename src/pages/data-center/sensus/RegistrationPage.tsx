@@ -360,7 +360,7 @@ const SensusRegistrationPage = () => {
         });
       }
 
-      showToast("warning", "Peringatan", "Lengkapi dulu data pada step ini.");
+      showToast("warn", "Peringatan", "Lengkapi dulu data pada step ini.");
     }
   };
 

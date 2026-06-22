@@ -7,7 +7,7 @@ export const setToastRef = (ref: Toast) => {
 };
 
 export const showToast = (
-  severity: "success" | "error" | "warning" | "info",
+  severity: "success" | "error" | "warn" | "info",
   summary: string,
   detail?: string,
   life: number = 3000,

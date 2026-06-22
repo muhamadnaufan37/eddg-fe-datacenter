@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
   ChangeEvent,
   InputHTMLAttributes,
@@ -55,7 +55,7 @@ interface CommonFieldProps {
   label: string;
   name: string;
   formik: FormikBag;
-  helperText?: string;
+  helperText?: ReactNode;
   className?: string;
   required?: boolean;
 }
@@ -265,47 +265,58 @@ export const PhotoField = ({
     | string
     | null
     | undefined;
-  const previewUrl = useMemo(() => {
-    if (!(fileValue instanceof File)) {
-      return null;
-    }
 
-    return URL.createObjectURL(fileValue);
-  }, [fileValue]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
+    if (!fileValue) {
+      setPreviewUrl(null);
+      return;
+    }
 
-  const selectedName = useMemo(() => {
+    // Jika file baru dipilih
+    if (fileValue instanceof File) {
+      const objectUrl = URL.createObjectURL(fileValue);
+      setPreviewUrl(objectUrl);
+
+      return () => {
+        URL.revokeObjectURL(objectUrl);
+      };
+    }
+
+    // Jika berasal dari URL backend
+    if (typeof fileValue === "string") {
+      setPreviewUrl(fileValue);
+    }
+  }, [fileValue]);
+
+  const selectedName = (() => {
     if (fileValue instanceof File) {
       return fileValue.name;
     }
 
     if (typeof fileValue === "string") {
-      return fileValue;
+      return fileValue.split("/").pop() || fileValue;
     }
 
     return "Belum ada file";
-  }, [fileValue]);
+  })();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.currentTarget.files?.[0] ?? null;
-    formik.setFieldValue(name, file, true);
-    formik.setFieldTouched(name, true, false);
+    const file = event.target.files?.[0] ?? null;
+
+    formik.setFieldValue(name, file);
+    formik.setFieldTouched(name, true);
   };
 
   return (
     <div className={className}>
       <span className={fieldLabel}>
-        {label} {required ? <span className="text-rose-500">*</span> : null}
+        {label}
+        {required && <span className="text-rose-500 ml-1">*</span>}
       </span>
 
-      <label className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 transition hover:border-sky-400 hover:bg-sky-50/60 dark:border-slate-700 dark:bg-slate-950/40 dark:hover:border-sky-500 dark:hover:bg-slate-900">
+      <label className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 transition-all hover:border-sky-400 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-950/40 dark:hover:border-sky-500">
         <input
           name={name}
           type="file"
@@ -314,30 +325,34 @@ export const PhotoField = ({
           onBlur={formik.handleBlur}
           className="hidden"
         />
+
         <div className="flex flex-col gap-1">
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
             Klik untuk memilih foto
           </span>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+
+          <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
             {selectedName}
           </span>
         </div>
-        {previewUrl ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+
+        {previewUrl && (
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
             <img
               src={previewUrl}
               alt={previewLabel}
-              className="h-48 w-full object-cover"
+              className="h-56 w-full object-cover transition-all duration-300 hover:scale-105"
             />
           </div>
-        ) : null}
+        )}
       </label>
 
-      {helperText ? (
+      {helperText && (
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           {helperText}
         </p>
-      ) : null}
+      )}
+
       <FormikErrorText formik={formik} name={name} />
     </div>
   );

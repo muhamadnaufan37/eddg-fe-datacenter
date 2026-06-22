@@ -189,6 +189,7 @@ export const submitCaiRegistration = async (payload: {
   tmpt_daerah: string;
   tmpt_desa: string;
   tmpt_kelompok: string;
+  size_tshirt: string;
   utusan: string;
   img: File;
 }) => {
@@ -200,6 +201,7 @@ export const submitCaiRegistration = async (payload: {
   appendIfPresent(formData, "tmpt_daerah", payload.tmpt_daerah);
   appendIfPresent(formData, "tmpt_desa", payload.tmpt_desa);
   appendIfPresent(formData, "tmpt_kelompok", payload.tmpt_kelompok);
+  appendIfPresent(formData, "size_tshirt", payload.size_tshirt);
   appendIfPresent(formData, "utusan", payload.utusan);
   appendIfPresent(formData, "img", payload.img);
 
