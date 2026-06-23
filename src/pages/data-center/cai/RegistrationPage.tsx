@@ -42,12 +42,13 @@ const jenisKelaminOptions: ReactSelectOption[] = [
 ];
 
 const utsusanOptions: ReactSelectOption[] = [
-  { label: "Daerah", value: "daerah" },
-  { label: "Desa", value: "desa" },
-  { label: "Kelompok", value: "kelompok" },
-  { label: "Pengurus", value: "pengurus" },
+  { label: "Keimaman / 4S", value: "keimaman/4s" },
+  { label: "Organisasi", value: "organisasi" },
+  { label: "MT", value: "mt" },
+  { label: "Panitia / PPG", value: "panitia_ppg" },
+  { label: "Utusan Desa", value: "utusan_desa" },
+  { label: "Utusan Kelompok", value: "utusan_kelompok" },
   { label: "Pondok", value: "pondok" },
-  { label: "Panitia", value: "panitia" },
 ];
 
 const tshirtOptions: ReactSelectOption[] = [
@@ -371,7 +372,7 @@ const CaiRegistrationPage = () => {
     );
   };
 
-  const registrationDeadline = new Date("2026-06-26T23:59:59+07:00");
+  const registrationDeadline = new Date("2026-06-29T23:59:59+07:00");
 
   const isRegistrationClosed = new Date() > registrationDeadline;
 
@@ -428,8 +429,8 @@ const CaiRegistrationPage = () => {
 
               <p className="mt-1 text-sm">
                 {isRegistrationClosed
-                  ? "Pendaftaran peserta telah ditutup pada tanggal 26 Juni 2026 pukul 23:59 WIB."
-                  : "Pendaftaran peserta akan ditutup pada tanggal 26 Juni 2026 pukul 23:59 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
+                  ? "Pendaftaran peserta telah ditutup pada tanggal 29 Juni 2026 pukul 23:59 WIB."
+                  : "Pendaftaran peserta akan ditutup pada tanggal 29 Juni 2026 pukul 23:59 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
               </p>
               {!isRegistrationClosed && (
                 <div className="mt-2 text-sm font-medium text-blue-700">
