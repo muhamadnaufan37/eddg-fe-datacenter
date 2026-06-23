@@ -41,13 +41,13 @@ const jenisKelaminOptions: ReactSelectOption[] = [
   { label: "PEREMPUAN", value: "PEREMPUAN" },
 ];
 
-const utsusanOptions: ReactSelectOption[] = [
-  { label: "Keimaman / 4S", value: "keimaman/4s" },
+const utusanOptions: ReactSelectOption[] = [
+  { label: "Keimaman / 4S", value: "pengurus" },
   { label: "Organisasi", value: "organisasi" },
   { label: "MT", value: "mt" },
-  { label: "Panitia / PPG", value: "panitia_ppg" },
-  { label: "Utusan Desa", value: "utusan_desa" },
-  { label: "Utusan Kelompok", value: "utusan_kelompok" },
+  { label: "Panitia / PPG", value: "panitia" },
+  { label: "Utusan Desa", value: "desa" },
+  { label: "Utusan Kelompok", value: "kelompok" },
   { label: "Pondok", value: "pondok" },
 ];
 
@@ -62,12 +62,13 @@ const tshirtOptions: ReactSelectOption[] = [
 ];
 
 const locationUtusanValues = {
-  daerah: "daerah",
   desa: "desa",
   kelompok: "kelompok",
   pengurus: "pengurus",
   pondok: "pondok",
   panitia: "panitia",
+  mt: "mt",
+  organisasi: "organisasi",
 } as const;
 
 const baseImageSchema = Yup.mixed<File>()
@@ -90,6 +91,8 @@ const isUtusan = (
 
 const requiresAllLocations = (value: string) => {
   return [
+    locationUtusanValues.mt,
+    locationUtusanValues.organisasi,
     locationUtusanValues.pengurus,
     locationUtusanValues.pondok,
     locationUtusanValues.panitia,
@@ -105,12 +108,7 @@ const stepSchemas = [
   }),
   Yup.object({
     size_tshirt: Yup.string().required("Ukuran baju wajib dipilih"),
-    tmpt_daerah: Yup.string().when("utusan", {
-      is: (value: string) =>
-        isUtusan(value, "daerah") || requiresAllLocations(value),
-      then: (schema) => schema.required("Tempat daerah wajib diisi"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
+    tmpt_daerah: Yup.string().required("Tempat daerah wajib diisi"),
     tmpt_desa: Yup.string().when("utusan", {
       is: (value: string) =>
         isUtusan(value, "desa") || requiresAllLocations(value),
@@ -486,7 +484,7 @@ const CaiRegistrationPage = () => {
                 name="utusan"
                 formik={formik}
                 required
-                options={utsusanOptions}
+                options={utusanOptions}
               />
             </div>
           ) : (
@@ -501,8 +499,7 @@ const CaiRegistrationPage = () => {
                   helperText={btnImgSize()}
                 />
                 <div className="grid gap-4 md:grid-cols-3">
-                  {(isUtusan(formik.values.utusan, "daerah") ||
-                    requiresAllLocations(formik.values.utusan) ||
+                  {(requiresAllLocations(formik.values.utusan) ||
                     isUtusan(formik.values.utusan, "desa") ||
                     isUtusan(formik.values.utusan, "kelompok") ||
                     isUtusan(formik.values.utusan, "pengurus") ||
@@ -512,10 +509,7 @@ const CaiRegistrationPage = () => {
                       label="Tempat daerah"
                       name="tmpt_daerah"
                       formik={formik}
-                      required={
-                        isUtusan(formik.values.utusan, "daerah") ||
-                        requiresAllLocations(formik.values.utusan)
-                      }
+                      required={requiresAllLocations(formik.values.utusan)}
                       options={daerahOptions}
                       isLoading={isLoadingDaerah}
                       placeholder={
