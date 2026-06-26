@@ -163,7 +163,7 @@ const CaiRegistrationPage = () => {
           throw new Error("Foto wajib diunggah");
         }
 
-        const registrationDeadline = new Date("2026-06-26T23:59:59+07:00");
+        const registrationDeadline = new Date("2026-06-27T23:59:59+07:00");
 
         if (new Date() > registrationDeadline) {
           showToast(
@@ -370,7 +370,7 @@ const CaiRegistrationPage = () => {
     );
   };
 
-  const registrationDeadline = new Date("2026-06-26T23:59:59+07:00");
+  const registrationDeadline = new Date("2026-06-27T23:59:59+07:00");
 
   const isRegistrationClosed = new Date() > registrationDeadline;
 
@@ -427,8 +427,8 @@ const CaiRegistrationPage = () => {
 
               <p className="mt-1 text-sm">
                 {isRegistrationClosed
-                  ? "Pendaftaran peserta telah ditutup pada tanggal 26 Juni 2026 pukul 23:59 WIB."
-                  : "Pendaftaran peserta akan ditutup pada tanggal 26 Juni 2026 pukul 23:59 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
+                  ? "Pendaftaran peserta telah ditutup pada tanggal 27 Juni 2026 pukul 23:59 WIB."
+                  : "Pendaftaran peserta akan ditutup pada tanggal 27 Juni 2026 pukul 23:59 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
               </p>
               {!isRegistrationClosed && (
                 <div className="mt-2 text-sm font-medium text-blue-700">
