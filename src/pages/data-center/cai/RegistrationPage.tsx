@@ -42,13 +42,14 @@ const jenisKelaminOptions: ReactSelectOption[] = [
 ];
 
 const utusanOptions: ReactSelectOption[] = [
-  { label: "Keimaman / 4S", value: "pengurus" },
-  { label: "Organisasi", value: "organisasi" },
-  { label: "MT", value: "mt" },
-  { label: "Panitia / PPG", value: "panitia" },
-  { label: "Utusan Desa", value: "desa" },
-  { label: "Utusan Kelompok", value: "kelompok" },
-  { label: "Pondok", value: "pondok" },
+  // { label: "Keimaman / 4S", value: "pengurus" },
+  // { label: "Organisasi", value: "organisasi" },
+  // { label: "MT", value: "mt" },
+  // { label: "Panitia / PPG", value: "panitia" },
+  // { label: "Utusan Desa", value: "desa" },
+  // { label: "Utusan Kelompok", value: "kelompok" },
+  // { label: "Pondok", value: "pondok" },
+  { label: "Asrama CAI MUMI", value: "asrama-mumi" },
 ];
 
 const tshirtOptions: ReactSelectOption[] = [
@@ -69,6 +70,7 @@ const locationUtusanValues = {
   panitia: "panitia",
   mt: "mt",
   organisasi: "organisasi",
+  asrama_mumi: "asrama-mumi",
 } as const;
 
 const baseImageSchema = Yup.mixed<File>()
@@ -92,7 +94,7 @@ const isUtusan = (
 const requiresAllLocations = (value: string) => {
   return [
     locationUtusanValues.mt,
-    locationUtusanValues.organisasi,
+    locationUtusanValues.asrama_mumi,
     locationUtusanValues.pengurus,
     locationUtusanValues.pondok,
     locationUtusanValues.panitia,
@@ -107,7 +109,7 @@ const stepSchemas = [
     utusan: Yup.string().required("Utusan wajib dipilih"),
   }),
   Yup.object({
-    size_tshirt: Yup.string().required("Ukuran baju wajib dipilih"),
+    // size_tshirt: Yup.string().required("Ukuran baju wajib dipilih"),
     tmpt_daerah: Yup.string().required("Tempat daerah wajib diisi"),
     tmpt_desa: Yup.string().when("utusan", {
       is: (value: string) =>
@@ -163,13 +165,13 @@ const CaiRegistrationPage = () => {
           throw new Error("Foto wajib diunggah");
         }
 
-        const registrationDeadline = new Date("2026-06-28T18:00:00+07:00");
+        const registrationDeadline = new Date("2026-07-03T18:00:00+07:00");
 
         if (new Date() > registrationDeadline) {
           showToast(
             "warn",
             "Pendaftaran Ditutup",
-            "Pendaftaran peserta telah ditutup pada tanggal 28 Juni 2026 pukul 18:00 WIB.",
+            "Pendaftaran peserta telah ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB.",
           );
           return;
         }
@@ -370,7 +372,7 @@ const CaiRegistrationPage = () => {
     );
   };
 
-  const registrationDeadline = new Date("2026-06-28T18:00:00+07:00");
+  const registrationDeadline = new Date("2026-07-03T18:00:00+07:00");
 
   const isRegistrationClosed = new Date() > registrationDeadline;
 
@@ -422,13 +424,13 @@ const CaiRegistrationPage = () => {
               <h3 className="font-semibold">
                 {isRegistrationClosed
                   ? "Pendaftaran Telah Ditutup"
-                  : "Informasi Pendaftaran"}
+                  : "Informasi Pendaftaran Untuk Muda-Mudi CAI Usia SMA/SMK kelas 3 keatas"}
               </h3>
 
               <p className="mt-1 text-sm">
                 {isRegistrationClosed
-                  ? "Pendaftaran peserta telah ditutup pada tanggal 28 Juni 2026 pukul 18:00 WIB."
-                  : "Pendaftaran peserta akan ditutup pada tanggal 28 Juni 2026 pukul 18:00 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
+                  ? "Pendaftaran peserta telah ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB."
+                  : "Pendaftaran peserta akan ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
               </p>
               {!isRegistrationClosed && (
                 <div className="mt-2 text-sm font-medium text-blue-700">
@@ -490,14 +492,14 @@ const CaiRegistrationPage = () => {
           ) : (
             <>
               <div className="flex flex-col gap-4">
-                <PrimeSelect
+                {/* <PrimeSelect
                   label="Ukuran Baju"
                   name="size_tshirt"
                   formik={formik}
                   required
                   options={tshirtOptions}
                   helperText={btnImgSize()}
-                />
+                /> */}
                 <div className="grid gap-4 md:grid-cols-3">
                   {(requiresAllLocations(formik.values.utusan) ||
                     isUtusan(formik.values.utusan, "desa") ||
