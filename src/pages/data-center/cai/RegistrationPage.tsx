@@ -52,15 +52,15 @@ const utusanOptions: ReactSelectOption[] = [
   { label: "Asrama CAI MUMI", value: "asrama-mumi" },
 ];
 
-const tshirtOptions: ReactSelectOption[] = [
-  { label: "S", value: "S" },
-  { label: "M", value: "M" },
-  { label: "L", value: "L" },
-  { label: "XL", value: "XL" },
-  { label: "2XL", value: "2XL" },
-  { label: "3XL", value: "3XL" },
-  { label: "4XL", value: "4XL" },
-];
+// const tshirtOptions: ReactSelectOption[] = [
+//   { label: "S", value: "S" },
+//   { label: "M", value: "M" },
+//   { label: "L", value: "L" },
+//   { label: "XL", value: "XL" },
+//   { label: "2XL", value: "2XL" },
+//   { label: "3XL", value: "3XL" },
+//   { label: "4XL", value: "4XL" },
+// ];
 
 const locationUtusanValues = {
   desa: "desa",
@@ -165,13 +165,13 @@ const CaiRegistrationPage = () => {
           throw new Error("Foto wajib diunggah");
         }
 
-        const registrationDeadline = new Date("2026-07-03T18:00:00+07:00");
+        const registrationDeadline = new Date("2026-07-05T18:00:00+07:00");
 
         if (new Date() > registrationDeadline) {
           showToast(
             "warn",
             "Pendaftaran Ditutup",
-            "Pendaftaran peserta telah ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB.",
+            "Pendaftaran peserta telah ditutup pada tanggal 05 Juli 2026 pukul 18:00 WIB.",
           );
           return;
         }
@@ -355,24 +355,24 @@ const CaiRegistrationPage = () => {
     }
   };
 
-  const btnImgSize = () => {
-    return (
-      <>
-        <div className="flex gap-2 items-center mt-2 text-sm text-slate-600 dark:text-slate-400">
-          <div>Pastika sebelum memilih ukuran baju, lihat panduan ukuran:</div>
-          <button
-            type="button"
-            onClick={() => setIsImagePreviewOpen(true)}
-            className="bg-sky-600 px-3 py-1 text-xs font-semibold text-white rounded-lg transition hover:bg-sky-700"
-          >
-            T-Shirt Size Guide
-          </button>
-        </div>
-      </>
-    );
-  };
+  // const btnImgSize = () => {
+  //   return (
+  //     <>
+  //       <div className="flex gap-2 items-center mt-2 text-sm text-slate-600 dark:text-slate-400">
+  //         <div>Pastika sebelum memilih ukuran baju, lihat panduan ukuran:</div>
+  //         <button
+  //           type="button"
+  //           onClick={() => setIsImagePreviewOpen(true)}
+  //           className="bg-sky-600 px-3 py-1 text-xs font-semibold text-white rounded-lg transition hover:bg-sky-700"
+  //         >
+  //           T-Shirt Size Guide
+  //         </button>
+  //       </div>
+  //     </>
+  //   );
+  // };
 
-  const registrationDeadline = new Date("2026-07-03T18:00:00+07:00");
+  const registrationDeadline = new Date("2026-07-05T18:00:00+07:00");
 
   const isRegistrationClosed = new Date() > registrationDeadline;
 
@@ -429,8 +429,8 @@ const CaiRegistrationPage = () => {
 
               <p className="mt-1 text-sm">
                 {isRegistrationClosed
-                  ? "Pendaftaran peserta telah ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB."
-                  : "Pendaftaran peserta akan ditutup pada tanggal 03 Juli 2026 pukul 18:00 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
+                  ? "Pendaftaran peserta telah ditutup pada tanggal 05 Juli 2026 pukul 18:00 WIB."
+                  : "Pendaftaran peserta akan ditutup pada tanggal 05 Juli 2026 pukul 18:00 WIB. Pastikan seluruh data telah diisi dengan benar sebelum mengirimkan formulir."}
               </p>
               {!isRegistrationClosed && (
                 <div className="mt-2 text-sm font-medium text-blue-700">
