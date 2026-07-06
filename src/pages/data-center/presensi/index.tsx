@@ -562,7 +562,14 @@ const PresensiPage = () => {
           response?.message ?? "Presensi berhasil disimpan.",
         );
 
-        helpers.resetForm();
+        helpers.resetForm({
+          values: {
+            ...values,
+            id_peserta: "",
+            status_presensi: "",
+            keterangan: "",
+          },
+        });
         setLocationAccuracy(null);
       } catch (error: any) {
         showToast(
