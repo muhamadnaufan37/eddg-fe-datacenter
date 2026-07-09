@@ -286,6 +286,8 @@ const CaiMethodCard = ({
 // ─── RFID Tapping Panel ───────────────────────────────────────────────────────
 type RfidScanState = "idle" | "ready" | "success" | "error";
 
+const RFID_SCAN_COOLDOWN_MS = 1500;
+
 const RFID_SCAN_CONFIG: Record<
   RfidScanState,
   { ring: string; glow: string; label: string }
@@ -541,6 +543,8 @@ const PresensiPage = () => {
   const currentYear = new Date().getFullYear();
   const rfidBufferRef = useRef("");
   const rfidBufferTimerRef = useRef<number | null>(null);
+  const isSubmittingRef = useRef(false);
+  const lastRfidSubmitAtRef = useRef(0);
 
   const formik = useFormik<PresensiFormValues>({
     initialValues: {
@@ -568,6 +572,7 @@ const PresensiPage = () => {
     onSubmit: async (values, helpers) => {
       try {
         setIsSubmitting(true);
+        isSubmittingRef.current = true;
 
         const isRfidMode =
           attendanceType === "cai" && caiAttendanceMode === "rfid";
@@ -605,6 +610,7 @@ const PresensiPage = () => {
         );
       } finally {
         setIsSubmitting(false);
+        isSubmittingRef.current = false;
       }
     },
   });
@@ -634,6 +640,7 @@ const PresensiPage = () => {
       setRfidCode("");
       setRfidScanState("idle");
       setRfidStatusMessage(null);
+      lastRfidSubmitAtRef.current = 0;
     };
 
     const loadKegiatan = async () => {
@@ -749,18 +756,66 @@ const PresensiPage = () => {
     }
   }, [attendanceType, caiAttendanceMode, activityData]);
 
-  const connectRfidCode = (rawCode: string) => {
+  const connectRfidCode = async (rawCode: string) => {
     const v = rawCode.trim().toUpperCase();
     if (!v) {
       setRfidScanState("error");
       setRfidStatusMessage("Kode RFID tidak terbaca. Coba tap ulang.");
       return;
     }
+
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    const elapsedSinceLastSubmit = Date.now() - lastRfidSubmitAtRef.current;
+    if (elapsedSinceLastSubmit < RFID_SCAN_COOLDOWN_MS) {
+      const remainingMs = RFID_SCAN_COOLDOWN_MS - elapsedSinceLastSubmit;
+      setRfidScanState("ready");
+      setRfidStatusMessage(
+        `Reader cooldown aktif. Coba tap lagi dalam ${Math.ceil(remainingMs / 1000)} detik.`,
+      );
+      return;
+    }
+
+    const autoLocation = getAutoAttendanceLocation(activityData);
+
+    if (!autoLocation.isAvailable) {
+      setRfidScanState("error");
+      setRfidStatusMessage(
+        "Lokasi kegiatan belum tersedia. Hubungi admin untuk melengkapi koordinat kegiatan.",
+      );
+      showToast(
+        "error",
+        "Gagal",
+        "Titik lokasi kegiatan belum tersedia. Presensi RFID tidak bisa dikirim otomatis.",
+      );
+      return;
+    }
+
     setRfidCode(v);
-    formikRef.current.setFieldValue("id_peserta", v, true);
+    await formikRef.current.setFieldValue("id_peserta", v, false);
+    await formikRef.current.setFieldValue("status_presensi", "hadir", false);
+    await formikRef.current.setFieldValue("keterangan", "", false);
+    await formikRef.current.setFieldValue(
+      "latitude",
+      autoLocation.latitude,
+      false,
+    );
+    await formikRef.current.setFieldValue(
+      "longitude",
+      autoLocation.longitude,
+      false,
+    );
     formikRef.current.setFieldTouched("id_peserta", true, false);
     setRfidScanState("success");
-    setRfidStatusMessage(`RFID ${v} terbaca otomatis dan siap dipakai.`);
+    setRfidStatusMessage(
+      `RFID ${v} terbaca. Presensi sedang dikirim otomatis...`,
+    );
+    setLocationAccuracy("Menggunakan titik lokasi kegiatan secara otomatis.");
+
+    lastRfidSubmitAtRef.current = Date.now();
+    await formikRef.current.submitForm();
   };
 
   useEffect(() => {
@@ -775,7 +830,7 @@ const PresensiPage = () => {
         rfidBufferTimerRef.current = null;
       }
       if (scanned.trim()) {
-        connectRfidCode(scanned);
+        void connectRfidCode(scanned);
       }
     };
 
@@ -825,6 +880,7 @@ const PresensiPage = () => {
         rfidBufferTimerRef.current = null;
       }
       rfidBufferRef.current = "";
+      lastRfidSubmitAtRef.current = 0;
     };
   }, [attendanceType, caiAttendanceMode]);
 
@@ -1418,22 +1474,29 @@ const PresensiPage = () => {
                             )}
 
                             <div className="flex justify-end border-t border-slate-200 pt-5 dark:border-slate-700">
-                              <button
-                                type="submit"
-                                className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                disabled={
-                                  isSubmitting ||
-                                  searchingLocation ||
-                                  formikRef.current.values.latitude ===
-                                    locationDefault ||
-                                  formikRef.current.values.longitude ===
-                                    locationDefault
-                                }
-                              >
-                                {isSubmitting
-                                  ? "Menyimpan..."
-                                  : "Simpan Presensi"}
-                              </button>
+                              {isRfidAttendanceMode ? (
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                  Presensi RFID dikirim otomatis setelah kartu
+                                  terbaca.
+                                </p>
+                              ) : (
+                                <button
+                                  type="submit"
+                                  className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                  disabled={
+                                    isSubmitting ||
+                                    searchingLocation ||
+                                    formikRef.current.values.latitude ===
+                                      locationDefault ||
+                                    formikRef.current.values.longitude ===
+                                      locationDefault
+                                  }
+                                >
+                                  {isSubmitting
+                                    ? "Menyimpan..."
+                                    : "Simpan Presensi"}
+                                </button>
+                              )}
                             </div>
                           </form>
 
