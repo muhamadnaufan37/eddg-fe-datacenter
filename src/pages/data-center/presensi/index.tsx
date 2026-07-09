@@ -142,6 +142,26 @@ const getVenueDetails = (activity: PresensiKegiatan | null) => {
   };
 };
 
+const getAutoAttendanceLocation = (activity: PresensiKegiatan | null) => {
+  const venue = getVenueDetails(activity);
+  const lat = Number(venue.latitude);
+  const lon = Number(venue.longitude);
+
+  if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    return {
+      latitude: locationDefault,
+      longitude: locationDefault,
+      isAvailable: false,
+    };
+  }
+
+  return {
+    latitude: lat.toFixed(6),
+    longitude: lon.toFixed(6),
+    isAvailable: true,
+  };
+};
+
 const MiniDetail = ({
   label,
   value,
@@ -528,7 +548,7 @@ const PresensiPage = () => {
       id_peserta: "",
       latitude: locationDefault,
       longitude: locationDefault,
-      status_presensi: "",
+      status_presensi: "hadir",
       keterangan: "",
     },
     validationSchema: Yup.object({
@@ -549,8 +569,12 @@ const PresensiPage = () => {
       try {
         setIsSubmitting(true);
 
+        const isRfidMode =
+          attendanceType === "cai" && caiAttendanceMode === "rfid";
+
         const response = await submitPresensi({
           ...values,
+          status_presensi: isRfidMode ? "hadir" : values.status_presensi,
           add_by_petugas: "124fe53d-64da-4647-8c30-87aea6ac23bd",
           radius_meter: 3540,
           category: attendanceType,
@@ -566,7 +590,7 @@ const PresensiPage = () => {
           values: {
             ...values,
             id_peserta: "",
-            status_presensi: "",
+            status_presensi: isRfidMode ? "hadir" : "",
             keterangan: "",
           },
         });
@@ -708,6 +732,22 @@ const PresensiPage = () => {
       window.clearTimeout(timeoutId);
     };
   }, [attendanceType, currentYear, participantSearchTerm]);
+
+  useEffect(() => {
+    const isRfidMode = attendanceType === "cai" && caiAttendanceMode === "rfid";
+    if (!isRfidMode) return;
+
+    const autoLocation = getAutoAttendanceLocation(activityData);
+
+    formikRef.current.setFieldValue("status_presensi", "hadir", false);
+    formikRef.current.setFieldValue("keterangan", "", false);
+    formikRef.current.setFieldValue("latitude", autoLocation.latitude, false);
+    formikRef.current.setFieldValue("longitude", autoLocation.longitude, false);
+
+    if (autoLocation.isAvailable) {
+      setLocationAccuracy("Menggunakan titik lokasi kegiatan secara otomatis.");
+    }
+  }, [attendanceType, caiAttendanceMode, activityData]);
 
   const connectRfidCode = (rawCode: string) => {
     const v = rawCode.trim().toUpperCase();
@@ -868,6 +908,8 @@ const PresensiPage = () => {
   };
 
   const venue = getVenueDetails(activityData);
+  const isRfidAttendanceMode =
+    attendanceType === "cai" && caiAttendanceMode === "rfid";
   const isExpired = Boolean(activityData?.is_expired);
   const canFillAttendance = Boolean(activityData && !isExpired);
 
@@ -1205,98 +1247,114 @@ const PresensiPage = () => {
                                 />
                               </div>
 
-                              <div className="md:col-span-2">
-                                <div className="mb-2 flex items-center justify-between gap-3">
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                      Kehadiran{" "}
-                                      <span className="text-rose-500">*</span>
-                                    </p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                      Pilih salah satu status presensi di bawah
-                                      ini.
-                                    </p>
+                              {isRfidAttendanceMode ? (
+                                <div className="md:col-span-2 rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                                  <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                                    Status kehadiran otomatis: Hadir
+                                  </p>
+                                  <p className="mt-1 text-xs leading-relaxed text-emerald-700/90 dark:text-emerald-200/90">
+                                    Pada mode Tapping RFID, status presensi
+                                    ditetapkan otomatis menjadi hadir.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="md:col-span-2">
+                                  <div className="mb-2 flex items-center justify-between gap-3">
+                                    <div>
+                                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        Kehadiran{" "}
+                                        <span className="text-rose-500">*</span>
+                                      </p>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Pilih salah satu status presensi di
+                                        bawah ini.
+                                      </p>
+                                    </div>
+                                    {formikRef.current.touched
+                                      .status_presensi &&
+                                    formikRef.current.errors.status_presensi ? (
+                                      <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
+                                        {
+                                          formikRef.current.errors
+                                            .status_presensi
+                                        }
+                                      </p>
+                                    ) : null}
                                   </div>
-                                  {formikRef.current.touched.status_presensi &&
-                                  formikRef.current.errors.status_presensi ? (
-                                    <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
-                                      {formikRef.current.errors.status_presensi}
-                                    </p>
-                                  ) : null}
-                                </div>
 
-                                <div className="grid gap-3 sm:grid-cols-3">
-                                  {attendanceOptions.map((option) => {
-                                    const isActive =
-                                      formikRef.current.values
-                                        .status_presensi === option.value;
+                                  <div className="grid gap-3 sm:grid-cols-3">
+                                    {attendanceOptions.map((option) => {
+                                      const isActive =
+                                        formikRef.current.values
+                                          .status_presensi === option.value;
 
-                                    return (
-                                      <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => {
-                                          formikRef.current.setFieldValue(
-                                            "status_presensi",
-                                            option.value,
-                                            true,
-                                          );
-                                          formikRef.current.setFieldTouched(
-                                            "status_presensi",
-                                            true,
-                                            false,
-                                          );
-                                        }}
-                                        className={`group flex h-full flex-col gap-3 rounded-[1.75rem] border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/10 ${
-                                          isActive
-                                            ? `${option.accent} border-current shadow-md`
-                                            : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-                                        }`}
-                                        aria-pressed={isActive}
-                                      >
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 shadow-sm ring-1 ring-inset ring-slate-200 dark:bg-slate-800/80 dark:ring-slate-700">
-                                            <svg
-                                              className="h-5 w-5"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              viewBox="0 0 24 24"
-                                            >
-                                              {option.icon}
-                                            </svg>
-                                          </div>
-                                          <span
-                                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
-                                              isActive
-                                                ? "bg-white/70 text-current"
-                                                : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
-                                            }`}
-                                          >
-                                            {isActive ? "Dipilih" : "Pilih"}
-                                          </span>
-                                        </div>
-
-                                        <div className="space-y-1">
-                                          <h3 className="text-base font-bold">
-                                            {option.label}
-                                          </h3>
-                                          <p className="text-sm leading-relaxed opacity-90">
-                                            {option.description}
-                                          </p>
-                                        </div>
-
-                                        <div
-                                          className={`mt-auto h-1.5 w-full rounded-full ${
+                                      return (
+                                        <button
+                                          key={option.value}
+                                          type="button"
+                                          onClick={() => {
+                                            formikRef.current.setFieldValue(
+                                              "status_presensi",
+                                              option.value,
+                                              true,
+                                            );
+                                            formikRef.current.setFieldTouched(
+                                              "status_presensi",
+                                              true,
+                                              false,
+                                            );
+                                          }}
+                                          className={`group flex h-full flex-col gap-3 rounded-[1.75rem] border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/10 ${
                                             isActive
-                                              ? "bg-current"
-                                              : "bg-slate-200 dark:bg-slate-700"
+                                              ? `${option.accent} border-current shadow-md`
+                                              : "border-slate-200 bg-white text-slate-700 hover:border-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                                           }`}
-                                        />
-                                      </button>
-                                    );
-                                  })}
+                                          aria-pressed={isActive}
+                                        >
+                                          <div className="flex items-start justify-between gap-3">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 shadow-sm ring-1 ring-inset ring-slate-200 dark:bg-slate-800/80 dark:ring-slate-700">
+                                              <svg
+                                                className="h-5 w-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                              >
+                                                {option.icon}
+                                              </svg>
+                                            </div>
+                                            <span
+                                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+                                                isActive
+                                                  ? "bg-white/70 text-current"
+                                                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
+                                              }`}
+                                            >
+                                              {isActive ? "Dipilih" : "Pilih"}
+                                            </span>
+                                          </div>
+
+                                          <div className="space-y-1">
+                                            <h3 className="text-base font-bold">
+                                              {option.label}
+                                            </h3>
+                                            <p className="text-sm leading-relaxed opacity-90">
+                                              {option.description}
+                                            </p>
+                                          </div>
+
+                                          <div
+                                            className={`mt-auto h-1.5 w-full rounded-full ${
+                                              isActive
+                                                ? "bg-current"
+                                                : "bg-slate-200 dark:bg-slate-700"
+                                            }`}
+                                          />
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
 
                               {(formikRef.current.values.status_presensi ===
                                 "sakit" ||
@@ -1313,34 +1371,51 @@ const PresensiPage = () => {
                               )}
                             </div>
 
-                            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
-                              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                    Cari lokasi otomatis
-                                  </p>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Tekan tombol untuk mengambil koordinat
-                                    perangkat.
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={searchCurrentLocation}
-                                  disabled={searchingLocation}
-                                  className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {searchingLocation
-                                    ? "Mencari..."
-                                    : "Cari lokasi"}
-                                </button>
-                              </div>
-                              {locationAccuracy ? (
-                                <p className="mt-3 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                                  {locationAccuracy}
+                            {isRfidAttendanceMode ? (
+                              <div className="rounded-[1.75rem] border border-dashed border-emerald-300 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                                  Lokasi diisi otomatis dari titik kegiatan
                                 </p>
-                              ) : null}
-                            </div>
+                                <p className="mt-1 text-xs text-emerald-700/90 dark:text-emerald-200/90">
+                                  Mode Tapping RFID tidak memerlukan pencarian
+                                  lokasi manual.
+                                </p>
+                                {locationAccuracy ? (
+                                  <p className="mt-3 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                    {locationAccuracy}
+                                  </p>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                      Cari lokasi otomatis
+                                    </p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      Tekan tombol untuk mengambil koordinat
+                                      perangkat.
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={searchCurrentLocation}
+                                    disabled={searchingLocation}
+                                    className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {searchingLocation
+                                      ? "Mencari..."
+                                      : "Cari lokasi"}
+                                  </button>
+                                </div>
+                                {locationAccuracy ? (
+                                  <p className="mt-3 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                    {locationAccuracy}
+                                  </p>
+                                ) : null}
+                              </div>
+                            )}
 
                             <div className="flex justify-end border-t border-slate-200 pt-5 dark:border-slate-700">
                               <button
