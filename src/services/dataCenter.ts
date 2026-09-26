@@ -375,6 +375,7 @@ export type PresensiKegiatan = {
   tmpt_kegiatan: string;
   type_kegiatan: string;
   category: string;
+  metode_presensi?: string;
   usia_mode: string;
   usia_min: number;
   usia_max: number;
@@ -436,12 +437,15 @@ export const searchPengaduanData = async (payload: { kontak: string }) => {
 
 export const submitPresensi = async (payload: {
   kode_kegiatan: string;
-  id_peserta: string;
+  metode_presensi: "tapping" | "manual";
+  id_peserta?: string;
+  id_card?: string;
   add_by_petugas: string;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   status_presensi: string;
-  radius_meter: number;
+  radius_meter?: number;
+  keterangan?: string;
   category: string | null;
 }) => {
   const response = await api.post(

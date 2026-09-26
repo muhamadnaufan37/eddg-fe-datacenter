@@ -142,6 +142,18 @@ const getVenueDetails = (activity: PresensiKegiatan | null) => {
   };
 };
 
+const getAllowedAttendanceMethods = (activity: PresensiKegiatan) => {
+  const configuredMethods = String(activity.metode_presensi || "both")
+    .toLowerCase()
+    .split(/[,|]/)
+    .map((method) => method.trim());
+
+  if (configuredMethods.includes("both")) return ["manual", "tapping"];
+  return configuredMethods.filter((method) =>
+    ["manual", "tapping"].includes(method),
+  );
+};
+
 const getAutoAttendanceLocation = (activity: PresensiKegiatan | null) => {
   const venue = getVenueDetails(activity);
   const lat = Number(venue.latitude);
@@ -578,10 +590,16 @@ const PresensiPage = () => {
           attendanceType === "cai" && caiAttendanceMode === "rfid";
 
         const response = await submitPresensi({
-          ...values,
+          kode_kegiatan: values.kode_kegiatan,
+          metode_presensi: isRfidMode ? "tapping" : "manual",
+          ...(isRfidMode
+            ? { id_card: values.id_peserta }
+            : { id_peserta: values.id_peserta }),
+          latitude: Number(values.latitude),
+          longitude: Number(values.longitude),
           status_presensi: isRfidMode ? "hadir" : values.status_presensi,
+          keterangan: values.keterangan || undefined,
           add_by_petugas: "124fe53d-64da-4647-8c30-87aea6ac23bd",
-          radius_meter: 3540,
           category: attendanceType,
         });
 
@@ -670,6 +688,21 @@ const PresensiPage = () => {
         }
 
         setActivityData(kegiatan);
+        const category = String(kegiatan.category || "").toLowerCase();
+        if (category === "sensus") {
+          setAttendanceType("sensus");
+        } else if (category === "cai") {
+          setAttendanceType("cai");
+          const allowedMethods = getAllowedAttendanceMethods(kegiatan);
+          setCaiAttendanceMode(
+            allowedMethods.includes("tapping") &&
+              !allowedMethods.includes("manual")
+              ? "rfid"
+              : "list",
+          );
+        } else {
+          setAttendanceType(null);
+        }
         formikRef.current.setFieldValue(
           "kode_kegiatan",
           kegiatan.kode_kegiatan,
@@ -1157,7 +1190,7 @@ const PresensiPage = () => {
                               </svg>
                             </div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                              Absen Muda/i
+                              Absen Sensus
                             </h2>
                             <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                               Absensi untuk peserta Sensus (Muda/i).
@@ -1195,7 +1228,15 @@ const PresensiPage = () => {
                                 Pilih cara mengidentifikasi peserta
                               </h3>
                               <div className="grid gap-4 sm:grid-cols-2">
-                                {CAI_METHODS.map((method) => (
+                                {CAI_METHODS.filter((method) =>
+                                  getAllowedAttendanceMethods(
+                                    activityData!,
+                                  ).includes(
+                                    method.value === "rfid"
+                                      ? "tapping"
+                                      : "manual",
+                                  ),
+                                ).map((method) => (
                                   <CaiMethodCard
                                     key={method.value}
                                     method={method}
@@ -1227,7 +1268,7 @@ const PresensiPage = () => {
                               <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                                   Data Presensi{" "}
-                                  {attendanceType === "cai" ? "CAI" : "Muda/i"}
+                                  {attendanceType === "cai" ? "CAI" : "Sensus"}
                                 </h2>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
                                   Lengkapi identitas peserta, status presensi,
