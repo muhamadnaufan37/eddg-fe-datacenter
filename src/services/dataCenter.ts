@@ -368,6 +368,17 @@ export type PresensiKegiatanVenue = {
   updated_at?: string;
 };
 
+export type PresensiKegiatanLocation = {
+  id: number;
+  level: string;
+  nama_tempat: string;
+  alamat?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  radius_meter?: number | null;
+  img_url?: string | null;
+};
+
 export type PresensiKegiatan = {
   id: number;
   kode_kegiatan: string;
@@ -385,6 +396,8 @@ export type PresensiKegiatan = {
   is_expired: boolean;
   status_kegiatan: string;
   expired_message: string;
+  lokasi_acara?: PresensiKegiatanLocation | null;
+  venue?: PresensiKegiatanLocation | null;
   daerah?: PresensiKegiatanVenue | null;
   desa?: PresensiKegiatanVenue | null;
   kelompok?: PresensiKegiatanVenue | null;

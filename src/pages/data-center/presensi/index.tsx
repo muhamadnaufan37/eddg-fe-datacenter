@@ -108,11 +108,29 @@ const getVenueDetails = (activity: PresensiKegiatan | null) => {
       latitude: "-",
       longitude: "-",
       label: "Tempat kegiatan",
+      radiusMeter: null,
+      imageUrl: null,
+    };
+  }
+
+  const activityVenue = activity.lokasi_acara ?? activity.venue;
+  if (activityVenue) {
+    return {
+      label: activityVenue.level
+        ? activityVenue.level.charAt(0).toUpperCase() +
+          activityVenue.level.slice(1)
+        : "Tempat kegiatan",
+      title: activityVenue.nama_tempat ?? activity.tmpt_kegiatan ?? "-",
+      address: activityVenue.alamat ?? "-",
+      latitude: activityVenue.latitude ?? "-",
+      longitude: activityVenue.longitude ?? "-",
+      radiusMeter: activityVenue.radius_meter ?? null,
+      imageUrl: activityVenue.img_url ?? null,
     };
   }
 
   const type = String(activity.type_kegiatan || "").toUpperCase();
-  const venue =
+  const legacyVenue =
     type === "DAERAH"
       ? activity.daerah
       : type === "DESA"
@@ -131,14 +149,16 @@ const getVenueDetails = (activity: PresensiKegiatan | null) => {
             ? "Kelompok"
             : "Tempat kegiatan",
     title:
-      venue?.nama_daerah ??
-      venue?.nama_desa ??
-      venue?.nama_kelompok ??
+      legacyVenue?.nama_daerah ??
+      legacyVenue?.nama_desa ??
+      legacyVenue?.nama_kelompok ??
       activity.tmpt_kegiatan ??
       "-",
-    address: venue?.alamat ?? "-",
-    latitude: venue?.latitude ?? "-",
-    longitude: venue?.longitude ?? "-",
+    address: legacyVenue?.alamat ?? "-",
+    latitude: legacyVenue?.latitude ?? "-",
+    longitude: legacyVenue?.longitude ?? "-",
+    radiusMeter: null,
+    imageUrl: legacyVenue?.img_url ?? null,
   };
 };
 
@@ -1002,7 +1022,7 @@ const PresensiPage = () => {
   const isExpired = Boolean(activityData?.is_expired);
   const canFillAttendance = Boolean(activityData && !isExpired);
 
-  const imageUrl = resolveImageUrl(activityData?.daerah?.img_url);
+  const imageUrl = resolveImageUrl(venue.imageUrl);
 
   return (
     <>
@@ -1631,7 +1651,7 @@ const PresensiPage = () => {
                       >
                         <img
                           src={imageUrl}
-                          alt="Foto CAI"
+                          alt="Foto lokasi kegiatan"
                           className="h-80 w-full rounded-3xl object-cover"
                         />
                       </button>
@@ -1654,12 +1674,14 @@ const PresensiPage = () => {
                       label="Jenis Kegiatan"
                       value={activityData.type_kegiatan}
                     />
+                    <MiniDetail label="Lokasi Acara" value={venue.title} />
+                    <MiniDetail label="Alamat" value={venue.address} />
                     <MiniDetail
-                      label="Alamat"
+                      label="Radius Presensi"
                       value={
-                        activityData.daerah?.alamat ||
-                        activityData.desa?.alamat ||
-                        activityData.kelompok?.alamat
+                        venue.radiusMeter
+                          ? `${venue.radiusMeter} meter`
+                          : "Mengikuti default server"
                       }
                     />
                     <MiniDetail

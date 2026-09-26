@@ -45,42 +45,30 @@ Digunakan untuk mencari informasi kegiatan sebelum peserta melakukan absensi. En
 
 ### Panduan Frontend untuk Lokasi Venue (Titik Acara)
 
-Respon API mengembalikan properti `type_kegiatan` serta objek `daerah`, `desa`, dan `kelompok`. Gunakan aturan prioritas berikut untuk menampilkan titik peta dan nama lokasi fisik acara:
+API sekarang **secara langsung menyediakan objek `lokasi_acara` (atau alias `venue`)** yang sudah siap pakai di dalam setiap data kegiatan. Frontend tidak perlu lagi melakukan pemilahan kondisi manual `if/else` antara `daerah`, `desa`, atau `kelompok`.
+
+Cukup ambil langsung dari properti `kegiatan.lokasi_acara`:
 
 ```javascript
-// Contoh penentuan lokasi venue di Frontend (JavaScript / TypeScript / Dart)
-function getVenueLocation(kegiatan) {
-  const type = (kegiatan.type_kegiatan || "").toUpperCase();
+// Sangat simpel! Langsung ambil koordinat dan info venue acara
+const venue = kegiatan.lokasi_acara;
 
-  if (type === "KELOMPOK" && kegiatan.kelompok) {
-    return {
-      nama: kegiatan.kelompok.nama_kelompok,
-      alamat: kegiatan.kelompok.alamat,
-      latitude: parseFloat(kegiatan.kelompok.latitude),
-      longitude: parseFloat(kegiatan.kelompok.longitude),
-      level: "kelompok",
-    };
-  }
-
-  if (type === "DESA" && kegiatan.desa) {
-    return {
-      nama: kegiatan.desa.nama_desa,
-      alamat: kegiatan.desa.alamat,
-      latitude: parseFloat(kegiatan.desa.latitude),
-      longitude: parseFloat(kegiatan.desa.longitude),
-      level: "desa",
-    };
-  }
-
-  return {
-    nama: kegiatan.daerah?.nama_daerah,
-    alamat: kegiatan.daerah?.alamat,
-    latitude: parseFloat(kegiatan.daerah?.latitude),
-    longitude: parseFloat(kegiatan.daerah?.longitude),
-    level: "daerah",
-  };
-}
+console.log(venue.nama_tempat); // "Sukamulya 1"
+console.log(venue.alamat); // "Jl. Ipik Gandamanah Gg. Sukamulya..."
+console.log(venue.latitude); // -6.5172682171343945 (tipe number)
+console.log(venue.longitude); // 107.45887945395884 (tipe number)
+console.log(venue.radius_meter); // 150 (toleransi radius presensi)
+console.log(venue.level); // "kelompok" | "desa" | "daerah"
+console.log(venue.img_url); // URL foto tempat acara (jika ada)
 ```
+
+Atribut di dalam objek `lokasi_acara` / `venue`:
+
+- `nama_tempat`: Nama lokasi tempat acara diadakan.
+- `alamat`: Alamat lengkap tempat acara.
+- `latitude` & `longitude`: Titik koordinat GPS tempat acara (bertipe `float` / `number`, siap dipasang ke Google Maps / Mapbox / Leaflet).
+- `radius_meter`: Toleransi radius presensi GPS default dari server (Kelompok: 150m, Desa: 500m, Daerah: 1000m) untuk menggambar lingkaran radius (circle) pada peta.
+- `level`: Tingkat administrasi venue (`"kelompok"`, `"desa"`, atau `"daerah"`).
 
 ### Contoh Request
 
@@ -117,6 +105,26 @@ Accept: application/json
       "is_expired": false,
       "status_kegiatan": "aktif",
       "expired_message": "Kegiatan masih aktif",
+      "lokasi_acara": {
+        "level": "kelompok",
+        "id": 2,
+        "nama_tempat": "Sukamulya 1",
+        "alamat": "Jl. Ipik Gandamanah Gg. Sukamulya, Ciseureuh, Kec. Purwakarta, Kabupaten Purwakarta, Jawa Barat 41118",
+        "latitude": -6.5172682171343945,
+        "longitude": 107.45887945395884,
+        "radius_meter": 150,
+        "img_url": "https://your-api-domain.com/storage/kelompok/7dc4afc4-133a-4d72-bb2d-6a7bf034fe0a.png"
+      },
+      "venue": {
+        "level": "kelompok",
+        "id": 2,
+        "nama_tempat": "Sukamulya 1",
+        "alamat": "Jl. Ipik Gandamanah Gg. Sukamulya, Ciseureuh, Kec. Purwakarta, Kabupaten Purwakarta, Jawa Barat 41118",
+        "latitude": -6.5172682171343945,
+        "longitude": 107.45887945395884,
+        "radius_meter": 150,
+        "img_url": "https://your-api-domain.com/storage/kelompok/7dc4afc4-133a-4d72-bb2d-6a7bf034fe0a.png"
+      },
       "daerah": {
         "id": 1,
         "nama_daerah": "Cikampek",
