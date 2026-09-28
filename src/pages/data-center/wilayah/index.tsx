@@ -218,7 +218,7 @@ const WilayahPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5 text-slate-900 dark:text-slate-100">
-      <section className="overflow-hidden rounded-xl border border-cyan-200 bg-cyan-50 text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+      <section className="overflow-hidden rounded-3xl bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-800 dark:text-cyan-300">
