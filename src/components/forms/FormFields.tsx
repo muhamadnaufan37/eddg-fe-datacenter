@@ -629,6 +629,7 @@ interface PrimeSelectProps extends CommonFieldProps {
   isSearchable?: boolean;
   isLoading?: boolean;
   placeholder?: string;
+  noOptionsMessage?: string;
   disabled?: boolean;
   onInputChange?: (
     newValue: string,
@@ -650,6 +651,7 @@ export const PrimeSelect = ({
   isLoading = false,
   disabled = false,
   placeholder = "Pilih opsi",
+  noOptionsMessage = "Tidak ada opsi tersedia",
   onInputChange,
 }: PrimeSelectProps) => {
   const { theme } = useTheme();
@@ -839,6 +841,7 @@ export const PrimeSelect = ({
         isLoading={isLoading}
         isDisabled={disabled}
         placeholder={placeholder}
+        noOptionsMessage={() => noOptionsMessage}
         className="w-full"
         styles={selectStyles}
         menuPortalTarget={

@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import type { InputActionMeta } from "react-select";
 import { Dialog } from "primereact/dialog";
-import { FiAlertTriangle, FiMapPin } from "react-icons/fi";
+import { FiAlertTriangle, FiMapPin, FiMessageCircle } from "react-icons/fi";
 
 import {
   PrimeInputText,
@@ -37,6 +37,12 @@ interface ReactSelectOption {
   label: string;
   value: string;
 }
+
+type DuplicateAttendance = {
+  message: string;
+  waktu_presensi?: string;
+  status_presensi?: string;
+};
 
 const attendanceOptions = [
   {
@@ -98,6 +104,42 @@ const formatDateTime = (value: string) => {
     dateStyle: "full",
     timeStyle: "short",
   }).format(parsed);
+};
+
+const getDuplicateAttendance = (
+  payload: unknown,
+): DuplicateAttendance | null => {
+  if (typeof payload !== "object" || payload === null) return null;
+
+  const response = payload as {
+    message?: unknown;
+    data?: unknown;
+  };
+  const message = typeof response.message === "string" ? response.message : "";
+
+  if (!/sudah melakukan presensi/i.test(message)) return null;
+
+  const details =
+    typeof response.data === "object" && response.data !== null
+      ? (response.data as Record<string, unknown>)
+      : {};
+
+  return {
+    message,
+    waktu_presensi:
+      typeof details.waktu_presensi === "string"
+        ? details.waktu_presensi
+        : undefined,
+    status_presensi:
+      typeof details.status_presensi === "string"
+        ? details.status_presensi
+        : undefined,
+  };
+};
+
+const formatAttendanceTime = (value: string) => {
+  const match = value.match(/\d{4}-\d{2}-\d{2}[ T](\d{2}:\d{2}(?::\d{2})?)/);
+  return match ? `${match[1]} WIB` : value;
 };
 
 const getVenueDetails = (activity: PresensiKegiatan | null) => {
@@ -568,11 +610,16 @@ const PresensiPage = () => {
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duplicateAttendance, setDuplicateAttendance] =
+    useState<DuplicateAttendance | null>(null);
   const [locationAccuracy, setLocationAccuracy] = useState<string | null>(null);
   const [participantSearchTerm, setParticipantSearchTerm] = useState("");
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const currentYear = new Date().getFullYear();
+  const activityCategory = String(activityData?.category ?? "")
+    .trim()
+    .toLowerCase();
   const rfidBufferRef = useRef("");
   const rfidBufferTimerRef = useRef<number | null>(null);
   const isSubmittingRef = useRef(false);
@@ -602,9 +649,22 @@ const PresensiPage = () => {
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values, helpers) => {
+      if (
+        !["cai", "sensus"].includes(activityCategory) ||
+        attendanceType !== activityCategory
+      ) {
+        showToast(
+          "error",
+          "Kategori presensi tidak sesuai",
+          "Jenis presensi harus mengikuti kategori kegiatan.",
+        );
+        return;
+      }
+
       try {
         setIsSubmitting(true);
         isSubmittingRef.current = true;
+        setDuplicateAttendance(null);
 
         const isRfidMode =
           attendanceType === "cai" && caiAttendanceMode === "rfid";
@@ -620,8 +680,19 @@ const PresensiPage = () => {
           status_presensi: isRfidMode ? "hadir" : values.status_presensi,
           keterangan: values.keterangan || undefined,
           add_by_petugas: "124fe53d-64da-4647-8c30-87aea6ac23bd",
-          category: attendanceType,
+          category: activityCategory,
         });
+
+        if (response?.success === false) {
+          const duplicate = getDuplicateAttendance(response);
+          setDuplicateAttendance(duplicate);
+          showToast(
+            "error",
+            "Presensi tidak dapat disimpan",
+            response?.message ?? "Gagal menyimpan presensi.",
+          );
+          return;
+        }
 
         showToast(
           "success",
@@ -639,10 +710,13 @@ const PresensiPage = () => {
         });
         setLocationAccuracy(null);
       } catch (error: any) {
+        const responseData = error?.response?.data;
+        const duplicate = getDuplicateAttendance(responseData);
+        setDuplicateAttendance(duplicate);
         showToast(
           "error",
-          "Gagal",
-          error?.response?.data?.message ||
+          duplicate ? "Peserta sudah presensi" : "Gagal",
+          responseData?.message ||
             error?.message ||
             "Gagal menyimpan presensi.",
         );
@@ -757,8 +831,6 @@ const PresensiPage = () => {
 
     const loadParticipants = async () => {
       try {
-        setLoadingParticipants(true);
-
         const options =
           attendanceType === "cai"
             ? await fetchNamaPesertaCaiReference({
@@ -783,6 +855,7 @@ const PresensiPage = () => {
       }
     };
 
+    setLoadingParticipants(true);
     const timeoutId = window.setTimeout(() => {
       void loadParticipants();
     }, 300);
@@ -1021,6 +1094,11 @@ const PresensiPage = () => {
     attendanceType === "cai" && caiAttendanceMode === "rfid";
   const isExpired = Boolean(activityData?.is_expired);
   const canFillAttendance = Boolean(activityData && !isExpired);
+  const registrationPath =
+    attendanceType === "cai"
+      ? "/digital-data/cai/registration"
+      : "/digital-data/sensus/registration";
+  const registrationCategory = attendanceType === "cai" ? "CAI" : "Sensus";
 
   const imageUrl = resolveImageUrl(venue.imageUrl);
 
@@ -1084,6 +1162,13 @@ const PresensiPage = () => {
                         Muat ulang
                       </button>
                     ) : null}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/digital-data/pengaduan")}
+                      className="rounded-2xl border border-amber-300 px-4 py-3 text-sm font-semibold text-amber-800 transition hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-200 dark:hover:bg-amber-500/10"
+                    >
+                      Menu Pengaduan
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1149,7 +1234,7 @@ const PresensiPage = () => {
                   </div>
                 </section>
 
-                {canFillAttendance ? (
+                {canFillAttendance && attendanceType ? (
                   <>
                     {!attendanceType ? (
                       <>
@@ -1163,8 +1248,13 @@ const PresensiPage = () => {
                         <div className="grid gap-4 md:grid-cols-2">
                           <button
                             type="button"
-                            onClick={() => setAttendanceType("cai")}
-                            className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                            onClick={() => {
+                              if (activityCategory === "cai") {
+                                setAttendanceType("cai");
+                              }
+                            }}
+                            disabled={activityCategory !== "cai"}
+                            className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
                           >
                             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 transition group-hover:bg-sky-600 group-hover:text-white dark:bg-slate-800">
                               <svg
@@ -1191,8 +1281,13 @@ const PresensiPage = () => {
 
                           <button
                             type="button"
-                            onClick={() => setAttendanceType("sensus")}
-                            className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                            onClick={() => {
+                              if (activityCategory === "sensus") {
+                                setAttendanceType("sensus");
+                              }
+                            }}
+                            disabled={activityCategory !== "sensus"}
+                            className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
                           >
                             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 transition group-hover:bg-sky-600 group-hover:text-white dark:bg-slate-800">
                               <svg
@@ -1232,8 +1327,8 @@ const PresensiPage = () => {
                       <>
                         <StepperHeader
                           title="Absensi Online"
-                          description="Lokasi harus diambil otomatis dari perangkat, bukan diketik manual. Radius meter dan petugas input ditetapkan oleh sistem."
-                          steps={["Pilih Tipe", "Data Presensi"]}
+                          description={`Kategori ${activityData.category} ditentukan oleh kegiatan. Lengkapi data peserta dan presensi sesuai kategori ini.`}
+                          steps={["Kategori Kegiatan", "Data Presensi"]}
                           activeStep={1}
                         />
 
@@ -1295,22 +1390,74 @@ const PresensiPage = () => {
                                   dan lokasi perangkat.
                                 </p>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setAttendanceType(null);
-                                  formikRef.current.resetForm();
-                                  formikRef.current.setFieldValue(
-                                    "kode_kegiatan",
-                                    activityData?.kode_kegiatan ?? "",
-                                    false,
-                                  );
-                                  setLocationAccuracy(null);
-                                }}
-                                className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                            </div>
+
+                            {duplicateAttendance ? (
+                              <div
+                                role="alert"
+                                className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
                               >
-                                ← Ubah tipe
-                              </button>
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="flex items-start gap-3">
+                                    <FiAlertTriangle className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-300" />
+                                    <div>
+                                      <p className="text-sm font-bold">
+                                        Presensi sudah tercatat
+                                      </p>
+                                      <p className="mt-1 text-sm leading-relaxed">
+                                        {duplicateAttendance.message}
+                                      </p>
+                                      {duplicateAttendance.waktu_presensi ||
+                                      duplicateAttendance.status_presensi ? (
+                                        <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                                          {duplicateAttendance.waktu_presensi ? (
+                                            <div>
+                                              <dt className="font-semibold opacity-70">
+                                                Waktu tercatat
+                                              </dt>
+                                              <dd className="mt-0.5 font-semibold">
+                                                {formatAttendanceTime(
+                                                  duplicateAttendance.waktu_presensi,
+                                                )}
+                                              </dd>
+                                            </div>
+                                          ) : null}
+                                          {duplicateAttendance.status_presensi ? (
+                                            <div>
+                                              <dt className="font-semibold opacity-70">
+                                                Status
+                                              </dt>
+                                              <dd className="mt-0.5 font-semibold capitalize">
+                                                {
+                                                  duplicateAttendance.status_presensi
+                                                }
+                                              </dd>
+                                            </div>
+                                          ) : null}
+                                        </dl>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDuplicateAttendance(null)}
+                                    aria-label="Tutup pemberitahuan"
+                                    className="shrink-0 text-sm font-semibold text-amber-800 underline decoration-amber-400 underline-offset-2 dark:text-amber-200"
+                                  >
+                                    Tutup
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            <div className="rounded-xl border border-sky-100 bg-sky-50/70 px-4 py-3 dark:border-sky-500/20 dark:bg-sky-500/5">
+                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                Urutan presensi
+                              </p>
+                              <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                Pilih peserta, tentukan status kehadiran, cari
+                                lokasi perangkat, lalu simpan presensi.
+                              </p>
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-1">
@@ -1329,6 +1476,11 @@ const PresensiPage = () => {
                                   required
                                   options={participantOptions}
                                   isLoading={loadingParticipants}
+                                  noOptionsMessage={
+                                    participantSearchTerm.trim()
+                                      ? "Nama peserta tidak ditemukan"
+                                      : "Daftar peserta belum tersedia"
+                                  }
                                   placeholder={
                                     loadingParticipants
                                       ? "Memuat peserta..."
@@ -1340,12 +1492,37 @@ const PresensiPage = () => {
                                   ) => {
                                     if (actionMeta.action === "input-change") {
                                       setParticipantSearchTerm(inputValue);
+                                      setDuplicateAttendance(null);
                                     }
 
                                     return inputValue;
                                   }}
+                                  helperText={`Cari peserta ${registrationCategory} berdasarkan nama. Hasil pencarian diperbarui otomatis.`}
                                 />
                               )}
+
+                              {!isRfidAttendanceMode &&
+                              !loadingParticipants &&
+                              participantOptions.length === 0 ? (
+                                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+                                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                    {participantSearchTerm.trim()
+                                      ? `Peserta ${registrationCategory} tidak ditemukan`
+                                      : `Belum ada peserta ${registrationCategory} di daftar`}
+                                  </p>
+                                  <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                    Periksa ejaan nama atau daftarkan peserta
+                                    terlebih dahulu.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(registrationPath)}
+                                    className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-500/20"
+                                  >
+                                    Registrasi {registrationCategory}
+                                  </button>
+                                </div>
+                              ) : null}
 
                               <div className="hidden">
                                 <PrimeInputText
@@ -1581,11 +1758,62 @@ const PresensiPage = () => {
                                 </li>
                               </ul>
                             </div>
+                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/20 dark:bg-amber-500/10">
+                              <div className="flex items-start gap-3">
+                                <FiMessageCircle className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-300" />
+                                <div>
+                                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                    Ada masalah dengan presensi atau data
+                                    peserta?
+                                  </p>
+                                  <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                    Buka menu pengaduan untuk mencari laporan
+                                    atau mengirim pengaduan baru.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      navigate("/digital-data/pengaduan")
+                                    }
+                                    className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-500/20 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                                  >
+                                    Menu Pengaduan
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </aside>
                         </div>
                       </>
                     )}
                   </>
+                ) : null}
+                {canFillAttendance && !attendanceType ? (
+                  <section
+                    role="alert"
+                    className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+                  >
+                    <div className="flex items-start gap-3">
+                      <FiAlertTriangle className="mt-0.5 shrink-0" />
+                      <div>
+                        <h3 className="text-base font-bold">
+                          Kategori kegiatan tidak dikenali
+                        </h3>
+                        <p className="mt-1 text-sm leading-relaxed">
+                          Presensi hanya tersedia untuk kegiatan berkategori CAI
+                          atau Sensus. Jenis presensi tidak dapat dipilih manual
+                          agar data peserta tetap sesuai kegiatan.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => navigate("/digital-data/pengaduan")}
+                          className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-500/20 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                        >
+                          Buka Menu Pengaduan
+                        </button>
+                      </div>
+                    </div>
+                  </section>
                 ) : null}
               </div>
             </div>

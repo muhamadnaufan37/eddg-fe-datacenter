@@ -315,6 +315,62 @@ export const fetchAllKelompokReference = async (): Promise<
   ]);
 };
 
+export type PublicWilayahKelompok = {
+  id: number;
+  desa_id?: number;
+  nama_kelompok: string;
+};
+
+export type PublicWilayahDesa = {
+  id: number;
+  daerah_id?: number;
+  nama_desa: string;
+  kelompok: PublicWilayahKelompok[];
+};
+
+export type PublicWilayahDaerah = {
+  id: number;
+  nama_daerah: string;
+  desa: PublicWilayahDesa[];
+};
+
+export type PublicWilayahType = "daerah" | "desa" | "kelompok";
+
+export type PublicWilayahDetail = {
+  id: number;
+  uuid?: string;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  alamat?: string | null;
+  is_active?: boolean;
+  img?: string | null;
+  img_url?: string | null;
+  nama_daerah?: string;
+  nama_desa?: string;
+  nama_kelompok?: string;
+  daerah_id?: number;
+  desa_id?: number;
+};
+
+export const fetchPublicWilayahTree = async (
+  daerahId?: number,
+): Promise<PublicWilayahDaerah[]> => {
+  const response = await api.get("/api/v1/public/wilayah/tree", {
+    params: daerahId ? { daerah_id: daerahId } : undefined,
+  });
+  return response.data?.data ?? [];
+};
+
+export const fetchPublicWilayahDetail = async (
+  type: PublicWilayahType,
+  id: number,
+): Promise<PublicWilayahDetail> => {
+  const response = await api.get("/api/v1/public/wilayah/detail", {
+    params: { type, id },
+  });
+  return response.data?.data;
+};
+
 export const fetchNamaPesertaReference = async (): Promise<
   ReferenceOption[]
 > => {
