@@ -250,7 +250,7 @@ const HomePage = () => {
             </div>
 
             {/* Quick Stat Telemetry Widget on Hero */}
-            <div className="hidden flex-col gap-3 rounded-2xl border-2 border-white/30 bg-black/20 p-5 backdrop-blur-md dark:border-[#526d82] dark:bg-[#1c2736]/85 lg:flex lg:w-72">
+            {/* <div className="hidden flex-col gap-3 rounded-2xl border-2 border-white/30 bg-black/20 p-5 backdrop-blur-md dark:border-[#526d82] dark:bg-[#1c2736]/85 lg:flex lg:w-72">
               <div className="flex items-center justify-between border-b border-white/20 pb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-white/90 dark:text-[#9db2bf]">
                   Status Jaringan
@@ -278,7 +278,7 @@ const HomePage = () => {
               <div className="rounded-xl border border-white/15 bg-black/30 p-2.5 text-[11px] font-medium leading-tight text-white/90 dark:bg-black/40">
                 🚀 Semua modul operasional siap diakses dengan ketersediaan penuh.
               </div>
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -307,8 +307,8 @@ const HomePage = () => {
                   type="button"
                   onClick={() => setViewMode("grid")}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${viewMode === "grid"
-                      ? "bg-[#2373f4] text-white shadow-xs dark:bg-[#578ef5]"
-                      : "text-slate-600 hover:text-slate-900 dark:text-[#9db2bf] dark:hover:text-[#dde6ed]"
+                    ? "bg-[#2373f4] text-white shadow-xs dark:bg-[#578ef5]"
+                    : "text-slate-600 hover:text-slate-900 dark:text-[#9db2bf] dark:hover:text-[#dde6ed]"
                     }`}
                   aria-label="Tampilan Grid Card"
                 >
@@ -319,8 +319,8 @@ const HomePage = () => {
                   type="button"
                   onClick={() => setViewMode("list")}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${viewMode === "list"
-                      ? "bg-[#2373f4] text-white shadow-xs dark:bg-[#578ef5]"
-                      : "text-slate-600 hover:text-slate-900 dark:text-[#9db2bf] dark:hover:text-[#dde6ed]"
+                    ? "bg-[#2373f4] text-white shadow-xs dark:bg-[#578ef5]"
+                    : "text-slate-600 hover:text-slate-900 dark:text-[#9db2bf] dark:hover:text-[#dde6ed]"
                     }`}
                   aria-label="Tampilan List Compact"
                 >
@@ -386,15 +386,15 @@ const HomePage = () => {
                     type="button"
                     onClick={() => setSelectedCategory(cat)}
                     className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-1.5 font-bold transition-all ${isSelected
-                        ? "bg-[#2373f4] text-white shadow-md shadow-[#2373f4]/25 dark:bg-[#578ef5]"
-                        : "border border-[#cbdcf5] bg-white text-slate-700 shadow-2xs hover:border-[#2373f4] hover:bg-[#eef4fc] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#9db2bf] dark:hover:border-[#65d0f4] dark:hover:text-[#dde6ed]"
+                      ? "bg-[#2373f4] text-white shadow-md shadow-[#2373f4]/25 dark:bg-[#578ef5]"
+                      : "border border-[#cbdcf5] bg-white text-slate-700 shadow-2xs hover:border-[#2373f4] hover:bg-[#eef4fc] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#9db2bf] dark:hover:border-[#65d0f4] dark:hover:text-[#dde6ed]"
                       }`}
                   >
                     <span>{cat}</span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${isSelected
-                          ? "bg-[#f2f7a0] text-slate-900"
-                          : "bg-[#edf2f9] text-slate-700 dark:bg-[#27374d] dark:text-[#dde6ed]"
+                        ? "bg-[#f2f7a0] text-slate-900"
+                        : "bg-[#edf2f9] text-slate-700 dark:bg-[#27374d] dark:text-[#dde6ed]"
                         }`}
                     >
                       {count}
