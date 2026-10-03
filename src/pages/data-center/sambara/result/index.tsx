@@ -378,22 +378,27 @@ export default function ResultInfoPajakKendaraan() {
           />
         )
       ) : (
-        <div className="relative z-9 mx-auto flex max-w-7xl flex-col gap-5 sm:gap-6">
-          <div className="overflow-hidden rounded-[28px] border border-white/40 bg-slate-950 p-5 text-white shadow-2xl shadow-sky-950/10 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="space-y-3 sm:space-y-4">
-                <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80 sm:text-xs sm:tracking-[0.28em]">
+        <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6">
+          {/* Header Dashboard Banner */}
+          <div className="relative overflow-hidden rounded-[2rem] bg-[#0b1120] p-8 text-white shadow-2xl ring-1 ring-white/10 sm:p-10">
+            {/* Mesh Gradients */}
+            <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[80px]" />
+            <div className="pointer-events-none absolute -bottom-20 -right-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 blur-[80px]" />
+            
+            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-md">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
                   Invoice Pajak Kendaraan
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-black tracking-tight sm:text-4xl">
+                  <h1 className="text-4xl font-black tracking-tight sm:text-5xl drop-shadow-sm">
                     {isInspectOpen
                       ? "[Disamarkan saat inspeksi]"
                       : `${vehicle?.no_polisi1 ?? ""} ${vehicle?.no_polisi2 ?? ""} ${vehicle?.no_polisi3 ?? ""}`}
                   </h1>
-
-                  <p className="mt-2 max-w-2xl text-xs leading-5 text-white/75 sm:text-base">
+                  <p className="mt-3 max-w-2xl text-sm font-medium tracking-wide text-white/70">
                     {isInspectOpen
                       ? "[Disamarkan saat inspeksi]"
                       : `${vehicle?.nm_merek_kb ?? ""} • ${vehicle?.nm_model_kb ?? ""}`}
@@ -401,24 +406,24 @@ export default function ResultInfoPajakKendaraan() {
                 </div>
               </div>
 
-              <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl sm:grid-cols-2 lg:min-w-105">
+              <div className="grid min-w-[300px] gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:grid-cols-2">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.2em] text-white/60">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">
                     Status
                   </div>
-                  <div className="mt-2 inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-sm font-semibold text-emerald-200">
+                  <div className="mt-2 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
                     Data berhasil diproses
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-xs uppercase tracking-[0.2em] text-white/60">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">
                     Total Pembayaran
                   </div>
-                  <div className="mt-2 text-2xl font-black sm:text-3xl">
+                  <div className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
                     {isInspectOpen ? (
                       <span className="text-sm italic text-white/75">
-                        [Disamarkan saat inspeksi]
+                        [Disamarkan]
                       </span>
                     ) : (
                       formatCurrency(totalBayar)
@@ -429,13 +434,13 @@ export default function ResultInfoPajakKendaraan() {
             </div>
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
             <div className="flex flex-col gap-6">
               <InfoCard
                 title="Ringkasan Kendaraan"
                 icon={<FiTruck size={20} />}
               >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   <DetailRow
                     label="Merk"
                     value={renderVal(vehicle?.nm_merek_kb)}
@@ -471,12 +476,12 @@ export default function ResultInfoPajakKendaraan() {
                   {invoiceMeta.map((item) => (
                     <div
                       key={item.label}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60"
+                      className="rounded-2xl border border-slate-200/50 bg-slate-50/50 p-4 transition-colors hover:bg-slate-50 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10"
                     >
-                      <span className="block text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
                         {item.label}
                       </span>
-                      <div className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                      <div className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
                         {item.value}
                       </div>
                     </div>
@@ -485,28 +490,28 @@ export default function ResultInfoPajakKendaraan() {
               </InfoCard>
 
               <InfoCard title="Rincian Biaya" icon={<FiCreditCard size={20} />}>
-                <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] border-b border-slate-200 bg-slate-100 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+                <div className="overflow-hidden rounded-[1.5rem] border border-slate-200/60 dark:border-white/10">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] border-b border-slate-200/60 bg-slate-50/50 px-5 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
                     <span>Komponen</span>
                     <span>Nominal</span>
                   </div>
 
-                  <div className="divide-y divide-slate-200 dark:divide-slate-800">
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
                     {biayaList.map((item) => (
                       <div
                         key={item.label}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-white/5"
                       >
                         <div>
-                          <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                          <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                             {item.label}
                           </div>
                         </div>
 
-                        <div className="text-right text-sm font-semibold text-slate-900 dark:text-white">
+                        <div className="text-right text-sm font-bold text-slate-900 dark:text-white">
                           {isInspectOpen ? (
-                            <span className="italic text-rose-600">
-                              [Disamarkan saat inspeksi]
+                            <span className="italic text-rose-500">
+                              [Disamarkan]
                             </span>
                           ) : (
                             formatCurrency(item.value)
@@ -516,20 +521,20 @@ export default function ResultInfoPajakKendaraan() {
                     ))}
                   </div>
 
-                  <div className="border-t border-slate-200 bg-slate-950 px-4 py-4 text-white dark:border-slate-800">
+                  <div className="border-t border-slate-200/60 bg-slate-900 px-5 py-6 text-white dark:border-white/10 dark:bg-slate-950">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <div className="text-xs uppercase tracking-[0.18em] text-white/60">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">
                           Total Pembayaran
                         </div>
-                        <div className="mt-1 text-xs text-white/50">
-                          Ringkasan nominal yang harus dibayarkan
+                        <div className="mt-1 text-xs text-white/40">
+                          Ringkasan nominal tagihan saat ini
                         </div>
                       </div>
-                      <div className="text-2xl font-black sm:text-3xl">
+                      <div className="text-2xl font-black tracking-tight sm:text-3xl">
                         {isInspectOpen ? (
                           <span className="text-sm italic text-white/70">
-                            [Disamarkan saat inspeksi]
+                            [Disamarkan]
                           </span>
                         ) : (
                           formatCurrency(totalBayar)
@@ -544,29 +549,32 @@ export default function ResultInfoPajakKendaraan() {
             <div className="flex flex-col gap-6 lg:sticky lg:top-6 lg:self-start">
               <InfoCard title="Invoice Summary" icon={<FiMapPin size={20} />}>
                 <div className="space-y-4">
-                  <div className="rounded-2xl bg-linear-to-br from-sky-500 to-cyan-500 p-4 text-white shadow-lg shadow-sky-500/20 sm:p-5">
-                    <div className="text-xs uppercase tracking-[0.2em] text-white/70">
-                      Total Tagihan
-                    </div>
-                    <div className="mt-3 text-2xl font-black sm:text-3xl">
-                      {isInspectOpen ? (
-                        <span className="text-sm italic text-white/80">
-                          [Disamarkan saat inspeksi]
-                        </span>
-                      ) : (
-                        formatCurrency(totalBayar)
-                      )}
+                  <div className="relative overflow-hidden rounded-2xl bg-[#0b1120] p-6 text-white shadow-xl">
+                    <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-blue-500/40 blur-[40px]" />
+                    <div className="relative z-10">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                        Total Tagihan
+                      </div>
+                      <div className="mt-2 text-3xl font-black tracking-tight">
+                        {isInspectOpen ? (
+                          <span className="text-sm italic text-white/80">
+                            [Disamarkan saat inspeksi]
+                          </span>
+                        ) : (
+                          formatCurrency(totalBayar)
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                  <div className="grid gap-4 rounded-2xl border border-slate-200/60 bg-slate-50/50 p-5 dark:border-white/10 dark:bg-white/5">
                     <div className="flex items-center justify-between gap-3 text-sm">
                       <span className="text-slate-500 dark:text-slate-400">
                         Nopol
                       </span>
-                      <span className="font-semibold text-slate-900 dark:text-white">
+                      <span className="font-bold tracking-wide text-slate-900 dark:text-white">
                         {isInspectOpen
-                          ? "[Disamarkan saat inspeksi]"
+                          ? "[Disamarkan]"
                           : `${vehicle?.no_polisi1 ?? ""} ${vehicle?.no_polisi2 ?? ""} ${vehicle?.no_polisi3 ?? ""}`}
                       </span>
                     </div>
@@ -574,9 +582,9 @@ export default function ResultInfoPajakKendaraan() {
                       <span className="text-slate-500 dark:text-slate-400">
                         Merk / Model
                       </span>
-                      <span className="font-semibold text-slate-900 dark:text-white">
+                      <span className="font-bold text-slate-900 dark:text-white">
                         {isInspectOpen
-                          ? "[Disamarkan saat inspeksi]"
+                          ? "[Disamarkan]"
                           : `${vehicle?.nm_merek_kb ?? "-"} / ${vehicle?.nm_model_kb ?? "-"}`}
                       </span>
                     </div>
@@ -584,36 +592,28 @@ export default function ResultInfoPajakKendaraan() {
                       <span className="text-slate-500 dark:text-slate-400">
                         Masa Pajak
                       </span>
-                      <span className="font-semibold text-slate-900 dark:text-white">
+                      <span className="font-bold text-slate-900 dark:text-white">
                         {isInspectOpen
-                          ? "[Disamarkan saat inspeksi]"
+                          ? "[Disamarkan]"
                           : `${vehicle?.tg_akhir_pajak ?? "-"} → ${vehicle?.data_hitung_pajak?.tg_akhir_pajak_baru ?? "N/A"}`}
                       </span>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
-                    Data invoice ini mengikuti hasil cek Sambara dan akan
-                    menyesuaikan jika terdapat bayaran ke depan yang valid.
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-[11px] font-medium leading-relaxed text-slate-500 dark:border-white/10 dark:bg-transparent dark:text-slate-400">
+                    Data invoice ini mengikuti hasil cek Sambara dan otomatis menyesuaikan jika terdapat opsi bayar di muka.
                   </div>
                 </div>
               </InfoCard>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <Button
-                  type="button"
-                  className="w-full p-button-sm text-xs"
-                  label="Kembali ke Pencarian"
-                  icon={<FiArrowLeft />}
-                  severity="contrast"
-                  outlined
-                  onClick={() =>
-                    navigate(`/digital-data/sambara/cek-pajak-kendaraan`, {
-                      replace: true,
-                    })
-                  }
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/digital-data/sambara/cek-pajak-kendaraan`, { replace: true })}
+                className="group flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+              >
+                <FiArrowLeft className="transition group-hover:-translate-x-1" />
+                Kembali ke Pencarian
+              </button>
             </div>
           </div>
         </div>

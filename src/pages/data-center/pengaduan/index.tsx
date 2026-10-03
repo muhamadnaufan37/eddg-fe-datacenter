@@ -1,4 +1,4 @@
-import { FiMessageCircle, FiSearch } from "react-icons/fi";
+import { FiMessageCircle, FiSearch, FiArrowLeft, FiChevronRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const PengaduanMenuPage = () => {
@@ -6,63 +6,108 @@ const PengaduanMenuPage = () => {
 
   const menus = [
     {
-      title: "Cari Data",
-      description: "Cari pengaduan cukup dengan kontak pelapor.",
-      icon: <FiSearch size={22} />,
+      code: "PGD-SEARCH",
+      title: "Cari Status Pengaduan",
+      description:
+        "Lacak riwayat dan status penanganan pengaduan dengan memasukkan kontak pelapor atau kode e-ticket.",
+      icon: <FiSearch size={24} />,
       path: "/digital-data/pengaduan/search",
+      gradient: "from-[#2373f4] to-[#578ef5]",
     },
     {
-      title: "Buat Data",
-      description: "Buat pengaduan baru melalui form e-ticket.",
-      icon: <FiMessageCircle size={22} />,
+      code: "PGD-TICKET",
+      title: "Buat Laporan Baru (E-Ticket)",
+      description:
+        "Buat laporan kendala atau pengaduan baru melalui form e-ticket terintegrasi untuk tindak lanjut cepat.",
+      icon: <FiMessageCircle size={24} />,
       path: "/digital-data/pengaduan/eticket",
+      gradient: "from-[#2373f4] to-[#65d0f4]",
     },
   ];
 
   return (
     <div className="w-full space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="flex flex-col md:flex-row justify-between gap-4">
+      {/* Header Banner */}
+      <div className="overflow-hidden rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d]">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">
-              Menu Pengaduan
-            </p>
-            <h1 className="mt-2 text-2xl font-black text-slate-900 dark:text-white">
-              Pilih aksi yang ingin dilakukan
+            <div className="flex items-center gap-2">
+              <span className="rounded-md border border-[#cbdcf5] bg-[#edf2f9] px-2.5 py-0.5 text-[11px] font-extrabold tracking-wider text-[#2373f4] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]">
+                HELPDESK DESK
+              </span>
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#2373f4] dark:text-[#65d0f4]">
+                Menu Pengaduan
+              </p>
+            </div>
+            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-[#dde6ed] sm:text-3xl">
+              Pusat Layanan & Pengaduan
             </h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              Menu dipisah agar pencarian dan pengisian pengaduan tidak
-              bercampur.
+            <p className="mt-1 text-sm font-medium text-slate-600 dark:text-[#9db2bf]">
+              Layanan pelaporan kendala dan pelacakan tiket aduan generus secara transparan
             </p>
           </div>
           <div>
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-2xl border-2 border-[#cbdcf5] bg-white px-4 py-2.5 text-xs font-bold text-[#2373f4] shadow-xs transition hover:border-[#2373f4] hover:bg-[#edf2f9] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4] dark:hover:border-[#65d0f4]"
             >
-              ← Kembali
+              <FiArrowLeft />
+              Kembali ke Menu Utama
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Action Cards */}
+      <div className="grid gap-6 md:grid-cols-2">
         {menus.map((menu) => (
           <button
             key={menu.path}
             onClick={() => navigate(menu.path)}
-            className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-sky-300 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border-2 border-[#cbdcf5] bg-white p-7 text-left shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#2373f4] hover:shadow-xl hover:shadow-[#2373f4]/15 dark:border-[#526d82] dark:bg-[#27374d] dark:hover:border-[#65d0f4]"
           >
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 transition group-hover:bg-sky-600 group-hover:text-white dark:bg-slate-800">
-              {menu.icon}
+            <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${menu.gradient}`} />
+
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="rounded-md border border-[#cbdcf5] bg-[#edf2f9] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider text-[#2373f4] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]">
+                  {menu.code}
+                </span>
+                <span className="text-xs font-bold text-[#2373f4] dark:text-[#65d0f4]">
+                  Akses Modul →
+                </span>
+              </div>
+
+              <div className="mt-5 flex items-center gap-4">
+                <div
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${menu.gradient} text-white shadow-md shadow-[#2373f4]/25 transition-transform duration-300 group-hover:scale-105`}
+                >
+                  {menu.icon}
+                </div>
+                <div>
+                  <h2 className="text-lg font-extrabold text-slate-900 group-hover:text-[#2373f4] dark:text-[#dde6ed] dark:group-hover:text-[#65d0f4]">
+                    {menu.title}
+                  </h2>
+                  <span className="text-xs font-semibold text-slate-400 dark:text-[#9db2bf]">
+                    SIPANDA Helpdesk Service
+                  </span>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm font-medium leading-relaxed text-slate-600 dark:text-[#9db2bf]">
+                {menu.description}
+              </p>
             </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-              {menu.title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-              {menu.description}
-            </p>
+
+            <div className="mt-6 flex items-center justify-between border-t border-[#cbdcf5]/60 pt-4 dark:border-[#526d82]/60">
+              <span className="text-xs font-bold text-[#2373f4] dark:text-[#65d0f4]">
+                Mulai Operasi
+              </span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#edf2f9] text-[#2373f4] transition group-hover:bg-[#2373f4] group-hover:text-white dark:bg-[#1c2736] dark:text-[#dde6ed] dark:group-hover:bg-[#65d0f4] dark:group-hover:text-[#1c2736]">
+                <FiChevronRight />
+              </div>
+            </div>
           </button>
         ))}
       </div>

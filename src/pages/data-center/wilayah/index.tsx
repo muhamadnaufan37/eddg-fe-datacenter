@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   FiAlertCircle,
+  FiArrowLeft,
   FiCheckCircle,
   FiChevronDown,
   FiChevronRight,
@@ -9,6 +10,7 @@ import {
   FiRefreshCw,
   FiSearch,
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 import {
   fetchPublicWilayahDetail,
@@ -45,6 +47,7 @@ const getWilayahName = (
 };
 
 const WilayahPage = () => {
+  const navigate = useNavigate();
   const [wilayah, setWilayah] = useState<PublicWilayahDaerah[]>([]);
   const [loadingTree, setLoadingTree] = useState(true);
   const [treeError, setTreeError] = useState<string | null>(null);
@@ -221,6 +224,14 @@ const WilayahPage = () => {
       <section className="overflow-hidden rounded-3xl bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-2xl">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="group mb-6 inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <FiArrowLeft className="transition group-hover:-translate-x-1" />
+              Kembali
+            </button>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-800 dark:text-cyan-300">
               Referensi Wilayah
             </p>

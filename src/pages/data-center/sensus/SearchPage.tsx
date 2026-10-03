@@ -74,13 +74,7 @@ const SensusSearchPage = () => {
           setNamaOptions(options);
         }
       } catch {
-        if (!cancelled) {
-          showToast(
-            "error",
-            "Gagal",
-            "Gagal memuat referensi nama peserta sensus.",
-          );
-        }
+        // Silently catch in-flight search errors during typing to prevent UI interruption
       } finally {
         if (!cancelled) {
           setLoadingOptions(false);
@@ -90,7 +84,7 @@ const SensusSearchPage = () => {
 
     const timeoutId = window.setTimeout(() => {
       void loadNamaOptions();
-    }, 300);
+    }, 250);
 
     return () => {
       cancelled = true;
@@ -158,16 +152,16 @@ const SensusSearchPage = () => {
 
       <form
         onSubmit={formik.handleSubmit}
-        className="space-y-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+        className="space-y-6 rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d] sm:p-7"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Form Cari Data
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#dde6ed]">
+            Form Cari Data Sensus
           </h2>
           <button
             type="button"
             onClick={() => navigate("/digital-data/sensus")}
-            className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="rounded-2xl border-2 border-[#cbdcf5] bg-white px-4 py-2 text-xs font-bold text-[#2373f4] transition hover:border-[#2373f4] hover:bg-[#edf2f9] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]"
           >
             ← Kembali
           </button>
@@ -180,13 +174,17 @@ const SensusSearchPage = () => {
             formik={formik}
             required
             options={namaOptions}
-            disabled={loadingOptions}
+            isLoading={loadingOptions}
+            placeholder="Ketik nama lengkap peserta..."
             onInputChange={(
               inputValue: string,
               actionMeta: InputActionMeta,
             ) => {
               if (actionMeta.action === "input-change") {
                 setNamaSearchTerm(inputValue);
+                if (inputValue.trim()) {
+                  formik.setFieldValue("nama_lengkap", inputValue.trim());
+                }
               }
 
               return inputValue;
@@ -210,13 +208,13 @@ const SensusSearchPage = () => {
           </div>
         </div>
 
-        <div className="flex justify-end border-t border-slate-200 pt-5 dark:border-slate-700">
+        <div className="flex justify-end border-t border-[#cbdcf5]/70 pt-5 dark:border-[#526d82]/60">
           <button
             type="submit"
             disabled={isSearching}
-            className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-2xl bg-[#2373f4] px-6 py-3 text-sm font-bold text-white shadow-md shadow-[#2373f4]/25 transition hover:bg-[#195ac7] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSearching ? "Mencari..." : "Cari Data"}
+            {isSearching ? "Mencari Data..." : "Cari Data Sensus"}
           </button>
         </div>
       </form>
@@ -231,14 +229,14 @@ const SensusSearchPage = () => {
               return (
                 <div
                   key={`${record.kode_cari_data ?? index}`}
-                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">
+                      <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#2373f4] dark:text-[#65d0f4]">
                         Hasil Sensus
                       </p>
-                      <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
+                      <h3 className="mt-1 text-lg font-extrabold text-slate-900 dark:text-[#dde6ed]">
                         <Sensitive
                           value={record.nama_lengkap ?? "Data sensus"}
                         />
@@ -247,9 +245,9 @@ const SensusSearchPage = () => {
                     {detailCode ? (
                       <Link
                         to={`/digital-data/sensus/search/${detailCode}`}
-                        className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-500 hover:text-sky-600 dark:border-slate-600 dark:text-slate-200"
+                        className="rounded-2xl border-2 border-[#cbdcf5] bg-white px-4 py-2 text-xs font-bold text-[#2373f4] transition hover:border-[#2373f4] hover:bg-[#edf2f9] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]"
                       >
-                        Detail
+                        Detail →
                       </Link>
                     ) : null}
                   </div>

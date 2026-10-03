@@ -64,13 +64,7 @@ const CaiSearchPage = () => {
           setNamaOptions(options);
         }
       } catch {
-        if (!cancelled) {
-          showToast(
-            "error",
-            "Gagal",
-            "Gagal memuat referensi nama peserta CAI.",
-          );
-        }
+        // Silently catch in-flight search errors during typing to prevent UI interruption
       } finally {
         if (!cancelled) {
           setLoadingOptions(false);
@@ -80,7 +74,7 @@ const CaiSearchPage = () => {
 
     const timeoutId = window.setTimeout(() => {
       void loadNamaOptions();
-    }, 300);
+    }, 250);
 
     return () => {
       cancelled = true;
@@ -148,16 +142,16 @@ const CaiSearchPage = () => {
 
       <form
         onSubmit={formik.handleSubmit}
-        className="space-y-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+        className="space-y-6 rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d] sm:p-7"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Form Cari Data
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#dde6ed]">
+            Form Cari Data CAI
           </h2>
           <button
             type="button"
             onClick={() => navigate("/digital-data/cai")}
-            className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="rounded-2xl border-2 border-[#cbdcf5] bg-white px-4 py-2 text-xs font-bold text-[#2373f4] transition hover:border-[#2373f4] hover:bg-[#edf2f9] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]"
           >
             ← Kembali
           </button>
@@ -170,13 +164,17 @@ const CaiSearchPage = () => {
             formik={formik}
             required
             options={namaOptions}
-            disabled={loadingOptions}
+            isLoading={loadingOptions}
+            placeholder="Ketik nama lengkap peserta..."
             onInputChange={(
               inputValue: string,
               actionMeta: InputActionMeta,
             ) => {
               if (actionMeta.action === "input-change") {
                 setNamaSearchTerm(inputValue);
+                if (inputValue.trim()) {
+                  formik.setFieldValue("nama_lengkap", inputValue.trim());
+                }
               }
 
               return inputValue;

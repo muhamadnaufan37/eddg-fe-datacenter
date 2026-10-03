@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-
 import {
-  PrimeInputText,
-  StepperHeader,
-} from "../../../components/forms/FormFields";
+  FiArrowLeft,
+  FiSearch,
+  FiMessageSquare,
+  FiUser,
+  FiTag,
+} from "react-icons/fi";
 import { searchPengaduanData } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { extractArrayResult } from "../../../utils/response";
@@ -91,8 +93,8 @@ const PengaduanSearchPage = () => {
           "error",
           "Gagal",
           error?.response?.data?.message ||
-            error?.message ||
-            "Gagal mencari data pengaduan.",
+          error?.message ||
+          "Gagal mencari data pengaduan.",
         );
       } finally {
         setIsSearching(false);
@@ -101,147 +103,196 @@ const PengaduanSearchPage = () => {
   });
 
   return (
-    <div className="w-full space-y-6">
-      <StepperHeader
-        title="Cari Data Pengaduan"
-        description="Masukkan kontak pelapor untuk melihat status pengaduan dan balasan admin bila sudah ada."
-        steps={["Form Cari Data"]}
-        activeStep={0}
-      />
+    <div className="w-full space-y-8">
+      {/* Modern Startup Header & Spotlight Search */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 dark:bg-[#0b1120] dark:shadow-none dark:ring-white/10 sm:p-12">
+        {/* Glow Effects */}
+        <div className="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[100px] dark:from-blue-600/20 dark:to-purple-600/20" />
+        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 blur-[100px] dark:from-cyan-500/20 dark:to-emerald-500/20" />
 
-      <form
-        onSubmit={formik.handleSubmit}
-        className="space-y-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-            Form Cari Data
-          </h2>
+        <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
+                <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
+                Operasional
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                Pusat Bantuan
+              </span>
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+              Lacak Tiket Pengaduan
+            </h1>
+            <p className="mt-4 text-lg font-medium text-slate-600 dark:text-slate-400">
+              Pantau status laporan dan tindak lanjut dari admin secara real-time. Masukkan nomor kontak terdaftar untuk melihat riwayat tiket.
+            </p>
+          </div>
+
           <button
             type="button"
             onClick={() => navigate("/digital-data/pengaduan")}
-            className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="group flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-700/80"
           >
-            ← Kembali
+            <FiArrowLeft className="transition group-hover:-translate-x-1" />
+            Kembali
           </button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <PrimeInputText
-              label="Kontak"
-              name="kontak"
-              formik={formik}
-              required
-              placeholder="Masukkan nomor kontak"
-              helperText="Gunakan nomor dengan format 62..."
-            />
+        {/* Spotlight Search Input */}
+        <form
+          onSubmit={formik.handleSubmit}
+          className="relative z-10 mt-10 max-w-3xl rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-900/5 transition-shadow focus-within:shadow-xl focus-within:ring-blue-500/50 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:ring-white/10 dark:focus-within:ring-blue-500/50 sm:flex sm:items-center sm:p-2.5"
+        >
+          <div className="flex-1 px-4 py-3 sm:py-0">
+            <label htmlFor="kontak" className="sr-only">Nomor Kontak</label>
+            <div className="relative flex items-center">
+              <FiSearch className="absolute left-0 text-slate-400 dark:text-slate-500 sm:text-xl" />
+              <input
+                id="kontak"
+                type="text"
+                {...formik.getFieldProps("kontak")}
+                placeholder="Cari menggunakan nomor (mis: 628...)"
+                className="w-full bg-transparent pl-8 sm:pl-10 outline-none text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500 sm:text-lg font-semibold"
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="flex justify-end border-t border-slate-200 pt-5 dark:border-slate-700">
           <button
             type="submit"
             disabled={isSearching}
-            className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-70 sm:mt-0 sm:w-auto"
           >
-            {isSearching ? "Mencari..." : "Cari Data"}
+            {isSearching ? (
+              <>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Mencari...
+              </>
+            ) : (
+              "Lacak Tiket"
+            )}
           </button>
-        </div>
-      </form>
+        </form>
+        {formik.touched.kontak && formik.errors.kontak && (
+          <p className="relative z-10 mt-3 pl-4 text-sm font-bold text-red-500">
+            {formik.errors.kontak}
+          </p>
+        )}
+      </div>
 
       {searched ? (
         results.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-8 lg:grid-cols-2">
             {results.map((record, index) => {
               const showReply = shouldShowReply(record);
+              const isResolved = record.status_pengaduan?.toLowerCase() === "selesai" || record.status_pengaduan?.toLowerCase() === "resolved";
 
               return (
                 <div
                   key={`${record.uuid ?? record.id ?? index}`}
-                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-white shadow-lg ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-[#0f172a] dark:ring-white/10"
                 >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-slate-100 p-8 dark:border-slate-800/60">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">
-                        Pengaduan
-                      </p>
-                      <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
-                        {record.subjek ?? "Tanpa subjek"}
+                      <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        <FiTag /> Pengaduan
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 dark:text-white line-clamp-2">
+                        {record.subjek ?? "Tanpa Subjek"}
                       </h3>
                     </div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                      {record.status_pengaduan ?? "-"}
-                    </span>
+                    {/* Status Badge */}
+                    <div className="shrink-0">
+                      {isResolved ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-emerald-600 ring-1 ring-inset ring-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Selesai
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-amber-600 ring-1 ring-inset ring-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" /> {record.status_pengaduan ?? "Menunggu"}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        Nama lengkap
-                      </p>
-                      <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.nama_lengkap ?? "-"}
-                      </p>
+                  <div className="flex-1 p-8">
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Nama Lengkap
+                        </p>
+                        <p className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-200">
+                          {record.nama_lengkap ?? "-"}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Kontak
+                        </p>
+                        <p className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-200">
+                          {record.kontak ?? "-"}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Jenis Pengaduan
+                        </p>
+                        <p className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-200">
+                          {record.jenis_pengaduan ?? "-"}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                          Kelompok
+                        </p>
+                        <p className="mt-1.5 text-sm font-bold text-slate-900 dark:text-slate-200">
+                          {record.nama_kelompok ?? "-"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        Kontak
+
+                    <div className="mt-8 rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/40">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        Isi Pengaduan
                       </p>
-                      <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.kontak ?? "-"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        Jenis pengaduan
-                      </p>
-                      <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.jenis_pengaduan ?? "-"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        Kelompok
-                      </p>
-                      <p className="mt-2 font-semibold text-slate-900 dark:text-white">
-                        {record.nama_kelompok ?? "-"}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/60 sm:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                        Isi pengaduan
-                      </p>
-                      <p className="mt-2 whitespace-pre-wrap font-semibold text-slate-900 dark:text-white">
+                      <p className="mt-3 whitespace-pre-wrap text-sm font-semibold leading-relaxed text-slate-700 dark:text-slate-300">
                         {record.isi_pengaduan ?? "-"}
                       </p>
                     </div>
-                  </div>
 
-                  {showReply ? (
-                    <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-                        Balasan admin
-                      </p>
-                      <p className="mt-2 whitespace-pre-wrap text-sm font-medium text-emerald-950 dark:text-emerald-100">
-                        {record.balasan_admin ?? "-"}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-emerald-700 dark:text-emerald-300">
-                        <span>
-                          Dibalas oleh:{" "}
-                          {record.dibalas_oleh_user?.nama_lengkap ?? "-"}
-                        </span>
-                        <span>Tanggal: {record.tanggal_dibalas ?? "-"}</span>
+                    {showReply && (
+                      <div className="mt-6 rounded-2xl bg-emerald-50 p-6 ring-1 ring-emerald-500/20 dark:bg-emerald-500/10 dark:ring-emerald-500/20">
+                        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-emerald-200/50 pb-4 dark:border-emerald-800/50">
+                          <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                            <FiMessageSquare /> Balasan Admin
+                          </p>
+                          <span className="text-xs font-bold text-emerald-600/80 dark:text-emerald-500/80">
+                            {record.tanggal_dibalas ?? "-"}
+                          </span>
+                        </div>
+                        <p className="whitespace-pre-wrap text-sm font-bold leading-relaxed text-emerald-900 dark:text-emerald-100">
+                          {record.balasan_admin ?? "-"}
+                        </p>
+                        <div className="mt-5 flex items-center gap-2 text-xs font-bold text-emerald-700/80 dark:text-emerald-400/80">
+                          <FiUser /> {record.dibalas_oleh_user?.nama_lengkap ?? "Admin"}
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-            Data pengaduan tidak ditemukan.
+          <div className="flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-200 bg-white py-20 px-6 text-center dark:border-slate-800 dark:bg-[#0b1120]">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-300 dark:bg-slate-800/50 dark:text-slate-600">
+              <FiSearch className="text-4xl" />
+            </div>
+            <h3 className="mt-6 text-2xl font-black text-slate-900 dark:text-white">
+              Tidak Ada Tiket
+            </h3>
+            <p className="mt-3 max-w-md text-base font-medium text-slate-500 dark:text-slate-400">
+              Data tiket pengaduan dengan nomor kontak tersebut tidak ditemukan. Silakan periksa kembali nomor Anda.
+            </p>
           </div>
         )
       ) : null}

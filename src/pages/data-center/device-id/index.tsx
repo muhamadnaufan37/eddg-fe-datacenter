@@ -62,16 +62,16 @@ const DeviceIdPage = () => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-r from-sky-600 via-cyan-500 to-blue-600" />
+    <div className="relative w-full overflow-hidden rounded-4xl border-2 border-[#cbdcf5] bg-white shadow-sm dark:border-[#526d82] dark:bg-[#27374d]">
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-r from-[#2373f4] via-[#578ef5] to-[#65d0f4]" />
       <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
       <div className="relative px-5 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-2xl text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/75">
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-white/90">
               Utility
             </p>
-            <h1 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl">
+            <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
               Device ID Checker
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
@@ -84,7 +84,7 @@ const DeviceIdPage = () => {
             <button
               type="button"
               onClick={loadDeviceInfo}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#2373f4] shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               <FiRefreshCcw className="h-4 w-4" />
               Refresh Device ID
@@ -100,16 +100,16 @@ const DeviceIdPage = () => {
         </div>
 
         <div className="mt-8 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-950/40 sm:p-6">
+          <div className="rounded-[1.75rem] border-2 border-[#cbdcf5] bg-[#edf2f9] p-5 dark:border-[#526d82] dark:bg-[#1c2736] sm:p-6">
             <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-600/25">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2373f4] text-white shadow-lg shadow-[#2373f4]/25">
                 <FiSmartphone className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-600 dark:text-sky-400">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#2373f4] dark:text-[#65d0f4]">
                   Device UUID
                 </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm font-medium text-slate-500 dark:text-[#9db2bf]">
                   Salin dan gunakan untuk pengecekan perangkat.
                 </p>
               </div>

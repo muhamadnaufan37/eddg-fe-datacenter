@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap");
 
 @import "tailwindcss/theme" layer(tailwind-base);
 @import "tailwindcss/preflight" layer(tailwind-base);
@@ -9,6 +9,32 @@
 
 @theme {
   --color-scheme: light dark;
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Sky color ramp mapped to user's recommended blues & cyans */
+  --color-sky-50: #f0f7ff;
+  --color-sky-100: #e0effe;
+  --color-sky-200: #badcfe;
+  --color-sky-300: #65d0f4;
+  --color-sky-400: #578ef5;
+  --color-sky-500: #2373f4;
+  --color-sky-600: #2373f4;
+  --color-sky-700: #1b5ecc;
+  --color-sky-800: #184da3;
+  --color-sky-900: #173f82;
+
+  /* User Specified Light Mode Tokens */
+  --color-brand-primary: #2373f4;
+  --color-brand-secondary: #578ef5;
+  --color-brand-cyan: #65d0f4;
+  --color-brand-lime: #f2f7a0;
+
+  /* User Specified Dark Mode Tokens */
+  --color-dc-navy: #27374d;
+  --color-dc-slate: #526d82;
+  --color-dc-muted: #9db2bf;
+  --color-dc-ice: #dde6ed;
 }
 
 @variant dark (&:is(.dark *));
@@ -24,26 +50,46 @@
   }
 }
 
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.06);
+  }
+}
+
 .animate-slide-down {
   animation: slide-down 0.3s ease-out;
 }
 
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 :root {
-  font-family: "Roboto", sans-serif;
+  font-family: "Poppins", sans-serif;
   color-scheme: light;
-  --app-bg: #f8fafc;
+  /* Tangible contrast background so cards are not washed out / bening */
+  --app-bg: #edf2f9;
   --app-surface: #ffffff;
   --app-surface-elevated: #ffffff;
-  --app-surface-muted: #f1f5f9;
-  --app-border: #dbe3ee;
+  --app-surface-muted: #e2ecf8;
+  --app-border: #cbdcf5;
+  --app-border-hover: #2373f4;
   --app-text: #0f172a;
   --app-text-muted: #475569;
-  --app-primary: #0ea5e9;
-  --app-primary-strong: #0284c7;
+  --app-primary: #2373f4;
+  --app-primary-strong: #195ac7;
   --app-primary-contrast: #ffffff;
-  --app-hover: #e0f2fe;
-  --app-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
-  --app-overlay: rgba(15, 23, 42, 0.55);
+  --app-secondary: #578ef5;
+  --app-cyan: #65d0f4;
+  --app-highlight: #f2f7a0;
+  --app-hover: #e8f1fc;
+  --app-shadow: 0 10px 30px rgba(35, 115, 244, 0.08);
+  --app-overlay: rgba(15, 23, 42, 0.6);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -54,19 +100,23 @@
 :root.dark,
 .dark {
   color-scheme: dark;
-  --app-bg: #020617;
-  --app-surface: #0f172a;
-  --app-surface-elevated: #111827;
-  --app-surface-muted: #1e293b;
-  --app-border: #334155;
-  --app-text: #e2e8f0;
-  --app-text-muted: #94a3b8;
-  --app-primary: #38bdf8;
-  --app-primary-strong: #0ea5e9;
-  --app-primary-contrast: #020617;
-  --app-hover: #1e293b;
-  --app-shadow: 0 24px 48px rgba(2, 6, 23, 0.55);
-  --app-overlay: rgba(2, 6, 23, 0.72);
+  --app-bg: #1c2736;
+  --app-surface: #27374d;
+  --app-surface-elevated: #31445e;
+  --app-surface-muted: #212f42;
+  --app-border: #526d82;
+  --app-border-hover: #65d0f4;
+  --app-text: #dde6ed;
+  --app-text-muted: #9db2bf;
+  --app-primary: #578ef5;
+  --app-primary-strong: #2373f4;
+  --app-primary-contrast: #ffffff;
+  --app-secondary: #526d82;
+  --app-cyan: #65d0f4;
+  --app-highlight: #f2f7a0;
+  --app-hover: #33465e;
+  --app-shadow: 0 20px 45px rgba(10, 18, 30, 0.6);
+  --app-overlay: rgba(15, 23, 42, 0.75);
 }
 
 html,
@@ -75,25 +125,52 @@ body,
   min-height: 100%;
 }
 
+*,
+*::before,
+*::after,
+html,
+body,
+input,
+button,
+select,
+textarea,
 .p-component {
-  font-family: "Roboto", sans-serif !important;
+  font-family: "Poppins", sans-serif !important;
 }
 
-body {
-  background: var(--app-bg);
-  color: var(--app-text);
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
+@layer tailwind-base {
+  body {
+    background: var(--app-bg);
+    color: var(--app-text);
+    transition:
+      background-color 220ms ease,
+      color 220ms ease;
+  }
+
+  a {
+    font-weight: 500;
+    color: var(--app-primary);
+    text-decoration: inherit;
+    transition: color 150ms ease;
+  }
+  a:hover {
+    color: var(--app-secondary);
+  }
 }
 
-a {
-  font-weight: 500;
-  color: var(--app-primary-strong);
-  text-decoration: inherit;
+/* Data Center Grid Pattern Overlay */
+.dc-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(35, 115, 244, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(35, 115, 244, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
-a:hover {
-  color: var(--app-primary);
+
+.dark .dc-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(101, 208, 244, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(101, 208, 244, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 .p-inputtext,
@@ -105,6 +182,7 @@ a:hover {
   background: var(--app-surface);
   color: var(--app-text);
   border-color: var(--app-border);
+  font-family: "Poppins", sans-serif !important;
 }
 
 .p-inputtext:enabled:focus,
@@ -114,16 +192,19 @@ a:hover {
 .p-dropdown.p-focus,
 .p-multiselect.p-focus {
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-primary) 16%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-primary) 18%, transparent);
 }
 
 .p-button {
   border-radius: 1rem;
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 600;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
     color 150ms ease,
-    box-shadow 150ms ease;
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
 .p-button:not(.p-button-text):not(.p-button-outlined) {
@@ -135,6 +216,7 @@ a:hover {
 .p-button:not(.p-button-text):not(.p-button-outlined):enabled:hover {
   background: var(--app-primary-strong);
   border-color: var(--app-primary-strong);
+  transform: translateY(-1px);
 }
 
 .p-button.p-button-text,
@@ -154,6 +236,7 @@ a:hover {
   color: var(--app-text);
   border: 1px solid var(--app-border);
   box-shadow: var(--app-shadow);
+  font-family: "Poppins", sans-serif !important;
 }
 
 .p-toast .p-toast-message .p-toast-message-content {
@@ -169,7 +252,7 @@ a:hover {
 }
 
 .p-toast .p-toast-message.p-toast-message-info {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #2373f4;
 }
 
 .p-toast .p-toast-message.p-toast-message-warn {
@@ -217,18 +300,8 @@ a:hover {
   max-width: 20rem !important;
 }
 
-.p-toast .p-toast-message.p-toast-message-error {
-  border-radius: 12px !important;
-}
-
-.p-toast .p-toast-message.p-toast-message-success {
-  border-radius: 12px !important;
-}
-
-.p-toast .p-toast-message.p-toast-message-success {
-  border-radius: 12px !important;
-}
-
+.p-toast .p-toast-message.p-toast-message-error,
+.p-toast .p-toast-message.p-toast-message-success,
 .p-toast .p-toast-message.p-toast-message-warn {
   border-radius: 12px !important;
 }
@@ -245,8 +318,8 @@ a:hover {
 
 .dark .activity-dialog .p-dialog-content,
 .dark .activity-dialog .p-dialog-header {
-  background: #212121;
-  color: #ffffff;
+  background: #27374d;
+  color: #dde6ed;
 }
 
 @media (max-width: 768px) {

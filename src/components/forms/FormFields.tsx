@@ -61,18 +61,18 @@ interface CommonFieldProps {
 }
 
 const fieldShell =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
+  "w-full rounded-2xl border-2 border-[#cbdcf5] bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#2373f4] focus:ring-4 focus:ring-[#2373f4]/15 dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#dde6ed] dark:placeholder:text-[#9db2bf]/70 dark:focus:border-[#65d0f4] dark:focus:ring-[#65d0f4]/20";
 
-const fieldError = "mt-1 text-xs font-medium text-rose-600 dark:text-rose-400";
+const fieldError = "mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400";
 
 const fieldLabel =
-  "mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200";
+  "mb-2 block text-sm font-bold text-slate-800 dark:text-[#dde6ed]";
 
 const primeFieldClass =
-  "w-full p-inputtext-sm rounded-2xl border border-slate-200 bg-slate-50 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500";
+  "w-full p-inputtext-sm rounded-2xl border-2 border-[#cbdcf5] bg-[#f8fafd] text-xs font-medium text-slate-900 shadow-2xs outline-none transition placeholder:text-slate-400 focus:border-[#2373f4] focus:bg-white focus:ring-4 focus:ring-[#2373f4]/15 dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#dde6ed] dark:placeholder:text-[#9db2bf]/70 dark:focus:border-[#65d0f4] dark:focus:ring-[#65d0f4]/20";
 
 const primeFieldErrorClass =
-  "border-rose-500 focus:border-rose-500 focus:ring-rose-500/10 dark:border-rose-400";
+  "border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 dark:border-rose-400";
 
 const shouldShowError = (formik: FormikBag, name: string) => {
   return Boolean(getIn(formik.touched, name) || formik.submitCount > 0);
@@ -372,20 +372,25 @@ export const StepperHeader = ({
   activeStep,
 }: StepperHeaderProps) => {
   return (
-    <div className="space-y-6 rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/90 sm:p-6">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">
-          Data Center
-        </p>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+    <div className="space-y-6 rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d] sm:p-7">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="rounded-md border border-[#cbdcf5] bg-[#edf2f9] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider text-[#2373f4] dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#65d0f4]">
+            DATA CENTER HUB
+          </span>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#2373f4] dark:text-[#65d0f4]">
+            Modul Operasi
+          </p>
+        </div>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-[#dde6ed] sm:text-3xl">
           {title}
         </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+        <p className="max-w-3xl text-sm font-medium leading-relaxed text-slate-600 dark:text-[#9db2bf]">
           {description}
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
         {steps.map((step, index) => {
           const isActive = index === activeStep;
           const isDone = index < activeStep;
@@ -393,30 +398,34 @@ export const StepperHeader = ({
           return (
             <div key={step} className="flex flex-1 items-center gap-3">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-bold transition ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-2 text-sm font-extrabold transition shadow-xs ${
                   isDone
                     ? "border-emerald-500 bg-emerald-500 text-white"
                     : isActive
-                      ? "border-sky-500 bg-sky-500 text-white"
-                      : "border-slate-300 bg-slate-100 text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                      ? "border-[#2373f4] bg-[#2373f4] text-white shadow-md shadow-[#2373f4]/25"
+                      : "border-[#cbdcf5] bg-[#edf2f9] text-slate-500 dark:border-[#526d82] dark:bg-[#1c2736] dark:text-[#9db2bf]"
                 }`}
               >
                 {index + 1}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p
-                  className={`text-sm font-semibold ${
+                  className={`text-sm font-bold ${
                     isActive || isDone
-                      ? "text-slate-900 dark:text-white"
-                      : "text-slate-500 dark:text-slate-400"
+                      ? "text-slate-900 dark:text-[#dde6ed]"
+                      : "text-slate-500 dark:text-[#9db2bf]"
                   }`}
                 >
                   {step}
                 </p>
-                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      isDone || isActive ? "bg-sky-500" : "bg-transparent"
+                      isDone
+                        ? "bg-emerald-500"
+                        : isActive
+                          ? "bg-[#2373f4]"
+                          : "bg-transparent"
                     }`}
                     style={{ width: isDone ? "100%" : isActive ? "65%" : "0%" }}
                   />
@@ -631,6 +640,7 @@ interface PrimeSelectProps extends CommonFieldProps {
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
+  filterOption?: any;
   onInputChange?: (
     newValue: string,
     actionMeta: InputActionMeta,
@@ -650,6 +660,7 @@ export const PrimeSelect = ({
   isSearchable = true,
   isLoading = false,
   disabled = false,
+  filterOption,
   placeholder = "Pilih opsi",
   noOptionsMessage = "Tidak ada opsi tersedia",
   onInputChange,
@@ -664,11 +675,11 @@ export const PrimeSelect = ({
   const selectedOption = useMemo(() => {
     if (isMulti && Array.isArray(value)) {
       return value
-        .map((v) => options.find((opt) => opt.value === v))
+        .map((v) => options.find((opt) => opt.value === v) || { label: String(v), value: String(v) })
         .filter(Boolean) as ReactSelectOption[];
     }
 
-    return options.find((opt) => opt.value === value) || null;
+    return options.find((opt) => opt.value === value) || (value ? { label: String(value), value: String(value) } : null);
   }, [value, options, isMulti]);
 
   const selectStyles = useMemo<StylesConfig<ReactSelectOption, boolean>>(
@@ -677,16 +688,19 @@ export const PrimeSelect = ({
         ...base,
         minHeight: "44px",
         borderRadius: "1rem",
+        borderWidth: "2px",
         borderColor: hasError
           ? "#ef4444"
           : state.isFocused
-            ? "#0ea5e9"
+            ? isDarkMode
+              ? "#65d0f4"
+              : "#2373f4"
             : isDarkMode
-              ? "#334155"
-              : "#cbd5e1",
-        backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+              ? "#526d82"
+              : "#cbdcf5",
+        backgroundColor: isDarkMode ? "#1c2736" : "#ffffff",
         boxShadow: state.isFocused
-          ? `0 0 0 4px ${isDarkMode ? "rgba(56, 189, 248, 0.15)" : "rgba(14, 165, 233, 0.12)"}`
+          ? `0 0 0 4px ${isDarkMode ? "rgba(101, 208, 244, 0.18)" : "rgba(35, 115, 244, 0.15)"}`
           : "none",
         opacity: disabled ? 0.72 : 1,
         transition: "all 150ms ease",
@@ -695,9 +709,11 @@ export const PrimeSelect = ({
             ? "#ef4444"
             : disabled
               ? isDarkMode
-                ? "#334155"
-                : "#cbd5e1"
-              : "#0ea5e9",
+                ? "#526d82"
+                : "#cbdcf5"
+              : isDarkMode
+                ? "#65d0f4"
+                : "#2373f4",
         },
       }),
       valueContainer: (base) => ({
@@ -706,30 +722,33 @@ export const PrimeSelect = ({
       }),
       singleValue: (base) => ({
         ...base,
-        color: isDarkMode ? "#e2e8f0" : "#0f172a",
+        color: isDarkMode ? "#dde6ed" : "#0f172a",
+        fontWeight: 600,
       }),
       input: (base) => ({
         ...base,
-        color: isDarkMode ? "#e2e8f0" : "#0f172a",
+        color: isDarkMode ? "#dde6ed" : "#0f172a",
+        fontWeight: 500,
       }),
       placeholder: (base) => ({
         ...base,
-        color: isDarkMode ? "#94a3b8" : "#64748b",
+        color: isDarkMode ? "#9db2bf" : "#94a3b8",
+        fontWeight: 400,
       }),
       indicatorSeparator: (base) => ({
         ...base,
-        backgroundColor: isDarkMode ? "#334155" : "#cbd5e1",
+        backgroundColor: isDarkMode ? "#526d82" : "#cbdcf5",
       }),
       dropdownIndicator: (base, state) => ({
         ...base,
-        color: state.isFocused ? "#0ea5e9" : isDarkMode ? "#94a3b8" : "#64748b",
+        color: state.isFocused ? (isDarkMode ? "#65d0f4" : "#2373f4") : isDarkMode ? "#9db2bf" : "#526d82",
         "&:hover": {
-          color: "#0ea5e9",
+          color: isDarkMode ? "#65d0f4" : "#2373f4",
         },
       }),
       clearIndicator: (base) => ({
         ...base,
-        color: isDarkMode ? "#94a3b8" : "#64748b",
+        color: isDarkMode ? "#9db2bf" : "#526d82",
         "&:hover": {
           color: "#ef4444",
         },
@@ -740,11 +759,36 @@ export const PrimeSelect = ({
         marginTop: "0.5rem",
         overflow: "hidden",
         borderRadius: "1rem",
-        border: `1px solid ${isDarkMode ? "#334155" : "#e2e8f0"}`,
-        backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+        border: `2px solid ${isDarkMode ? "#526d82" : "#cbdcf5"}`,
+        backgroundColor: isDarkMode ? "#27374d" : "#ffffff",
         boxShadow: isDarkMode
-          ? "0 24px 48px rgba(2, 6, 23, 0.55)"
-          : "0 24px 48px rgba(15, 23, 42, 0.12)",
+          ? "0 24px 48px rgba(10, 18, 30, 0.7)"
+          : "0 24px 48px rgba(35, 115, 244, 0.12)",
+      }),
+      option: (base, state) => ({
+        ...base,
+        borderRadius: "0.75rem",
+        margin: "0.125rem 0",
+        backgroundColor: state.isSelected
+          ? isDarkMode
+            ? "#578ef5"
+            : "#2373f4"
+          : state.isFocused
+            ? isDarkMode
+              ? "#33465e"
+              : "#edf2f9"
+            : "transparent",
+        color: state.isSelected
+          ? "#ffffff"
+          : isDarkMode
+            ? "#dde6ed"
+            : "#0f172a",
+        fontWeight: state.isSelected ? 600 : 500,
+        cursor: state.isDisabled ? "not-allowed" : "pointer",
+        padding: "0.625rem 1rem",
+        "&:active": {
+          backgroundColor: isDarkMode ? "#33465e" : "#e0effe",
+        },
       }),
       menuPortal: (base) => ({
         ...base,
@@ -753,33 +797,6 @@ export const PrimeSelect = ({
       menuList: (base) => ({
         ...base,
         padding: "0.5rem",
-      }),
-      option: (base, state) => ({
-        ...base,
-        borderRadius: "0.75rem",
-        margin: "0.125rem 0",
-        backgroundColor: state.isSelected
-          ? "#0ea5e9"
-          : state.isFocused
-            ? isDarkMode
-              ? "#1e293b"
-              : "#f1f5f9"
-            : isDarkMode
-              ? "#0f172a"
-              : "#ffffff",
-        color: state.isSelected
-          ? "#ffffff"
-          : isDarkMode
-            ? "#e2e8f0"
-            : "#0f172a",
-        cursor: state.isDisabled ? "not-allowed" : "pointer",
-        "&:active": {
-          backgroundColor: state.isSelected
-            ? "#0284c7"
-            : isDarkMode
-              ? "#334155"
-              : "#e2e8f0",
-        },
       }),
       multiValue: (base) => ({
         ...base,
@@ -840,6 +857,7 @@ export const PrimeSelect = ({
         isSearchable={isSearchable}
         isLoading={isLoading}
         isDisabled={disabled}
+        filterOption={filterOption !== undefined ? filterOption : (onInputChange ? () => true : undefined)}
         placeholder={placeholder}
         noOptionsMessage={() => noOptionsMessage}
         className="w-full"
