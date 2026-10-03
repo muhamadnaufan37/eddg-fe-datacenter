@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Toast } from "primereact/toast";
-import { Button } from "primereact/button";
 
 import {
   FiArrowLeft,
@@ -384,7 +383,7 @@ export default function ResultInfoPajakKendaraan() {
             {/* Mesh Gradients */}
             <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[80px]" />
             <div className="pointer-events-none absolute -bottom-20 -right-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 blur-[80px]" />
-            
+
             <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-md">
