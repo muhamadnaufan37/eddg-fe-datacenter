@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import viteCompression from "vite-plugin-compression";
 
 const copyHtaccessPlugin = () => {
   let projectRoot = process.cwd();
@@ -26,7 +27,7 @@ const copyHtaccessPlugin = () => {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), copyHtaccessPlugin()],
+  plugins: [react(), tailwindcss(), copyHtaccessPlugin(), viteCompression()],
   // Use absolute base so built assets are referenced from site root.
   // This avoids requests for ./assets/... under nested client routes
   // which can cause the server to return index.html (text/html).

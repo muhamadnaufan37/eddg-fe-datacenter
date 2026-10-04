@@ -182,7 +182,7 @@ const CaiShowPage = () => {
           {/* Executive Portfolio Header Dossier Card */}
           <div className="relative overflow-hidden rounded-3xl border border-[#578ef5]/50 bg-gradient-to-br from-[#2373f4] via-[#3a83f6] to-[#1b5ecc] p-6 text-white shadow-2xl shadow-[#2373f4]/20 dark:border-[#526d82]/50 dark:from-[#27374d] dark:via-[#2f435c] dark:to-[#1c2736] sm:p-8">
             <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-[#f2f7a0]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-cyan-400/15 blur-3xl" />
             <div className="pointer-events-none absolute bottom-0 right-1/3 h-64 w-64 rounded-full bg-[#65d0f4]/20 blur-3xl" />
 
             <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
@@ -216,23 +216,23 @@ const CaiShowPage = () => {
                 </div>
 
                 {/* Identity Info */}
-                <div className="flex flex-col items-center justify-center space-y-3 sm:items-start">
+                <div className="flex flex-col items-center justify-center space-y-3 sm:items-start text-center sm:text-left">
                   <div className="flex flex-wrap items-center justify-center gap-2.5 sm:justify-start">
-                    <span className="rounded-lg bg-[#f2f7a0] px-3 py-1 text-[10px] font-black tracking-widest text-[#1e293b] uppercase shadow-sm">
+                    <span className="rounded-lg bg-cyan-400 px-3 py-1 text-[10px] font-black tracking-widest text-[#1e293b] uppercase shadow-sm">
                       PESERTA CAI TERVERIFIKASI
                     </span>
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-white/95">
-                      <FiCheckCircle className="text-sm text-[#f2f7a0] dark:text-[#65d0f4]" />
+                      <FiCheckCircle className="text-sm text-cyan-300 dark:text-[#65d0f4]" />
                       Tahun Kegiatan: {record.tahun ?? currentYear}
                     </span>
                   </div>
 
-                  <h1 className="text-center text-2xl font-black tracking-tight text-white drop-shadow-md sm:text-left sm:text-3xl lg:text-4xl">
+                  <h1 className="text-2xl font-black tracking-tight text-white drop-shadow-md sm:text-3xl lg:text-4xl">
                     <Sensitive value={record.nama_lengkap ?? "Nama Peserta"} />
                   </h1>
 
                   <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-white/90 sm:justify-start">
-                    <span className="rounded-lg border border-black/10 bg-black/20 px-3 py-1.5 font-mono text-[#f2f7a0] backdrop-blur-sm dark:text-[#65d0f4]">
+                    <span className="rounded-lg border border-black/10 bg-black/20 px-3 py-1.5 font-mono text-cyan-300 backdrop-blur-sm dark:text-[#65d0f4]">
                       ID Peserta: {maskText(record.kode_cari_data ?? "-")}
                     </span>
                     {record.utusan && (
@@ -245,21 +245,21 @@ const CaiShowPage = () => {
               </div>
 
               {/* Status Chips Block */}
-              <div className="mt-2 grid w-full grid-cols-2 gap-2.5 sm:grid-cols-2 lg:mt-0 lg:w-auto lg:flex lg:flex-col lg:items-end">
-                <div className="col-span-1 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/20 p-2.5 text-center backdrop-blur-md lg:w-auto lg:min-w-[170px] lg:px-6 lg:py-2">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-white/80">
+              <div className="mt-4 grid w-full grid-cols-2 gap-3 sm:gap-4 md:mt-0 md:w-auto md:flex md:flex-col md:items-end">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/20 p-3 text-center backdrop-blur-md md:w-auto md:min-w-[180px] md:px-6 md:py-2.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
                     Status Keaktifan
                   </span>
-                  <span className="text-[13px] font-black text-[#f2f7a0] dark:text-[#65d0f4]">
+                  <span className="mt-1 text-sm font-black text-cyan-300 dark:text-[#65d0f4]">
                     {formatBooleanLabel(record.is_active)}
                   </span>
                 </div>
 
-                <div className="col-span-1 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/20 p-2.5 text-center backdrop-blur-md lg:w-auto lg:min-w-[170px] lg:px-6 lg:py-2">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-white/80">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/20 p-3 text-center backdrop-blur-md md:w-auto md:min-w-[180px] md:px-6 md:py-2.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
                     ID Card RFID
                   </span>
-                  <span className="font-mono text-[13px] font-black text-white">
+                  <span className="mt-1 font-mono text-sm font-black text-white">
                     {maskText(record.id_card || "-")}
                   </span>
                 </div>

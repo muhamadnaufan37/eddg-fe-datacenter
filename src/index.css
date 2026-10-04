@@ -148,13 +148,8 @@ textarea,
   }
 
   a {
-    font-weight: 500;
-    color: var(--app-primary);
     text-decoration: inherit;
     transition: color 150ms ease;
-  }
-  a:hover {
-    color: var(--app-secondary);
   }
 }
 

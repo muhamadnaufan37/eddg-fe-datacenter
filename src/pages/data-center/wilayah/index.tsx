@@ -221,42 +221,49 @@ const WilayahPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5 text-slate-900 dark:text-slate-100">
-      <section className="overflow-hidden rounded-3xl bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
-        <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <section className="relative overflow-hidden rounded-[2rem] bg-white p-8 text-slate-900 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 dark:bg-[#0b1120] dark:text-white dark:shadow-none dark:ring-white/10 sm:p-10">
+        {/* Glow Effects */}
+        <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-[80px] dark:from-blue-500/30 dark:to-purple-500/30" />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 blur-[80px] dark:from-cyan-500/30 dark:to-emerald-500/30" />
+        
+        <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-2xl">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="group mb-6 inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="group mb-8 inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
             >
               <FiArrowLeft className="transition group-hover:-translate-x-1" />
               Kembali
             </button>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-800 dark:text-cyan-300">
-              Referensi Wilayah
-            </p>
-            <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
-              Jelajahi wilayah
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-blue-600 backdrop-blur-md dark:border-blue-200/20 dark:bg-blue-500/10 dark:text-blue-300">
+                <span className="h-2 w-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
+                Referensi Wilayah
+              </div>
+            </div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl drop-shadow-sm text-slate-900 dark:text-white">
+              Jelajahi Wilayah
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Telusuri data dari Daerah hingga Kelompok dan lihat informasi
-              lokasi yang tersedia.
+            <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-slate-600 dark:text-white/70">
+              Telusuri struktur data secara berjenjang mulai dari tingkat Daerah hingga Kelompok, serta dapatkan insight spasial mendetail.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          
+          <div className="grid grid-cols-3 gap-4 rounded-3xl border border-slate-200 bg-white/50 p-5 backdrop-blur-xl sm:gap-6 dark:border-white/10 dark:bg-white/5">
             {[
               { label: "Daerah", count: totals.daerah },
               { label: "Desa", count: totals.desa },
               { label: "Kelompok", count: totals.kelompok },
-            ].map((item) => (
+            ].map((item, idx) => (
               <div
                 key={item.label}
-                className="min-w-20 border-l border-slate-300 pl-3 first:border-0 first:pl-0 dark:border-white/20 sm:min-w-24 sm:pl-4"
+                className={`min-w-16 sm:min-w-20 ${idx > 0 ? "border-l border-slate-200 pl-4 sm:pl-6 dark:border-white/10" : ""}`}
               >
-                <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-white sm:text-2xl">
+                <p className="text-2xl font-black tabular-nums text-slate-900 sm:text-3xl dark:text-white">
                   {item.count}
                 </p>
-                <p className="text-xs text-slate-600 dark:text-slate-300">
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/50">
                   {item.label}
                 </p>
               </div>

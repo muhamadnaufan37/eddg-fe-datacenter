@@ -139,38 +139,43 @@ const PengaduanSearchPage = () => {
           </button>
         </div>
 
-        {/* Spotlight Search Input */}
+        {/* Interactive Spotlight Search Input */}
         <form
           onSubmit={formik.handleSubmit}
-          className="relative z-10 mt-10 max-w-3xl rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-900/5 transition-shadow focus-within:shadow-xl focus-within:ring-blue-500/50 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:ring-white/10 dark:focus-within:ring-blue-500/50 sm:flex sm:items-center sm:p-2.5"
+          className="group relative z-10 mt-10 max-w-3xl"
         >
-          <div className="flex-1 px-4 py-3 sm:py-0">
-            <label htmlFor="kontak" className="sr-only">Nomor Kontak</label>
-            <div className="relative flex items-center">
-              <FiSearch className="absolute left-0 text-slate-400 dark:text-slate-500 sm:text-xl" />
-              <input
-                id="kontak"
-                type="text"
-                {...formik.getFieldProps("kontak")}
-                placeholder="Cari menggunakan nomor (mis: 628...)"
-                className="w-full bg-transparent pl-8 sm:pl-10 outline-none text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500 sm:text-lg font-semibold"
-              />
+          <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-blue-500 via-cyan-500 to-emerald-500 opacity-20 blur-lg transition-opacity duration-500 group-focus-within:opacity-50 dark:opacity-30 dark:group-focus-within:opacity-70" />
+          <div className="relative flex flex-col rounded-3xl bg-white/90 p-2.5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/5 transition-all focus-within:ring-blue-500/50 dark:bg-[#0f172a]/90 dark:ring-white/10 dark:focus-within:ring-blue-500/50 sm:flex-row sm:items-center">
+            <div className="flex-1 px-4 py-3 sm:py-2">
+              <label htmlFor="kontak" className="sr-only">Nomor Kontak</label>
+              <div className="relative flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-focus-within:bg-blue-600 group-focus-within:text-white dark:bg-blue-500/10 dark:text-blue-400 dark:group-focus-within:bg-blue-500 dark:group-focus-within:text-white">
+                  <FiSearch className="text-xl" />
+                </div>
+                <input
+                  id="kontak"
+                  type="text"
+                  {...formik.getFieldProps("kontak")}
+                  placeholder="Ketik nomor kontak (mis: 628...)"
+                  className="w-full bg-transparent outline-none text-slate-900 placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500 text-lg sm:text-xl font-bold tracking-wide transition-all"
+                />
+              </div>
             </div>
+            <button
+              type="submit"
+              disabled={isSearching}
+              className="mt-2 flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:bg-blue-700 hover:shadow-blue-500/25 disabled:opacity-70 sm:mt-0 sm:w-auto dark:bg-blue-500 dark:hover:bg-blue-400"
+            >
+              {isSearching ? (
+                <>
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Mencari...
+                </>
+              ) : (
+                "Lacak Tiket"
+              )}
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={isSearching}
-            className="mt-4 flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-70 sm:mt-0 sm:w-auto"
-          >
-            {isSearching ? (
-              <>
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Mencari...
-              </>
-            ) : (
-              "Lacak Tiket"
-            )}
-          </button>
         </form>
         {formik.touched.kontak && formik.errors.kontak && (
           <p className="relative z-10 mt-3 pl-4 text-sm font-bold text-red-500">
@@ -189,7 +194,7 @@ const PengaduanSearchPage = () => {
               return (
                 <div
                   key={`${record.uuid ?? record.id ?? index}`}
-                  className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-white shadow-lg ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-[#0f172a] dark:ring-white/10"
+                  className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-white shadow-lg ring-1 ring-slate-900/5 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01] hover:shadow-2xl hover:shadow-blue-500/10 hover:ring-blue-500/20 dark:bg-[#0f172a] dark:ring-white/10 dark:hover:ring-blue-500/30"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-slate-100 p-8 dark:border-slate-800/60">
                     <div>

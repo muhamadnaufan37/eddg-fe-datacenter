@@ -106,20 +106,20 @@ const menus: MenuItem[] = [
   //   gradient: "from-[#578ef5] to-[#65d0f4]",
   //   accentColor: "#578ef5",
   // },
-  {
-    id: "sambara",
-    code: "SRV-06",
-    title: "SAMBARA (Pajak Kendaraan)",
-    category: "Layanan Tambahan",
-    description:
-      "Integrasi layanan cek informasi Pajak Kendaraan Bermotor (PKB) Jawa Barat secara langsung dan akurat.",
-    icon: <AiFillCar className="text-2xl" />,
-    path: "/digital-data/sambara/cek-pajak-kendaraan",
-    tags: ["Cek Pajak Jabar", "Info Kendaraan", "Nomor Polisi"],
-    status: "Active",
-    gradient: "from-[#2373f4] to-[#578ef5]",
-    accentColor: "#2373f4",
-  },
+  // {
+  //   id: "sambara",
+  //   code: "SRV-06",
+  //   title: "SAMBARA",
+  //   category: "Layanan Tambahan",
+  //   description:
+  //     "Integrasi layanan cek informasi Pajak Kendaraan Bermotor (PKB) Jawa Barat secara langsung dan akurat.",
+  //   icon: <AiFillCar className="text-2xl" />,
+  //   path: "/digital-data/sambara/cek-pajak-kendaraan",
+  //   tags: ["Cek Pajak Jabar", "Info Kendaraan", "Nomor Polisi"],
+  //   status: "Active",
+  //   gradient: "from-[#2373f4] to-[#578ef5]",
+  //   accentColor: "#2373f4",
+  // },
 ];
 
 const categories = [
@@ -138,6 +138,27 @@ const HomePage = () => {
   const [debounced, setDebounced] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua Layanan");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [latency, setLatency] = useState(12);
+  const [uptimeStr, setUptimeStr] = useState("99.98%");
+  const [activeNode, setActiveNode] = useState("DC-JKT-01");
+  const [activeConnections, setActiveConnections] = useState(1243);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setLatency(Math.floor(Math.random() * (25 - 12 + 1)) + 12);
+      setActiveConnections(Math.floor(Math.random() * (1350 - 1150 + 1)) + 1150);
+
+      const flip = Math.random();
+      if (flip > 0.95) setActiveNode("DC-BDG-01");
+      else if (flip > 0.9) setActiveNode("DC-SBY-02");
+      else setActiveNode("DC-JKT-01");
+
+      const uptimeFlip = Math.random();
+      if (uptimeFlip > 0.8) setUptimeStr("99.99%");
+      else setUptimeStr("99.98%");
+    }, 2000);
+    return () => clearInterval(t);
+  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -205,14 +226,14 @@ const HomePage = () => {
           <div className="pointer-events-none absolute -bottom-16 left-1/3 h-52 w-52 rounded-full bg-[#f2f7a0]/30 blur-2xl dark:bg-[#526d82]/30" />
 
           <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="space-y-4">
-              {/* Cluster Status Chip with #F2F7A0 accent */}
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/30 bg-[#f2f7a0] px-3.5 py-1.5 text-slate-900 shadow-sm dark:border-[#526d82] dark:bg-[#27374d] dark:text-[#dde6ed]">
+            <div className="flex flex-col items-start gap-5">
+              {/* Cluster Status Chip with updated colors */}
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/30 bg-white/20 backdrop-blur-sm px-3.5 py-1.5 text-white shadow-sm dark:border-white/10 dark:bg-black/30">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2373f4] opacity-75 dark:bg-[#65d0f4]" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2373f4] dark:bg-[#65d0f4]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300 opacity-75 dark:bg-cyan-400" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400 dark:bg-cyan-500" />
                 </span>
-                <span className="text-[11px] font-extrabold tracking-widest uppercase text-slate-900 dark:text-[#dde6ed]">
+                <span className="text-[11px] font-extrabold tracking-widest uppercase text-white">
                   SIPANDA CLUSTER v2.4 • HIGH AVAILABILITY HUB
                 </span>
               </div>
@@ -230,21 +251,21 @@ const HomePage = () => {
 
               {/* Telemetry quick badges */}
               <div className="flex flex-wrap items-center gap-2 pt-2 text-xs font-semibold text-white">
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10">
-                  <FiServer className="text-[#f2f7a0] dark:text-[#65d0f4]" />
-                  <span>Node: DC-JKT-01</span>
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10 transition-all duration-300">
+                  <FiServer className="text-cyan-300 dark:text-cyan-400" />
+                  <span>Node: {activeNode}</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10">
-                  <FiZap className="text-[#f2f7a0] dark:text-[#65d0f4]" />
-                  <span>Latency: &lt; 15ms</span>
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10 transition-all duration-300">
+                  <FiZap className="text-cyan-300 dark:text-cyan-400" />
+                  <span>Latency: {latency}ms</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10">
-                  <FiShield className="text-[#f2f7a0] dark:text-[#65d0f4]" />
-                  <span>TLS 1.3 End-to-End</span>
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10 transition-all duration-300">
+                  <FiShield className="text-cyan-300 dark:text-cyan-400" />
+                  <span>Conn: {activeConnections.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10">
-                  <FiActivity className="text-[#f2f7a0] dark:text-[#65d0f4]" />
-                  <span>Uptime: 99.98%</span>
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-black/25 px-3 py-1.5 backdrop-blur-xs dark:bg-white/10 transition-all duration-300">
+                  <FiActivity className="text-cyan-300 dark:text-cyan-400" />
+                  <span>Uptime: {uptimeStr}</span>
                 </div>
               </div>
             </div>
@@ -583,7 +604,7 @@ const HomePage = () => {
           <div className="grid gap-4 sm:grid-cols-3">
             {/* Feature 1 */}
             <div className="rounded-3xl border-2 border-[#cbdcf5] bg-white p-5 shadow-xs transition hover:border-[#2373f4] hover:shadow-md dark:border-[#526d82] dark:bg-[#27374d]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2373f4] text-white shadow-xs dark:bg-[#65d0f4] dark:text-[#1c2736]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fc] text-[#2373f4] shadow-xs dark:bg-[#1c2736] dark:text-[#65d0f4]">
                 <FiDatabase className="text-lg" />
               </div>
               <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-[#dde6ed]">
@@ -596,7 +617,7 @@ const HomePage = () => {
 
             {/* Feature 2 */}
             <div className="rounded-3xl border-2 border-[#cbdcf5] bg-white p-5 shadow-xs transition hover:border-[#2373f4] hover:shadow-md dark:border-[#526d82] dark:bg-[#27374d]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#578ef5] text-white shadow-xs dark:bg-[#578ef5] dark:text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fc] text-[#2373f4] shadow-xs dark:bg-[#1c2736] dark:text-[#65d0f4]">
                 <FiCpu className="text-lg" />
               </div>
               <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-[#dde6ed]">
@@ -609,7 +630,7 @@ const HomePage = () => {
 
             {/* Feature 3 */}
             <div className="rounded-3xl border-2 border-[#cbdcf5] bg-white p-5 shadow-xs transition hover:border-[#2373f4] hover:shadow-md dark:border-[#526d82] dark:bg-[#27374d]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#65d0f4] text-[#1c2736] shadow-xs dark:bg-[#65d0f4] dark:text-[#1c2736]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fc] text-[#2373f4] shadow-xs dark:bg-[#1c2736] dark:text-[#65d0f4]">
                 <FiShield className="text-lg" />
               </div>
               <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-[#dde6ed]">

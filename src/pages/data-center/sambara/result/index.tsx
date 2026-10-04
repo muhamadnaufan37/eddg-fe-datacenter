@@ -379,25 +379,25 @@ export default function ResultInfoPajakKendaraan() {
       ) : (
         <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6">
           {/* Header Dashboard Banner */}
-          <div className="relative overflow-hidden rounded-[2rem] bg-[#0b1120] p-8 text-white shadow-2xl ring-1 ring-white/10 sm:p-10">
+          <div className="relative overflow-hidden rounded-[2rem] bg-white p-8 text-slate-900 shadow-xl ring-1 ring-slate-900/5 transition-colors dark:bg-[#0b1120] dark:text-white dark:shadow-2xl dark:ring-white/10 sm:p-10">
             {/* Mesh Gradients */}
-            <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[80px]" />
-            <div className="pointer-events-none absolute -bottom-20 -right-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 blur-[80px]" />
+            <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-[80px] dark:from-blue-500/30 dark:to-purple-500/30" />
+            <div className="pointer-events-none absolute -bottom-20 -right-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 blur-[80px] dark:from-cyan-500/30 dark:to-emerald-500/30" />
 
             <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-md">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-blue-600 backdrop-blur-md dark:border-white/15 dark:bg-white/10 dark:text-white">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
                   Invoice Pajak Kendaraan
                 </div>
 
                 <div>
-                  <h1 className="text-4xl font-black tracking-tight sm:text-5xl drop-shadow-sm">
+                  <h1 className="text-4xl font-black tracking-tight drop-shadow-sm sm:text-5xl">
                     {isInspectOpen
                       ? "[Disamarkan saat inspeksi]"
                       : `${vehicle?.no_polisi1 ?? ""} ${vehicle?.no_polisi2 ?? ""} ${vehicle?.no_polisi3 ?? ""}`}
                   </h1>
-                  <p className="mt-3 max-w-2xl text-sm font-medium tracking-wide text-white/70">
+                  <p className="mt-3 max-w-2xl text-sm font-medium tracking-wide text-slate-600 dark:text-white/70">
                     {isInspectOpen
                       ? "[Disamarkan saat inspeksi]"
                       : `${vehicle?.nm_merek_kb ?? ""} • ${vehicle?.nm_model_kb ?? ""}`}
@@ -405,23 +405,23 @@ export default function ResultInfoPajakKendaraan() {
                 </div>
               </div>
 
-              <div className="grid min-w-[300px] gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:grid-cols-2">
+              <div className="grid min-w-[300px] gap-4 rounded-3xl border border-slate-200 bg-slate-50/50 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:grid-cols-2">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/50">
                     Status
                   </div>
-                  <div className="mt-2 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
+                  <div className="mt-2 inline-flex rounded-full border border-emerald-500/30 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
                     Data berhasil diproses
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/50">
                     Total Pembayaran
                   </div>
-                  <div className="mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                  <div className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">
                     {isInspectOpen ? (
-                      <span className="text-sm italic text-white/75">
+                      <span className="text-sm italic text-slate-500 dark:text-white/75">
                         [Disamarkan]
                       </span>
                     ) : (
@@ -520,19 +520,19 @@ export default function ResultInfoPajakKendaraan() {
                     ))}
                   </div>
 
-                  <div className="border-t border-slate-200/60 bg-slate-900 px-5 py-6 text-white dark:border-white/10 dark:bg-slate-950">
+                  <div className="border-t border-slate-200/60 bg-slate-50 px-5 py-6 text-slate-900 dark:border-white/10 dark:bg-slate-950 dark:text-white">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">
                           Total Pembayaran
                         </div>
-                        <div className="mt-1 text-xs text-white/40">
+                        <div className="mt-1 text-xs text-slate-400 dark:text-white/40">
                           Ringkasan nominal tagihan saat ini
                         </div>
                       </div>
-                      <div className="text-2xl font-black tracking-tight sm:text-3xl">
+                      <div className="text-2xl font-black tracking-tight sm:text-3xl text-slate-900 dark:text-white">
                         {isInspectOpen ? (
-                          <span className="text-sm italic text-white/70">
+                          <span className="text-sm italic text-slate-400 dark:text-white/70">
                             [Disamarkan]
                           </span>
                         ) : (
@@ -548,15 +548,15 @@ export default function ResultInfoPajakKendaraan() {
             <div className="flex flex-col gap-6 lg:sticky lg:top-6 lg:self-start">
               <InfoCard title="Invoice Summary" icon={<FiMapPin size={20} />}>
                 <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl bg-[#0b1120] p-6 text-white shadow-xl">
-                    <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-blue-500/40 blur-[40px]" />
+                  <div className="relative overflow-hidden rounded-2xl bg-white p-6 text-slate-900 shadow-xl ring-1 ring-slate-900/5 transition-colors dark:bg-[#0b1120] dark:text-white dark:shadow-2xl dark:ring-white/10">
+                    <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-blue-500/20 blur-[40px] dark:bg-blue-500/40" />
                     <div className="relative z-10">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">
                         Total Tagihan
                       </div>
-                      <div className="mt-2 text-3xl font-black tracking-tight">
+                      <div className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
                         {isInspectOpen ? (
-                          <span className="text-sm italic text-white/80">
+                          <span className="text-sm italic text-slate-500 dark:text-white/80">
                             [Disamarkan saat inspeksi]
                           </span>
                         ) : (

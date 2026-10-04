@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Formik, Form, Field, type FormikHelpers } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { Toast } from "primereact/toast";
 import { axiosServices } from "../../../services/axios";
-import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
+import { FiArrowLeft } from "react-icons/fi";
 import { useInspectContext } from "../../../contexts/InspectContext";
 
 export interface Root {
@@ -31,7 +31,6 @@ const CekPajakKendaraanPage = () => {
   const navigate = useNavigate();
 
   const toastRef = useRef<Toast>(null);
-  const [selectedOption, setSelectedOption] = useState("Hitam/Putih Pribadi");
 
   const input2Ref = useRef<HTMLInputElement>(null);
   const input1Ref = useRef<HTMLInputElement>(null);
@@ -109,240 +108,203 @@ const CekPajakKendaraanPage = () => {
   };
 
   const optionsDataProgresif = [
-    { value: "1", label: "Hitam/Putih Pribadi", short: "Hitam/Putih", color: "bg-slate-900", border: "border-slate-700", text: "text-white" },
-    { value: "2", label: "Merah Instansi", short: "Merah", color: "bg-red-600", border: "border-red-500", text: "text-white" },
-    { value: "3", label: "Kuning Umum", short: "Kuning", color: "bg-amber-400", border: "border-amber-500", text: "text-slate-900" },
+    { value: "1", label: "Pribadi (Hitam / Putih)" },
+    { value: "2", label: "Instansi (Merah)" },
+    { value: "3", label: "Umum (Kuning)" },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8">
-      {/* Modern Startup Header & Search Interface */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 dark:bg-[#0b1120] dark:shadow-none dark:ring-white/10 sm:p-12">
-        {/* Glow Effects */}
-        <div className="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[100px] dark:from-blue-600/20 dark:to-purple-600/20" />
-        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 blur-[100px] dark:from-cyan-500/20 dark:to-emerald-500/20" />
+    <div className="mx-auto w-full max-w-3xl space-y-8">
+      {/* Sleek Minimalist Header */}
+      <div className="flex flex-col gap-4 text-center">
+        <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+          Cek Pajak Kendaraan
+        </h1>
+        <p className="mx-auto max-w-xl text-sm font-medium text-slate-500 dark:text-slate-400 sm:text-base">
+          Akses informasi pajak kendaraan bermotor (PKB) secara real-time. Masukkan nomor registrasi dan wilayah untuk melihat rincian tagihan, kendaraan yang terdaftar hanya untuk wilayah jawa barat.
+        </p>
+      </div>
 
-        <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-6 flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
-                <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
-                Tax Integration
-              </span>
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                Sambara
-              </span>
-            </div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
-              Cek Pajak Kendaraan
-            </h1>
-            <p className="mt-4 text-lg font-medium text-slate-600 dark:text-slate-400">
-              Integrasi langsung untuk memeriksa informasi pajak kendaraan bermotor. Masukkan nomor registrasi dan pilih jenis plat di bawah ini.
-            </p>
-          </div>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        validateOnChange={true}
+        validateOnBlur={true}
+      >
+        {({ errors, touched, isSubmitting, values, setFieldValue }) => {
+          const { isInspectOpen } = useInspectContext();
 
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="group flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-700/80"
-          >
-            <FiArrowLeft className="transition group-hover:-translate-x-1" />
-            Kembali
-          </button>
-        </div>
+          useEffect(() => {
+            if (!values.kd_plat) {
+              setFieldValue("kd_plat", "1");
+            }
+          }, [setFieldValue, values.kd_plat]);
 
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-          validateOnChange={true}
-          validateOnBlur={true}
-        >
-          {({ errors, touched, isSubmitting, values, setFieldValue }) => {
-            const { isInspectOpen } = useInspectContext();
-            
-            useEffect(() => {
-              const defaultOption = optionsDataProgresif.find(
-                (opt) => opt.value === "1",
-              );
-              if (defaultOption && !values.kd_plat) {
-                setSelectedOption(defaultOption.label);
-                setFieldValue("kd_plat", defaultOption.value);
-              }
-            }, [setFieldValue, values.kd_plat]);
+          return (
+            <>
+              <Toast ref={toastRef} />
+              <Form className="relative z-10 mx-auto max-w-2xl">
+                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/40 transition-all dark:border-slate-800 dark:bg-[#0f172a] dark:shadow-none">
 
-            return (
-              <>
-                <Toast ref={toastRef} />
-                <Form className="relative z-10 mt-10">
-                  <div className="rounded-[2rem] bg-white/50 p-6 shadow-lg ring-1 ring-slate-900/5 backdrop-blur-xl dark:bg-slate-900/50 dark:ring-white/10 sm:p-8">
-                    
-                    <div className="grid gap-10 lg:grid-cols-[1fr_auto]">
-                      {/* Left: Plate Input Section */}
-                      <div className="space-y-4">
-                        <label className="text-xs font-black tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-                          Nomor Registrasi Kendaraan
-                        </label>
-                        
-                        <div className={`relative flex items-center justify-between gap-2 sm:gap-4 rounded-[1.5rem] p-4 sm:p-6 shadow-inner transition-colors duration-300 ${
-                          values?.kd_plat === "1" ? "bg-slate-900 ring-4 ring-slate-900/20" :
-                          values?.kd_plat === "2" ? "bg-red-600 ring-4 ring-red-600/20" :
-                          values?.kd_plat === "3" ? "bg-amber-400 ring-4 ring-amber-400/20" :
-                          "bg-slate-900 ring-4 ring-slate-900/20"
-                        }`}>
-                          {/* Inner Border mimicking a physical license plate */}
-                          <div className={`pointer-events-none absolute inset-2 rounded-xl border-2 ${
-                            values?.kd_plat === "1" || values?.kd_plat === "2" ? "border-white/20" :
-                            values?.kd_plat === "3" ? "border-black/20" : "border-white/20"
-                          }`} />
+                  <div className="p-6 sm:p-8 space-y-8">
+                    {/* Input Section */}
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                        Nomor Polisi (NRKB)
+                      </label>
+                      {(() => {
+                        const getPlateColors = () => {
+                          switch (values.kd_plat) {
+                            case "2":
+                              return {
+                                wrapper: "border-red-700 bg-red-600 dark:border-red-800",
+                                input: "text-white placeholder-white/40",
+                                footer: "border-black/20 bg-red-700/80 text-white/60",
+                              };
+                            case "3":
+                              return {
+                                wrapper: "border-yellow-600 bg-yellow-400 dark:border-yellow-700",
+                                input: "text-slate-900 placeholder-slate-900/30",
+                                footer: "border-black/10 bg-yellow-500/50 text-slate-900/60",
+                              };
+                            case "1":
+                            default:
+                              return {
+                                wrapper: "border-slate-300 bg-white dark:border-slate-400 dark:bg-slate-100",
+                                input: "text-slate-900 placeholder-slate-300",
+                                footer: "border-slate-900/10 bg-slate-100 text-slate-900/40 dark:bg-slate-200",
+                              };
+                          }
+                        };
+                        const pColor = getPlateColors();
 
-                          {/* Prefix Letter */}
-                          <Field name="no_polisi1">
-                            {({ field }: any) => {
-                              const display = isInspectOpen ? "" : field.value;
-                              return (
-                                <input
-                                  id="no_polisi1"
-                                  maxLength={2}
-                                  ref={input1Ref}
-                                  value={display}
-                                  readOnly={isInspectOpen}
-                                  className={`relative z-10 w-16 sm:w-24 bg-transparent text-center text-4xl sm:text-5xl font-black uppercase tracking-widest outline-none transition-colors ${
-                                    values?.kd_plat === "1" || values?.kd_plat === "2" ? "text-white placeholder:text-white/20" : "text-slate-900 placeholder:text-slate-900/20"
-                                  } ${errors.no_polisi1 && touched.no_polisi1 ? "ring-2 ring-red-500 rounded-lg" : ""}`}
-                                  placeholder={isInspectOpen ? "**" : "B"}
-                                  onChange={(e: any) => {
-                                    const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
-                                    setFieldValue("no_polisi1", value);
-                                    if (value.length >= 1 && value.length <= 2) {
-                                      // Focus next when user inputs enough characters
+                        return (
+                          <div className={`mx-auto flex w-full max-w-[28rem] flex-col overflow-hidden rounded-xl border-[6px] shadow-inner transition-colors duration-300 ${pColor.wrapper}`}>
+                            <div className="flex items-center justify-center gap-1 p-2 sm:gap-2">
+                              <Field name="no_polisi1">
+                                {({ field }: any) => (
+                                  <input
+                                    {...field}
+                                    maxLength={2}
+                                    ref={input1Ref}
+                                    readOnly={isInspectOpen}
+                                    className={`w-[25%] bg-transparent text-center text-4xl font-black uppercase tracking-wider outline-none transition-colors sm:text-5xl ${pColor.input} ${errors.no_polisi1 && touched.no_polisi1 ? "!text-rose-500 drop-shadow-sm" : ""}`}
+                                    placeholder={isInspectOpen ? "**" : "D"}
+                                    onChange={(e: any) => {
+                                      const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                                      setFieldValue("no_polisi1", value);
                                       if (value.length === 2) input2Ref.current?.focus();
-                                    }
-                                  }}
-                                />
-                              );
-                            }}
-                          </Field>
+                                    }}
+                                  />
+                                )}
+                              </Field>
 
-                          {/* Middle Numbers */}
-                          <Field name="no_polisi2">
-                            {({ field }: any) => {
-                              const display = isInspectOpen ? "" : field.value;
-                              return (
-                                <input
-                                  id="no_polisi2"
-                                  maxLength={4}
-                                  ref={input2Ref}
-                                  value={display}
-                                  readOnly={isInspectOpen}
-                                  className={`relative z-10 w-24 sm:w-36 bg-transparent text-center text-4xl sm:text-5xl font-black tracking-widest outline-none transition-colors ${
-                                    values?.kd_plat === "1" || values?.kd_plat === "2" ? "text-white placeholder:text-white/20" : "text-slate-900 placeholder:text-slate-900/20"
-                                  } ${errors.no_polisi2 && touched.no_polisi2 ? "ring-2 ring-red-500 rounded-lg" : ""}`}
-                                  placeholder={isInspectOpen ? "****" : "1234"}
-                                  onChange={(e) => {
-                                    const value = e.target.value.replace(/[^0-9]/g, "");
-                                    setFieldValue("no_polisi2", value);
-                                    if (value === "") input1Ref.current?.focus();
-                                    else if (value.length === 4) input3Ref.current?.focus();
-                                  }}
-                                />
-                              );
-                            }}
-                          </Field>
+                              <Field name="no_polisi2">
+                                {({ field }: any) => (
+                                  <input
+                                    {...field}
+                                    maxLength={4}
+                                    ref={input2Ref}
+                                    readOnly={isInspectOpen}
+                                    className={`w-[40%] bg-transparent text-center text-4xl font-black tracking-widest outline-none transition-colors sm:text-5xl ${pColor.input} ${errors.no_polisi2 && touched.no_polisi2 ? "!text-rose-500 drop-shadow-sm" : ""}`}
+                                    placeholder={isInspectOpen ? "****" : "1234"}
+                                    onChange={(e: any) => {
+                                      const value = e.target.value.replace(/[^0-9]/g, "");
+                                      setFieldValue("no_polisi2", value);
+                                      if (value === "") input1Ref.current?.focus();
+                                      else if (value.length === 4) input3Ref.current?.focus();
+                                    }}
+                                  />
+                                )}
+                              </Field>
 
-                          {/* Suffix Letter */}
-                          <Field name="no_polisi3">
-                            {({ field }: any) => {
-                              const display = isInspectOpen ? "" : field.value;
-                              return (
-                                <input
-                                  id="no_polisi3"
-                                  maxLength={3}
-                                  ref={input3Ref}
-                                  value={display}
-                                  readOnly={isInspectOpen}
-                                  className={`relative z-10 w-20 sm:w-28 bg-transparent text-center text-4xl sm:text-5xl font-black uppercase tracking-widest outline-none transition-colors ${
-                                    values?.kd_plat === "1" || values?.kd_plat === "2" ? "text-white placeholder:text-white/20" : "text-slate-900 placeholder:text-slate-900/20"
-                                  } ${errors.no_polisi3 && touched.no_polisi3 ? "ring-2 ring-red-500 rounded-lg" : ""}`}
-                                  placeholder={isInspectOpen ? "***" : "XYZ"}
-                                  onChange={(e: any) => {
-                                    const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
-                                    setFieldValue("no_polisi3", value);
-                                    if (value === "") input2Ref.current?.focus();
-                                  }}
-                                />
-                              );
-                            }}
-                          </Field>
-                        </div>
-                      </div>
-
-                      {/* Right: Plate Color/Type Selector */}
-                      <div className="space-y-4">
-                        <label className="text-xs font-black tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-                          Jenis TNKB
-                        </label>
-                        <div className="flex flex-col gap-3">
-                          {optionsDataProgresif.map((option) => (
-                            <button
-                              type="button"
-                              key={option.value}
-                              onClick={() => {
-                                setSelectedOption(option.label);
-                                setFieldValue("kd_plat", option.value);
-                              }}
-                              className={`group relative flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
-                                selectedOption === option.label
-                                  ? "border-blue-600 bg-blue-50 shadow-md dark:border-blue-500 dark:bg-blue-500/10"
-                                  : "border-transparent bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-700/60"
-                              }`}
-                            >
-                              <div className={`h-6 w-8 shrink-0 rounded border ${option.border} ${option.color} shadow-sm transition-transform group-hover:scale-105`} />
-                              <div className="flex-1">
-                                <p className={`text-xs font-bold ${
-                                  selectedOption === option.label ? "text-blue-700 dark:text-blue-400" : "text-slate-700 dark:text-slate-300"
-                                }`}>
-                                  {option.label}
-                                </p>
-                              </div>
-                              {selectedOption === option.label && (
-                                <FiCheckCircle className="text-lg text-blue-600 dark:text-blue-400 shrink-0" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                              <Field name="no_polisi3">
+                                {({ field }: any) => (
+                                  <input
+                                    {...field}
+                                    maxLength={3}
+                                    ref={input3Ref}
+                                    readOnly={isInspectOpen}
+                                    className={`w-[35%] bg-transparent text-center text-4xl font-black uppercase tracking-wider outline-none transition-colors sm:text-5xl ${pColor.input} ${errors.no_polisi3 && touched.no_polisi3 ? "!text-rose-500 drop-shadow-sm" : ""}`}
+                                    placeholder={isInspectOpen ? "***" : "XYZ"}
+                                    onChange={(e: any) => {
+                                      const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+                                      setFieldValue("no_polisi3", value);
+                                      if (value === "") input2Ref.current?.focus();
+                                    }}
+                                  />
+                                )}
+                              </Field>
+                            </div>
+                            <div className={`flex justify-center border-t-2 py-1 transition-colors duration-300 ${pColor.footer}`}>
+                              <span className="text-[10px] font-black tracking-[0.4em] text-inherit">KORLANTAS POLRI</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
 
-                    <div className="mt-10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4 border-t border-slate-200 pt-6 dark:border-slate-800/60">
-                      <button
-                        type="submit"
-                        disabled={
-                          isSubmitting ||
-                          !values?.no_polisi1 ||
-                          !values?.no_polisi2 ||
-                          !values?.no_polisi3 ||
-                          (typeof isInspectOpen !== "undefined" && isInspectOpen)
-                        }
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-500/30 transition hover:bg-blue-700 disabled:opacity-50 sm:w-auto dark:shadow-none"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            Memproses...
-                          </>
-                        ) : (
-                          "Cek Informasi Kendaraan"
-                        )}
-                      </button>
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                        Jenis TNKB
+                      </label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {optionsDataProgresif.map((option) => (
+                          <button
+                            type="button"
+                            key={option.value}
+                            onClick={() => setFieldValue("kd_plat", option.value)}
+                            className={`flex items-center justify-center rounded-xl border-2 p-3 text-xs font-bold transition-all ${values.kd_plat === option.value
+                              ? "border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-500/10 dark:text-blue-400"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-[#0f172a] dark:text-slate-400 dark:hover:border-slate-700"
+                              }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </Form>
-              </>
-            );
-          }}
-        </Formik>
-      </div>
+
+                  <div className="flex flex-col-reverse sm:flex-row items-center gap-4 bg-slate-50 px-6 py-5 dark:bg-slate-900/50 sm:justify-between">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/")}
+                      className="group flex w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto"
+                    >
+                      <FiArrowLeft className="transition-transform group-hover:-translate-x-1" />
+                      Kembali
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={
+                        isSubmitting ||
+                        !values?.no_polisi1 ||
+                        !values?.no_polisi2 ||
+                        !values?.no_polisi3 ||
+                        (typeof isInspectOpen !== "undefined" && isInspectOpen)
+                      }
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/30 transition-all hover:bg-blue-700 disabled:opacity-50 dark:shadow-none sm:w-auto"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Memproses...
+                        </>
+                      ) : (
+                        "Cari Data Kendaraan"
+                      )}
+                    </button>
+                  </div>
+
+                </div>
+              </Form>
+            </>
+          );
+        }}
+      </Formik>
     </div>
   );
 };
