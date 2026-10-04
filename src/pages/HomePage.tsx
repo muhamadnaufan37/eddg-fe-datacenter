@@ -18,7 +18,7 @@ import {
   FiList,
 } from "react-icons/fi";
 import { BiUser, BiWater } from "react-icons/bi";
-import { AiFillCar } from "react-icons/ai";
+// import { AiFillCar } from "react-icons/ai";
 // import { MdOutlineEventAvailable } from "react-icons/md";
 
 interface MenuItem {
