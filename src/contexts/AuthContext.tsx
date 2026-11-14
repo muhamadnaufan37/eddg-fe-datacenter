@@ -4,85 +4,104 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import axios from "axios";
-import { axiosServices } from "../services/axios";
+import {
+  endZiswafSession,
+  getZiswafErrorMessage,
+  startZiswafSession,
+  type ZiswafSessionUser,
+} from "../services/ziswaf";
 
-export interface AuthUser {
-  id: string;
-  nama_lengkap: string;
-  role_id: string;
-  nm_role: string;
-  status_nda: number;
-}
+type SessionStatus = "idle" | "loading" | "ready" | "error";
 
 interface AuthContextValue {
-  token: string | null;
-  user: AuthUser | null;
+  user: ZiswafSessionUser | null;
+  expiresAt: string | null;
+  status: SessionStatus;
+  error: string | null;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-}
-
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    token?: string;
-    user?: AuthUser;
-  };
+  startSession: () => Promise<void>;
+  refreshSession: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const getErrorMessage = (error: unknown) => {
-  if (axios.isAxiosError<{ message?: string }>(error)) {
-    return (
-      error.response?.data?.message ?? "Login gagal. Periksa kembali data Anda."
-    );
-  }
-  return error instanceof Error ? error.message : "Login gagal.";
-};
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<ZiswafSessionUser | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [status, setStatus] = useState<SessionStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const sessionRequestRef = useRef<Promise<void> | null>(null);
 
-  const login = useCallback(async (username: string, password: string) => {
+  const establishSession = useCallback((force: boolean) => {
+    if (!force && status === "ready") return Promise.resolve();
+    if (sessionRequestRef.current) return sessionRequestRef.current;
+
+    setStatus("loading");
+    setError(null);
+    const request = startZiswafSession()
+      .then((session) => {
+        setUser(session.user);
+        setExpiresAt(session.expires_at);
+        setStatus("ready");
+      })
+      .catch((cause: unknown) => {
+        const message = getZiswafErrorMessage(cause);
+        setUser(null);
+        setExpiresAt(null);
+        setError(message);
+        setStatus("error");
+        throw new Error(message);
+      })
+      .finally(() => {
+        sessionRequestRef.current = null;
+      });
+
+    sessionRequestRef.current = request;
+    return request;
+  }, [status]);
+
+  const startSession = useCallback(
+    () => establishSession(false),
+    [establishSession],
+  );
+  const refreshSession = useCallback(
+    () => establishSession(true),
+    [establishSession],
+  );
+
+  const logout = useCallback(async () => {
     try {
-      const response = await axiosServices().post<LoginResponse>(
-        "/api/v1/login",
-        { username, password },
-      );
-      const payload = response.data;
-
-      if (!payload.success || !payload.data?.token || !payload.data.user) {
-        throw new Error(payload.message || "Respons login tidak lengkap.");
+      await endZiswafSession();
+    } catch (cause) {
+      if (!axios.isAxiosError(cause) || cause.response?.status !== 401) {
+        throw new Error(getZiswafErrorMessage(cause));
       }
-
-      setToken(payload.data.token);
-      setUser(payload.data.user);
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
+    } finally {
+      setUser(null);
+      setExpiresAt(null);
+      setError(null);
+      setStatus("idle");
     }
-  }, []);
-
-  const logout = useCallback(() => {
-    setToken(null);
-    setUser(null);
   }, []);
 
   const value = useMemo(
     () => ({
-      token,
       user,
-      isAuthenticated: Boolean(token && user),
-      login,
+      expiresAt,
+      status,
+      error,
+      isAuthenticated: status === "ready",
+      startSession,
+      refreshSession,
       logout,
     }),
-    [token, user, login, logout],
+    [user, expiresAt, status, error, startSession, refreshSession, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

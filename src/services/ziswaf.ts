@@ -1,5 +1,20 @@
 import axios from "axios";
-import { axiosServices } from "./axios";
+import type { AxiosResponse } from "axios";
+
+const configuredApiUrl =
+  import.meta.env.VITE_PUBLIC_REACT_APP_BASE_URL_API?.replace(/\/+$/, "") ?? "";
+const apiBaseUrl = /\/api\/v1$/i.test(configuredApiUrl)
+  ? configuredApiUrl
+  : `${configuredApiUrl}/api/v1`;
+
+export const ziswafApi = axios.create({
+  baseURL: apiBaseUrl,
+  withCredentials: true,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
 
 export type DonationType = "zakat" | "infaq" | "sedekah" | "wakaf";
 export type DonationStatus =
@@ -31,48 +46,40 @@ export interface Donation {
   created_at?: string;
 }
 
-export interface Pagination {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
-
-export interface DonationListResponse {
-  items: Donation[];
-  pagination: Pagination;
-}
-
 export interface ApiEnvelope<T> {
   success: boolean;
   message: string;
   data: T;
 }
 
-export interface Withdrawal {
-  uuid: string;
-  withdrawal_id?: string;
-  amount: number;
-  fee?: number;
-  net_amount?: number;
-  status: string;
-  note?: string | null;
-  created_at?: string;
-  processed_at?: string | null;
+export interface ZiswafSessionUser {
+  id?: string;
+  nama_lengkap?: string;
+  role_id?: string;
+  nm_role?: string;
 }
 
-const api = axiosServices();
+export interface ZiswafSession {
+  user: ZiswafSessionUser;
+  expires_at: string;
+}
 
-const authConfig = (token: string) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
+const isAxiosUnauthorized = (error: unknown) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
 
 export const getZiswafErrorMessage = (error: unknown) => {
   if (axios.isAxiosError<{ message?: string }>(error)) {
-    return error.response?.data?.message ?? "Permintaan gagal. Silakan coba lagi.";
+    return (
+      error.response?.data?.message ??
+      "Permintaan gagal. Silakan coba lagi."
+    );
   }
-  return error instanceof Error ? error.message : "Terjadi kesalahan.";
+  if (error instanceof Error) return error.message;
+  return "Terjadi kesalahan saat menghubungi layanan ZISWAF.";
 };
+
+export const getZiswafStatusCode = (error: unknown) =>
+  axios.isAxiosError(error) ? (error.response?.status ?? null) : null;
 
 export const getRetryAfterSeconds = (error: unknown) => {
   if (!axios.isAxiosError(error)) return null;
@@ -81,82 +88,60 @@ export const getRetryAfterSeconds = (error: unknown) => {
   return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
 };
 
-export const fetchMyDonations = async (
-  token: string,
-  page = 1,
-  perPage = 15,
-) => {
-  const response = await api.get<ApiEnvelope<DonationListResponse>>(
-    `/api/v1/ziswaf/donations?per_page=${perPage}&page=${page}`,
-    authConfig(token),
+export const startZiswafSession = async () => {
+  const response = await ziswafApi.post<ApiEnvelope<ZiswafSession>>(
+    "/ziswaf/session",
   );
+  if (
+    !response.data.success ||
+    !response.data.data?.user ||
+    !response.data.data.expires_at
+  ) {
+    throw new Error(
+      response.data.message || "Respons sesi ZISWAF tidak lengkap.",
+    );
+  }
   return response.data.data;
 };
 
-export const createDonation = async (
-  token: string,
-  payload: {
-    request_id: string;
-    donation_type: DonationType;
-    amount: number;
-  },
-) => {
-  const response = await api.post<ApiEnvelope<Donation>>(
-    "/api/v1/ziswaf/donations",
+export const endZiswafSession = async () => {
+  await ziswafApi.delete("/ziswaf/session");
+};
+
+export const createDonation = async (payload: {
+  request_id: string;
+  donation_type: DonationType;
+  amount: number;
+}) => {
+  const response = await ziswafApi.post<ApiEnvelope<Donation>>(
+    "/ziswaf/donations",
     payload,
-    authConfig(token),
   );
   return response.data;
 };
 
-export const fetchDonation = async (token: string, uuid: string) => {
-  const response = await api.get<ApiEnvelope<Donation>>(
-    `/api/v1/ziswaf/donations/${encodeURIComponent(uuid)}`,
-    authConfig(token),
-  );
+const getDonationResponse = (response: AxiosResponse<ApiEnvelope<Donation>>) => {
+  if (!response.data.success || !response.data.data) {
+    throw new Error(response.data.message || "Data transaksi tidak tersedia.");
+  }
   return response.data.data;
 };
 
-export const fetchAdminDonations = async (
-  token: string,
-  filters: {
-    status?: string;
-    donation_type?: DonationType | "";
-    page?: number;
-    per_page?: number;
-  },
+export const fetchDonation = async (
+  uuid: string,
+  refreshSession: () => Promise<void>,
 ) => {
-  const params = new URLSearchParams();
-  if (filters.status) params.set("status", filters.status);
-  if (filters.donation_type) params.set("donation_type", filters.donation_type);
-  params.set("per_page", String(filters.per_page ?? 15));
-  params.set("page", String(filters.page ?? 1));
-  const response = await api.get<
-    ApiEnvelope<DonationListResponse | Donation[]>
-  >(`/api/v1/ziswaf/admin/donations?${params.toString()}`, authConfig(token));
-  return response.data.data;
-};
+  const path = `/ziswaf/donations/${encodeURIComponent(uuid)}`;
+  try {
+    return getDonationResponse(
+      await ziswafApi.get<ApiEnvelope<Donation>>(path),
+    );
+  } catch (error) {
+    if (!isAxiosUnauthorized(error)) throw error;
 
-export const fetchAdminWithdrawals = async (token: string, page = 1) => {
-  const response = await api.get<
-    ApiEnvelope<{ items: Withdrawal[]; pagination?: Pagination } | Withdrawal[]>
-  >(`/api/v1/ziswaf/admin/withdrawals?per_page=15&page=${page}`, authConfig(token));
-  return response.data.data;
-};
-
-export const createWithdrawal = async (token: string, amount: number) => {
-  const response = await api.post<ApiEnvelope<Withdrawal>>(
-    "/api/v1/ziswaf/admin/withdrawals",
-    { amount },
-    authConfig(token),
-  );
-  return response.data;
-};
-
-export const fetchAdminWithdrawal = async (token: string, uuid: string) => {
-  const response = await api.get<ApiEnvelope<Withdrawal>>(
-    `/api/v1/ziswaf/admin/withdrawals/${encodeURIComponent(uuid)}`,
-    authConfig(token),
-  );
-  return response.data.data;
+    await refreshSession();
+    return getDonationResponse(
+      await ziswafApi.get<ApiEnvelope<Donation>>(path),
+    );
+  }
 };
