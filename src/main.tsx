@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AlertProvider } from "./contexts/AlertContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { routes } from "./routes";
 import { PrimeReactProvider } from "primereact/api";
 
@@ -44,7 +45,9 @@ createRoot(document.getElementById("root")!).render(
     >
       <ThemeProvider>
         <AlertProvider>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
         </AlertProvider>
       </ThemeProvider>
     </PrimeReactProvider>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Toast } from "primereact/toast";
-import { FiMoon, FiSun, FiHome } from "react-icons/fi";
+import { FiMoon, FiSun, FiHome, FiHeart } from "react-icons/fi";
 import { useTheme } from "../contexts/ThemeContext";
 import { setToastRef } from "../services/toast";
 import { InspectProvider } from "../contexts/InspectContext";
@@ -81,6 +81,16 @@ const Layout = () => {
                 <span className="hidden sm:inline">Beranda</span>
               </Link>
             )}
+
+            <Link
+              to="/digital-data/ziswaf"
+              className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-xs transition hover:border-emerald-400 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/70"
+              title="Buka layanan ZISWAF Digital"
+              aria-label="Buka layanan ZISWAF Digital"
+            >
+              <FiHeart className="text-sm" />
+              <span className="hidden sm:inline">ZISWAF</span>
+            </Link>
 
             {/* Modern Theme Switcher Button */}
             <button

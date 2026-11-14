@@ -1,6 +1,7 @@
 import { FiSearch, FiArrowLeft, FiChevronRight } from "react-icons/fi";
 import { MdAppRegistration } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import ZiswafShortcut from "../../../components/ZiswafShortcut";
 
 const CaiMenuPage = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const CaiMenuPage = () => {
 
   return (
     <div className="w-full space-y-6">
+      <ZiswafShortcut />
       {/* Header Banner */}
       <div className="overflow-hidden rounded-3xl border-2 border-[#cbdcf5] bg-white p-6 shadow-sm dark:border-[#526d82] dark:bg-[#27374d]">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">

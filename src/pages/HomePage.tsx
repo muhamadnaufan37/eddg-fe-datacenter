@@ -16,6 +16,7 @@ import {
   FiLayers,
   FiGrid,
   FiList,
+  FiHeart,
 } from "react-icons/fi";
 import { BiUser, BiWater } from "react-icons/bi";
 // import { AiFillCar } from "react-icons/ai";
@@ -91,6 +92,20 @@ const menus: MenuItem[] = [
     status: "Operational",
     gradient: "from-[#65d0f4] to-[#2373f4]",
     accentColor: "#65d0f4",
+  },
+  {
+    id: "ziswaf",
+    code: "SRV-05",
+    title: "ZISWAF Digital",
+    category: "Layanan Tambahan",
+    description:
+      "Salurkan zakat, infaq, sedekah, dan wakaf melalui pembayaran QRIS dengan riwayat transaksi terpusat.",
+    icon: <FiHeart className="text-2xl" />,
+    path: "/digital-data/ziswaf",
+    tags: ["Zakat", "Infaq", "Sedekah", "Wakaf", "QRIS", "Donasi"],
+    status: "Active",
+    gradient: "from-emerald-600 to-teal-500",
+    accentColor: "#059669",
   },
   // {
   //   id: "presensi",

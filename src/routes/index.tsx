@@ -16,6 +16,7 @@ import CekPajakKendaraanPage from "../pages/data-center/sambara/CekPajakKendaraa
 import ResultInfoPajakKendaraan from "../pages/data-center/sambara/result";
 import DeviceIdPage from "../pages/data-center/device-id";
 import WilayahPage from "../pages/data-center/wilayah";
+import ZiswafPage from "../pages/data-center/ziswaf";
 
 export const routes = [
   {
@@ -77,6 +78,10 @@ export const routes = [
       {
         path: "digital-data/wilayah",
         element: <WilayahPage />,
+      },
+      {
+        path: "digital-data/ziswaf",
+        element: <ZiswafPage />,
       },
       {
         path: "digital-data/pengaduan/eticket",

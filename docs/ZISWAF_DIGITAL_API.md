@@ -19,13 +19,27 @@ BuatQris. Semua endpoint menggunakan prefix `/api/v1`.
 
 ## Biaya dan nominal
 
-Nilai `amount` adalah nominal donasi yang dimasukkan pengguna dan sudah
-mencakup biaya admin gateway. Backend mengirim `fee_by=user`, sehingga fee
-dipotong dari saldo organisasi, bukan ditambahkan sebagai biaya admin bagi
-donatur. Sebagai contoh, donasi Rp10.000 dengan fee 2% tetap meminta nominal
-QRIS sekitar Rp10.000; saldo bersih yang masuk sekitar Rp9.800. Gateway dapat
-menambahkan `amount_uniq`, sehingga nilai yang harus dibayar adalah
-`total_amount`, bukan `amount`.
+`amount` adalah nominal dasar transaksi yang dikirim ke BuatQris.
+Backend mengirim `fee_by=user`, yang berarti biaya layanan gateway dipotong
+dari saldo merchant/organisasi dan **tidak ditambahkan ke tagihan donatur**.
+Contoh pada nominal Rp10.000 dengan fee 2%: `admin_fee` Rp200 dan
+`credit_amount` sekitar Rp9.800.
+
+BuatQris juga dapat menambahkan `amount_uniq` (kode unik) ke tagihan. Kode
+unik ini berbeda dari biaya layanan dan dibayar donatur. Contoh respons:
+`amount` Rp10.000, `admin_fee` Rp200, `amount_uniq` Rp390, sehingga
+`total_amount` yang dibayar adalah Rp10.390 dan saldo merchant menerima
+sekitar Rp9.800. Frontend harus membedakan biaya layanan yang dipotong dari
+merchant dengan kode unik yang ditambahkan ke tagihan.
+
+API BuatQris yang didokumentasikan tidak menyediakan parameter untuk
+meniadakan kode unik. Karena itu, `amount` dari frontend **tidak menjamin**
+bahwa `total_amount` yang dibayar donatur akan sama persis; selalu tampilkan
+nilai `total_amount` dari respons gateway. Untuk membuat tagihan tepat sama
+dengan nominal donasi, kode unik harus dinonaktifkan/diatur oleh BuatQris
+melalui konfigurasi merchant atau dukungan penyedia. Jangan mengurangi
+`amount` secara perkiraan di backend: nilai kode unik ditentukan oleh gateway
+dan transaksi QRIS yang telah dibuat tidak dapat diubah oleh API ini.
 
 Minimum/maksimum default adalah Rp1.000/Rp5.000.000; sesuaikan
 `BUATQRIS_MINIMUM_AMOUNT` dan `BUATQRIS_MAXIMUM_AMOUNT` dengan konfigurasi
@@ -214,7 +228,8 @@ menghitungnya di frontend.
 
 - Jangan menandai pembayaran lunas hanya karena request berhasil dibuat atau
   status HTTP adalah 200. Tunggu `data.status === "success"`.
-- Tampilkan nominal bayar dari `total_amount`, sedangkan `amount` adalah nilai
-  donasi yang dipilih pengguna.
+- Tampilkan nominal bayar dari `total_amount`. Bedakan `amount_uniq` sebagai
+  kode unik yang ditambahkan ke tagihan dan `admin_fee` sebagai biaya layanan
+  yang dipotong dari merchant.
 - QR dapat ditampilkan menggunakan `qr_url` atau `qris_image`.
 - Status final dari webhook: `success`, `expired`, atau `failed`.

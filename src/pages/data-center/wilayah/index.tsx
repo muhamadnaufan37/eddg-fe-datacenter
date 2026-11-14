@@ -22,6 +22,7 @@ import {
   type PublicWilayahType,
 } from "../../../services/dataCenter";
 import { resolveImageUrl } from "../../../utils/text";
+import ZiswafShortcut from "../../../components/ZiswafShortcut";
 
 type SelectedWilayah = {
   type: PublicWilayahType;
@@ -221,6 +222,7 @@ const WilayahPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5 text-slate-900 dark:text-slate-100">
+      <ZiswafShortcut />
       <section className="relative overflow-hidden rounded-[2rem] bg-white p-8 text-slate-900 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-900/5 dark:bg-[#0b1120] dark:text-white dark:shadow-none dark:ring-white/10 sm:p-10">
         {/* Glow Effects */}
         <div className="pointer-events-none absolute -left-20 -top-20 h-[20rem] w-[20rem] rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 blur-[80px] dark:from-blue-500/30 dark:to-purple-500/30" />
