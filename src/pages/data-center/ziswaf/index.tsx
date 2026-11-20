@@ -91,6 +91,75 @@ const StatusBadge = ({ status }: { status: DonationStatus }) => (
   </span>
 );
 
+const PaymentStatusAnimation = ({ status }: { status: DonationStatus }) => {
+  if (status === "success") {
+    return (
+      <div className="relative flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-emerald-200 bg-linear-to-br from-emerald-50 via-white to-teal-50 dark:border-emerald-800/60 dark:from-emerald-950/50 dark:via-slate-900 dark:to-teal-950/30">
+        <span className="absolute h-24 w-24 animate-ping rounded-full border border-emerald-300/50" />
+        <span className="absolute h-20 w-20 animate-pulse rounded-full bg-emerald-200/40 dark:bg-emerald-400/10" />
+        <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+          <FiCheckCircle className="h-7 w-7" />
+        </span>
+        <div className="absolute inset-x-0 bottom-2 text-center">
+          <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-300">
+            PEMBAYARAN BERHASIL
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "failed" || status === "expired") {
+    const isExpired = status === "expired";
+    return (
+      <div className={`relative flex h-28 items-center justify-center overflow-hidden rounded-2xl border ${
+        isExpired
+          ? "border-slate-200 bg-linear-to-br from-slate-50 via-white to-slate-100 dark:border-slate-700 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800"
+          : "border-rose-200 bg-linear-to-br from-rose-50 via-white to-orange-50 dark:border-rose-900/60 dark:from-rose-950/40 dark:via-slate-900 dark:to-orange-950/20"
+      }`}>
+        <span className={`absolute h-20 w-20 animate-pulse rounded-full ${
+          isExpired ? "bg-slate-200/70 dark:bg-slate-700/40" : "bg-rose-200/60 dark:bg-rose-500/10"
+        }`} />
+        <span className={`relative flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg ${
+          isExpired
+            ? "bg-slate-500 shadow-slate-500/20"
+            : "bg-rose-500 shadow-rose-500/25"
+        }`}>
+          {isExpired ? (
+            <FiClock className="h-7 w-7" />
+          ) : (
+            <FiX className="h-7 w-7" />
+          )}
+        </span>
+        <div className="absolute inset-x-0 bottom-2 text-center">
+          <span className={`text-xs font-extrabold ${
+            isExpired
+              ? "text-slate-600 dark:text-slate-300"
+              : "text-rose-700 dark:text-rose-300"
+          }`}>
+            {isExpired ? "TRANSAKSI KEDALUWARSA" : "PEMBAYARAN GAGAL"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-amber-200 bg-linear-to-br from-amber-50 via-white to-orange-50 dark:border-amber-900/60 dark:from-amber-950/30 dark:via-slate-900 dark:to-orange-950/20">
+      <span className="absolute h-20 w-20 animate-pulse rounded-full bg-amber-200/60 dark:bg-amber-500/10" />
+      <span className="absolute h-14 w-14 rounded-full border-4 border-transparent border-t-amber-500 border-r-amber-300 animate-spin" />
+      <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-amber-600 shadow-md dark:bg-slate-900 dark:text-amber-300">
+        <FiClock className="h-4 w-4" />
+      </span>
+      <div className="absolute inset-x-0 bottom-2 text-center">
+        <span className="text-xs font-extrabold text-amber-700 dark:text-amber-300">
+          {status === "processing" ? "MEMPROSES PEMBAYARAN" : "MENUNGGU PEMBAYARAN"}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const Panel = ({
   children,
   className = "",
@@ -633,7 +702,11 @@ const ZiswafPage = () => {
               </div>
             </div>
             <div className="space-y-4 p-4 sm:p-5">
-              {selectedDonation.qris_image || selectedDonation.qr_url ? (
+              <PaymentStatusAnimation status={selectedDonation.status} />
+
+              {(selectedDonation.status === "pending" ||
+                selectedDonation.status === "processing") &&
+              (selectedDonation.qris_image || selectedDonation.qr_url) ? (
                 <div className="relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-5 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
                   <div className="absolute left-1/2 top-24 h-44 w-44 -translate-x-1/2 rounded-full bg-emerald-300/15 blur-2xl" />
                   <div className="relative rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10 dark:border-slate-600">
@@ -657,13 +730,14 @@ const ZiswafPage = () => {
                     Pindai QRIS menggunakan aplikasi pembayaran pilihan Anda
                   </p>
                 </div>
-              ) : (
+              ) : (selectedDonation.status === "pending" ||
+                selectedDonation.status === "processing") ? (
                 <div className="flex items-start gap-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-400/10 dark:text-blue-200">
                   <FiClock className="mt-0.5 shrink-0" />
                   Transaksi sedang diproses. QRIS akan tampil setelah informasi
                   pembayaran tersedia.
                 </div>
-              )}
+              ) : null}
               <dl className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
                   <dt className="text-[11px] text-slate-500 dark:text-slate-400">
