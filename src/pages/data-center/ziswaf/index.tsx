@@ -83,9 +83,7 @@ const StatusBadge = ({ status }: { status: DonationStatus }) => (
     {status === "pending" && (
       <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
     )}
-    {status === "success" && (
-      <FiCheckCircle className="h-3 w-3" />
-    )}
+    {status === "success" && <FiCheckCircle className="h-3 w-3" />}
     {status === "processing" && (
       <FiRefreshCw className="h-3 w-3 animate-spin" />
     )}
@@ -310,14 +308,15 @@ const ZiswafPage = () => {
             </div>
             <p className="mt-4 text-lg font-extrabold">Berbagi Lebih Mudah</p>
             <p className="mt-1 text-xs leading-relaxed text-emerald-50/85">
-              Pilih nominal, pindai QRIS, dan salurkan kebaikan dalam hitungan menit.
+              Pilih nominal, pindai QRIS, dan salurkan kebaikan dalam hitungan
+              menit.
             </p>
           </div>
         </div>
       </section>
 
       <div className="mx-auto w-full space-y-4">
-        <div hidden={sessionIsLoading} className="space-y-4">
+        <div hidden>
           <Panel className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
               <span
@@ -483,7 +482,10 @@ const ZiswafPage = () => {
                     min={1000}
                     max={500000}
                     step={1000}
-                    value={Math.min(500000, Math.max(1000, Number(amount) || 1000))}
+                    value={Math.min(
+                      500000,
+                      Math.max(1000, Number(amount) || 1000),
+                    )}
                     onChange={(event) => setAmount(event.target.value)}
                     aria-label="Atur nominal donasi dalam kelipatan seribu rupiah"
                     className="h-2 w-full cursor-pointer accent-emerald-600"
@@ -551,7 +553,8 @@ const ZiswafPage = () => {
               </div>
               <div className="mt-3 flex items-start gap-2 rounded-xl bg-white/70 p-3 text-[11px] leading-relaxed text-slate-600 dark:bg-slate-800/70 dark:text-slate-300">
                 <FiShield className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                Nominal final dapat dipengaruhi kode unik atau konfigurasi gateway.
+                Nominal final dapat dipengaruhi kode unik atau konfigurasi
+                gateway.
               </div>
 
               {donationError && (
