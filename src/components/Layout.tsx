@@ -6,6 +6,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { setToastRef } from "../services/toast";
 import { InspectProvider } from "../contexts/InspectContext";
 import { useInspectDetect } from "../utils/useInspectDetect";
+import { ZiswafCompletionProvider } from "../contexts/ZiswafCompletionContext";
 
 const Layout = () => {
   const { theme, toggleTheme } = useTheme();
@@ -112,9 +113,11 @@ const Layout = () => {
       {/* Main Content */}
       <main className="flex w-full flex-1 flex-col items-stretch justify-start px-3 py-6 pt-20 sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-          <InspectProvider value={{ isInspectOpen }}>
-            <Outlet />
-          </InspectProvider>
+          <ZiswafCompletionProvider>
+            <InspectProvider value={{ isInspectOpen }}>
+              <Outlet />
+            </InspectProvider>
+          </ZiswafCompletionProvider>
         </div>
       </main>
     </div>

@@ -16,6 +16,8 @@ import {
   FiRefreshCw,
   FiShield,
   FiX,
+  FiGift,
+  FiArrowRight,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -35,10 +37,11 @@ const donationTypes: Array<{
   title: string;
   description: string;
 }> = [
-  { value: "zakat", title: "Zakat", description: "Tunaikan kewajiban zakat" },
-  { value: "infaq", title: "Infaq", description: "Berbagi untuk kebaikan" },
-  { value: "sedekah", title: "Sedekah", description: "Bantu sesama dengan ikhlas" },
-  { value: "wakaf", title: "Wakaf", description: "Dukungan manfaat berkelanjutan" },
+  {
+    value: "sodakoh",
+    title: "sodakoh",
+    description: "Raih pahala melalui sodakoh online",
+  },
 ];
 
 const donationPresets = [
@@ -75,8 +78,17 @@ const statusLabel: Record<DonationStatus, string> = {
 
 const StatusBadge = ({ status }: { status: DonationStatus }) => (
   <span
-    className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset ${statusClass[status]}`}
+    className={`relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset ${statusClass[status]}`}
   >
+    {status === "pending" && (
+      <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+    )}
+    {status === "success" && (
+      <FiCheckCircle className="h-3 w-3" />
+    )}
+    {status === "processing" && (
+      <FiRefreshCw className="h-3 w-3 animate-spin" />
+    )}
     {statusLabel[status]}
   </span>
 );
@@ -106,7 +118,7 @@ const ZiswafPage = () => {
     logout,
   } = useAuth();
   const didStartSession = useRef(false);
-  const [donationType, setDonationType] = useState<DonationType>("infaq");
+  const [donationType, setDonationType] = useState<DonationType>("sodakoh");
   const [amount, setAmount] = useState("10000");
   const [donationError, setDonationError] = useState("");
   const [isCreatingDonation, setIsCreatingDonation] = useState(false);
@@ -162,7 +174,9 @@ const ZiswafPage = () => {
       numericAmount < 1000 ||
       numericAmount > 5_000_000
     ) {
-      setDonationError("Masukkan nominal bulat antara Rp1.000 dan Rp5.000.000.");
+      setDonationError(
+        "Masukkan nominal bulat antara Rp1.000 dan Rp5.000.000.",
+      );
       return;
     }
 
@@ -179,7 +193,11 @@ const ZiswafPage = () => {
       requestAttempt?.type === donationType &&
       requestAttempt.amount === numericAmount
         ? requestAttempt
-        : { id: crypto.randomUUID(), type: donationType, amount: numericAmount };
+        : {
+            id: crypto.randomUUID(),
+            type: donationType,
+            amount: numericAmount,
+          };
     setRequestAttempt(attempt);
 
     try {
@@ -193,7 +211,7 @@ const ZiswafPage = () => {
       }
       setSelectedDonation(response.data);
       setRequestAttempt(null);
-      setDonationType("infaq");
+      setDonationType("sodakoh");
       setAmount("10000");
     } catch (error) {
       const status = getZiswafStatusCode(error);
@@ -250,18 +268,20 @@ const ZiswafPage = () => {
     }
   };
 
-  const sessionIsLoading = sessionStatus === "idle" || sessionStatus === "loading";
+  const sessionIsLoading =
+    sessionStatus === "idle" || sessionStatus === "loading";
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 pb-8">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-700 via-teal-700 to-cyan-800 p-5 text-white shadow-xl shadow-emerald-950/10 sm:p-8 lg:p-10">
+      <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-emerald-700 via-teal-700 to-cyan-800 p-5 text-white shadow-xl shadow-emerald-950/10 sm:p-8 lg:p-10">
         <div className="pointer-events-none absolute -right-14 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-cyan-300/10 blur-3xl" />
-        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="absolute right-0 top-0 h-full w-2/5 bg-linear-to-l from-white/5 to-transparent" />
+        <div className="relative grid gap-6 lg:grid-cols-[1fr_260px] lg:items-end">
           <div className="max-w-2xl">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/15"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm transition hover:-translate-x-0.5 hover:bg-white/20"
             >
               <FiArrowLeft />
               Menu utama
@@ -274,86 +294,93 @@ const ZiswafPage = () => {
               ZISWAF Digital
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-emerald-50 sm:text-base">
-              Salurkan zakat, infaq, sedekah, dan wakaf secara praktis melalui
-              QRIS. Pembayaran diproses dengan sesi aman dari backend.
+              Orang-orang yang menginfakkan hartanya malam dan siang hari secara
+              sembunyi-sembunyi maupun terang-terangan, mereka mendapat pahala
+              di sisi Tuhannya." QS. Al-Baqarah ayat 274
             </p>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
-              <FiShield className="h-5 w-5" />
-            </span>
-            <span>
-              <span className="block text-xs font-bold text-white">
-                Sesi otomatis aman
+          <div className="hidden rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-md lg:block">
+            <div className="flex items-center justify-between">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-emerald-100">
+                <FiGift className="h-5 w-5" />
               </span>
-              <span className="mt-1 block max-w-48 text-[11px] leading-relaxed text-emerald-100">
-                Kredensial dan JWT tetap berada di server.
+              <span className="rounded-full bg-emerald-300/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-100">
+                QRIS Aktif
               </span>
-            </span>
+            </div>
+            <p className="mt-4 text-lg font-extrabold">Berbagi Lebih Mudah</p>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-50/85">
+              Pilih nominal, pindai QRIS, dan salurkan kebaikan dalam hitungan menit.
+            </p>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-2xl space-y-4">
-        <Panel className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                isAuthenticated
-                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
-                  : sessionStatus === "error"
-                    ? "bg-rose-50 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
-                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-              }`}
-            >
-              {sessionIsLoading ? (
-                <FiRefreshCw className="animate-spin" />
-              ) : isAuthenticated ? (
-                <FiCheckCircle />
-              ) : (
-                <FiAlertCircle />
-              )}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                {sessionIsLoading
-                  ? "Menghubungkan sesi pembayaran…"
-                  : isAuthenticated
-                    ? user?.nama_lengkap || "Sesi pembayaran aktif"
-                    : "Sesi pembayaran belum tersedia"}
-              </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {sessionIsLoading
-                  ? "Backend sedang menyiapkan sesi aman."
-                  : isAuthenticated
-                    ? `Sesi aman aktif${user?.nm_role ? ` · ${user.nm_role}` : ""}`
-                    : "Pastikan endpoint sesi ZISWAF di backend sudah aktif."}
-              </p>
+      <div className="mx-auto w-full space-y-4">
+        <div hidden={sessionIsLoading} className="space-y-4">
+          <Panel className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <span
+                className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition ${
+                  isAuthenticated
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+                    : sessionStatus === "error"
+                      ? "bg-rose-50 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
+                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                }`}
+              >
+                {isAuthenticated && (
+                  <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 shadow-sm dark:border-slate-900" />
+                )}
+                {sessionIsLoading ? (
+                  <FiRefreshCw className="animate-spin" />
+                ) : isAuthenticated ? (
+                  <FiCheckCircle />
+                ) : (
+                  <FiAlertCircle />
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                  {sessionIsLoading
+                    ? "Menghubungkan sesi pembayaran…"
+                    : isAuthenticated
+                      ? `Halo, ${user?.nama_lengkap || "Donatur"}`
+                      : "Sesi pembayaran belum tersedia"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {sessionIsLoading
+                    ? "Backend sedang menyiapkan sesi aman."
+                    : isAuthenticated
+                      ? `Sesi aman aktif${user?.nm_role ? ` · ${user.nm_role}` : ""}. Siap menerima donasi.`
+                      : "Pastikan endpoint sesi ZISWAF di backend sudah aktif."}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {!isAuthenticated && sessionStatus === "error" && (
-              <button
-                type="button"
-                onClick={() => void startSession().catch(() => undefined)}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-3 text-xs font-bold text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-              >
-                <FiRefreshCw />
-                Coba lagi
-              </button>
-            )}
-            {isAuthenticated && (
-              <button
-                type="button"
-                onClick={() => void handleLogout()}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-              >
-                <FiLogOut />
-                Akhiri sesi
-              </button>
-            )}
-          </div>
-        </Panel>
+            <div className="flex flex-wrap gap-2">
+              {!isAuthenticated && sessionStatus === "error" && (
+                <button
+                  type="button"
+                  onClick={() => void startSession().catch(() => undefined)}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-3 text-xs font-bold text-white hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                >
+                  <FiRefreshCw />
+                  Coba lagi
+                </button>
+              )}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <FiLogOut />
+                  Akhiri sesi
+                </button>
+              )}
+            </div>
+          </Panel>
+        </div>
 
         {(sessionError || logoutError) && (
           <p
@@ -383,150 +410,188 @@ const ZiswafPage = () => {
           </div>
           <form
             onSubmit={handleCreateDonation}
-            className="space-y-5 p-5 sm:p-6"
+            className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_300px]"
           >
-            <fieldset>
-              <legend className="mb-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Jenis donasi
-              </legend>
-              <div className="grid grid-cols-2 gap-2">
-                {donationTypes.map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setDonationType(item.value)}
-                    aria-pressed={donationType === item.value}
-                    className={`min-h-[76px] rounded-xl border p-3 text-left transition ${
-                      donationType === item.value
-                        ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10 dark:border-emerald-500 dark:bg-emerald-400/10"
-                        : "border-slate-200 hover:border-emerald-300 dark:border-slate-700 dark:hover:border-emerald-700"
-                    }`}
-                  >
-                    <span className="block text-sm font-bold capitalize text-slate-900 dark:text-white">
-                      {item.title}
-                    </span>
-                    <span className="mt-1 block text-[11px] leading-snug text-slate-500 dark:text-slate-400">
-                      {item.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+            <div className="space-y-5">
+              <fieldset>
+                <legend className="mb-3 text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  1. Pilih Kategori
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {donationTypes.map((item) => {
+                    const isSelected = donationType === item.value;
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => setDonationType(item.value)}
+                        aria-pressed={isSelected}
+                        className={`group min-h-19 rounded-2xl border p-3 text-left transition-all ${
+                          isSelected
+                            ? "border-emerald-500 bg-linear-to-br from-emerald-50 to-teal-50 shadow-md shadow-emerald-500/10 ring-2 ring-emerald-500/10 dark:border-emerald-500 dark:from-emerald-400/10 dark:to-teal-400/5"
+                            : "border-slate-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-sm dark:border-slate-700 dark:hover:border-emerald-700"
+                        }`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-extrabold capitalize text-slate-900 dark:text-white">
+                            {item.title}
+                          </span>
+                          {isSelected && (
+                            <FiCheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+                          )}
+                        </span>
+                        <span className="mt-1 block text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+                          {item.description}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
 
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Pilih nominal donasi
-              </legend>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {donationPresets.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setAmount(String(preset))}
-                    aria-pressed={Number(amount) === preset}
-                    className={`min-h-11 rounded-xl border px-2 text-xs font-bold transition ${
-                      Number(amount) === preset
-                        ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-600/10 dark:border-emerald-500 dark:bg-emerald-400/10 dark:text-emerald-200"
-                        : "border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/60 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-400/5"
-                    }`}
-                  >
-                    {formatRupiah(preset)}
-                  </button>
-                ))}
-              </div>
-              <label className="block space-y-2">
-                <span className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  <span>Atur nominal hingga Rp500.000</span>
-                  <output className="font-extrabold text-emerald-700 dark:text-emerald-300">
-                    {formatRupiah(Number(amount))}
-                  </output>
-                </span>
-                <input
-                  type="range"
-                  min={1000}
-                  max={500000}
-                  step={1000}
-                  value={Math.min(500000, Math.max(1000, Number(amount) || 1000))}
-                  onChange={(event) => setAmount(event.target.value)}
-                  aria-label="Atur nominal donasi dalam kelipatan seribu rupiah"
-                  className="h-2 w-full cursor-pointer accent-emerald-600"
-                />
-                <span className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                  <span>Rp1.000</span>
-                  <span>Kelipatan Rp1.000</span>
-                  <span>Rp500.000</span>
-                </span>
-              </label>
-              <label className="block space-y-1.5">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  Atau masukkan nominal sendiri
-                </span>
-                <span className="flex min-h-12 items-center overflow-hidden rounded-xl border border-slate-300 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 dark:border-slate-700">
-                  <span className="border-r border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                    Rp
+              <fieldset className="space-y-3">
+                <legend className="mb-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  2. Pilih Nominal
+                </legend>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {donationPresets.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setAmount(String(preset))}
+                      aria-pressed={Number(amount) === preset}
+                      className={`min-h-11 rounded-xl border px-2 text-xs font-bold transition-all ${
+                        Number(amount) === preset
+                          ? "-translate-y-px border-emerald-600 bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                          : "border-slate-200 text-slate-700 hover:-translate-y-px hover:border-emerald-300 hover:bg-emerald-50/60 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-400/5"
+                      }`}
+                    >
+                      {formatRupiah(preset)}
+                    </button>
+                  ))}
+                </div>
+
+                <label className="block space-y-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-700 dark:bg-slate-800/40">
+                  <span className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <span>Geser untuk mengubah nominal</span>
+                    <output className="font-extrabold text-emerald-700 dark:text-emerald-300">
+                      {formatRupiah(Number(amount))}
+                    </output>
                   </span>
                   <input
-                    required
-                    type="number"
+                    type="range"
                     min={1000}
-                    max={5_000_000}
-                    step={1}
-                    inputMode="numeric"
-                    value={amount}
+                    max={500000}
+                    step={1000}
+                    value={Math.min(500000, Math.max(1000, Number(amount) || 1000))}
                     onChange={(event) => setAmount(event.target.value)}
-                    onBlur={() => {
-                      if (amount && Number(amount) < 1000) setAmount("1000");
-                    }}
-                    className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm font-bold text-slate-900 outline-none dark:text-white"
-                    aria-label="Nominal donasi khusus dalam rupiah"
+                    aria-label="Atur nominal donasi dalam kelipatan seribu rupiah"
+                    className="h-2 w-full cursor-pointer accent-emerald-600"
                   />
-                </span>
-                <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-                  Minimum Rp1.000. Batas maksimum default Rp5.000.000 mengikuti
-                  konfigurasi backend.
-                </span>
-              </label>
-            </fieldset>
+                  <span className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                    <span>Rp1.000</span>
+                    <span>Kelipatan Rp1.000</span>
+                    <span>Rp500.000</span>
+                  </span>
+                </label>
 
-            {donationError && (
-              <p
-                role="alert"
-                className="flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
-              >
-                <FiAlertCircle className="mt-0.5 shrink-0" />
-                {donationError}
+                <label className="block space-y-1.5">
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    Atau masukkan nominal sendiri
+                  </span>
+                  <span className="flex min-h-12 items-center overflow-hidden rounded-xl border border-slate-300 transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 dark:border-slate-700">
+                    <span className="border-r border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      Rp
+                    </span>
+                    <input
+                      required
+                      type="number"
+                      min={1000}
+                      max={5_000_000}
+                      step={1}
+                      inputMode="numeric"
+                      value={amount}
+                      onChange={(event) => setAmount(event.target.value)}
+                      onBlur={() => {
+                        if (amount && Number(amount) < 1000) setAmount("1000");
+                      }}
+                      className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm font-extrabold text-slate-900 outline-none dark:text-white"
+                      aria-label="Nominal donasi khusus dalam rupiah"
+                    />
+                  </span>
+                </label>
+              </fieldset>
+            </div>
+
+            <aside className="flex flex-col rounded-2xl border border-emerald-100 bg-linear-to-b from-emerald-50/90 to-white p-4 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:to-slate-900 lg:sticky lg:top-24 lg:self-start">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                Ringkasan donasi
               </p>
-            )}
-            <button
-              type="submit"
-              disabled={!isAuthenticated || isCreatingDonation}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-            >
-              {isCreatingDonation ? (
-                <FiRefreshCw className="animate-spin" />
-              ) : (
-                <FiCreditCard />
+              <div className="mt-4 flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white">
+                  <FiHeart />
+                </span>
+                <div>
+                  <p className="text-sm font-extrabold capitalize text-slate-900 dark:text-white">
+                    {donationType}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Pembayaran via QRIS
+                  </p>
+                </div>
+              </div>
+              <div className="my-4 h-px bg-emerald-100 dark:bg-emerald-900/50" />
+              <div className="flex items-end justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Nominal dasar
+                </span>
+                <strong className="text-xl font-extrabold text-emerald-800 dark:text-emerald-200">
+                  {formatRupiah(Number(amount))}
+                </strong>
+              </div>
+              <div className="mt-3 flex items-start gap-2 rounded-xl bg-white/70 p-3 text-[11px] leading-relaxed text-slate-600 dark:bg-slate-800/70 dark:text-slate-300">
+                <FiShield className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                Nominal final dapat dipengaruhi kode unik atau konfigurasi gateway.
+              </div>
+
+              {donationError && (
+                <p
+                  role="alert"
+                  className="mt-3 flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-xs text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
+                >
+                  <FiAlertCircle className="mt-0.5 shrink-0" />
+                  {donationError}
+                </p>
               )}
-              {isCreatingDonation
-                ? "Menyiapkan QRIS..."
-                : sessionIsLoading
-                  ? "Menyiapkan sesi..."
-                  : isAuthenticated
-                    ? "Lanjutkan ke pembayaran"
-                    : "Pembayaran belum tersedia"}
-            </button>
-            <p className="text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-              Nominal ini adalah nilai dasar donasi. Biaya layanan gateway
-              dipotong dari saldo organisasi, sedangkan kode unik dapat
-              menambah tagihan. Total pembayaran mengikuti nilai gateway.
-            </p>
+              <button
+                type="submit"
+                disabled={!isAuthenticated || isCreatingDonation}
+                className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-bold text-white shadow-lg shadow-emerald-700/15 transition hover:-translate-y-px hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+              >
+                {isCreatingDonation ? (
+                  <FiRefreshCw className="animate-spin" />
+                ) : (
+                  <FiCreditCard />
+                )}
+                {isCreatingDonation
+                  ? "Menyiapkan QRIS..."
+                  : sessionIsLoading
+                    ? "Menyiapkan sesi..."
+                    : isAuthenticated
+                      ? "Lanjutkan Pembayaran"
+                      : "Pembayaran Belum Tersedia"}
+                {isAuthenticated && !isCreatingDonation && (
+                  <FiArrowRight className="h-4 w-4" />
+                )}
+              </button>
+            </aside>
           </form>
         </Panel>
       </div>
 
       {selectedDonation && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-60 flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setSelectedDonation(null);
@@ -539,14 +604,15 @@ const ZiswafPage = () => {
             aria-labelledby="donation-details-title"
             className="max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:rounded-2xl"
           >
-            <div className="flex items-start justify-between gap-3 border-b border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20 sm:p-5">
+            <div className="relative overflow-hidden flex items-start justify-between gap-3 border-b border-emerald-100 bg-linear-to-r from-emerald-50 via-teal-50/70 to-cyan-50/60 p-4 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/20 sm:p-5">
+              <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-emerald-300/20 blur-xl" />
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                <p className="relative text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
                   Transaksi donasi
                 </p>
                 <p
                   id="donation-details-title"
-                  className="mt-1 text-sm font-extrabold capitalize text-slate-900 dark:text-white"
+                  className="relative mt-1 text-sm font-extrabold capitalize text-slate-900 dark:text-white"
                 >
                   {selectedDonation.donation_type}
                 </p>
@@ -565,18 +631,27 @@ const ZiswafPage = () => {
             </div>
             <div className="space-y-4 p-4 sm:p-5">
               {selectedDonation.qris_image || selectedDonation.qr_url ? (
-                <div className="flex flex-col items-center gap-4 rounded-xl bg-slate-50 p-4 dark:bg-slate-800">
-                  <img
-                    src={
-                      selectedDonation.qris_image ??
-                      selectedDonation.qr_url ??
-                      undefined
-                    }
-                    alt="QRIS pembayaran donasi"
-                    className="aspect-square w-52 max-w-full rounded-lg bg-white object-contain p-2 shadow-sm"
-                  />
-                  <p className="text-center text-xs text-slate-600 dark:text-slate-300">
-                    Pindai QRIS menggunakan aplikasi pembayaran Anda.
+                <div className="relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-5 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                  <div className="absolute left-1/2 top-24 h-44 w-44 -translate-x-1/2 rounded-full bg-emerald-300/15 blur-2xl" />
+                  <div className="relative rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10 dark:border-slate-600">
+                    {selectedDonation.status === "pending" && (
+                      <span className="absolute -right-2 -top-2 flex h-5 w-5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                        <span className="relative inline-flex h-5 w-5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900" />
+                      </span>
+                    )}
+                    <img
+                      src={
+                        selectedDonation.qris_image ??
+                        selectedDonation.qr_url ??
+                        undefined
+                      }
+                      alt="QRIS pembayaran donasi"
+                      className="aspect-square w-52 max-w-full rounded-lg object-contain"
+                    />
+                  </div>
+                  <p className="relative text-center text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    Pindai QRIS menggunakan aplikasi pembayaran pilihan Anda
                   </p>
                 </div>
               ) : (

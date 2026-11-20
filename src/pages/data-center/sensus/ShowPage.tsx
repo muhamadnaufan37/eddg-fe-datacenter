@@ -13,10 +13,7 @@ import {
 
 import { fetchSensusByUuid } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
-import {
-  maskText,
-  resolveImageUrl,
-} from "../../../utils/text";
+import { maskText, resolveImageUrl } from "../../../utils/text";
 import Sensitive from "../../../components/Sensitive";
 
 interface SensusRecord {
@@ -59,8 +56,10 @@ const SensusShowPage = () => {
   };
 
   const getStatusPernikahanLabel = (status?: boolean | number | string) => {
-    if (status == 1 || status === "1" || status === true) return "SUDAH MENIKAH";
-    if (status == 0 || status === "0" || status === false) return "BELUM MENIKAH";
+    if (status == 1 || status === "1" || status === true)
+      return "SUDAH MENIKAH";
+    if (status == 0 || status === "0" || status === false)
+      return "BELUM MENIKAH";
     return "BELUM MENIKAH";
   };
 
@@ -105,7 +104,9 @@ const SensusShowPage = () => {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between p-3">
-              <span className="text-xs font-bold text-white/80">Foto Profil Dokumen Sensus</span>
+              <span className="text-xs font-bold text-white/80">
+                Foto Profil Dokumen Sensus
+              </span>
               <button
                 type="button"
                 onClick={() => setIsImagePreviewOpen(false)}
@@ -134,7 +135,9 @@ const SensusShowPage = () => {
             <FiArrowLeft />
             Kembali ke Sensus
           </button>
-          <span className="text-xs font-bold text-slate-400 dark:text-[#9db2bf]">/ Ringkasan Portofolio</span>
+          <span className="text-xs font-bold text-slate-400 dark:text-[#9db2bf]">
+            / Ringkasan Portofolio
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -455,7 +458,9 @@ const SensusShowPage = () => {
                       Kriteria Pasangan
                     </span>
                     <p className="mt-1 break-all text-sm font-bold text-slate-900 dark:text-[#dde6ed]">
-                      <Sensitive value={maskText(record.kriteria_pasangan || "-")} />
+                      <Sensitive
+                        value={maskText(record.kriteria_pasangan || "-")}
+                      />
                     </p>
                   </div>
                 </div>
@@ -474,13 +479,14 @@ const SensusShowPage = () => {
                   Terverifikasi Sistem Basis Data Terpusat SIPANDA
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-[#9db2bf]">
-                  Dokumen digital resmi dengan penyamaran data sensitif aktif (Protected Record).
+                  Dokumen digital resmi dengan penyamaran data sensitif aktif
+                  (Protected Record).
                 </p>
               </div>
             </div>
 
             <span className="font-mono text-xs font-bold text-[#2373f4] dark:text-[#65d0f4]">
-              UUID: {maskText(kodeUuid)}
+              Kode Peserta: {maskText(kodeUuid)}
             </span>
           </div>
         </div>

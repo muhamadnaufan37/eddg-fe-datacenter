@@ -35,6 +35,15 @@
   --color-dc-slate: #526d82;
   --color-dc-muted: #9db2bf;
   --color-dc-ice: #dde6ed;
+  --color-dc-deep: #1c2736;
+  --color-dc-hero-via: #2f435c;
+  --color-dc-shadow: #0a121e;
+  --color-dc-list-hover: #223043;
+  --color-dc-border: #cbdcf5;
+  --color-dc-bg: #edf2f9;
+  --color-dc-surface: #f8fafd;
+  --color-dc-hover: #eef4fc;
+  --color-dc-hover-strong: #e0effe;
 }
 
 @variant dark (&:is(.dark *));

@@ -18,6 +18,7 @@ import {
   submitSensusRegistration,
 } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
+import { useZiswafCompletion } from "../../../contexts/ZiswafCompletionContext";
 
 type SensusFormValues = {
   nama_lengkap: string;
@@ -166,6 +167,7 @@ const ConsentModal = ({
 
 const SensusRegistrationPage = () => {
   const navigate = useNavigate();
+  const { showZiswafCompletion } = useZiswafCompletion();
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentOpen, setIsConsentOpen] = useState(false);
@@ -229,6 +231,10 @@ const SensusRegistrationPage = () => {
           "success",
           "Berhasil",
           response?.message ?? "Registrasi sensus berhasil disimpan.",
+        );
+        showZiswafCompletion(
+          "Registrasi Sensus Selesai",
+          "Data sensus telah berhasil disimpan. Saatnya berbagi kebaikan melalui ZISWAF Digital.",
         );
         helpers.resetForm();
         setActiveStep(0);

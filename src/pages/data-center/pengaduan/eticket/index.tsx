@@ -17,6 +17,7 @@ import {
   submitEticket,
 } from "../../../../services/dataCenter";
 import { showToast } from "../../../../services/toast";
+import { useZiswafCompletion } from "../../../../contexts/ZiswafCompletionContext";
 
 type EticketFormValues = {
   nama_lengkap: string;
@@ -69,6 +70,7 @@ const stepSchemas = [
 
 const EticketPage = () => {
   const navigate = useNavigate();
+  const { showZiswafCompletion } = useZiswafCompletion();
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingNames, setIsLoadingNames] = useState(false);
@@ -105,6 +107,10 @@ const EticketPage = () => {
           "success",
           "Berhasil",
           response?.message ?? "E-ticket berhasil dikirim.",
+        );
+        showZiswafCompletion(
+          "Pengaduan Berhasil Dikirim",
+          "E-ticket Anda telah diteruskan. Jangan lupa untuk berbagi kebaikan melalui ZISWAF Digital.",
         );
         helpers.resetForm();
         setActiveStep(0);

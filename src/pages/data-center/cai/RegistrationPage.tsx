@@ -16,6 +16,7 @@ import {
   submitCaiRegistration,
 } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
+import { useZiswafCompletion } from "../../../contexts/ZiswafCompletionContext";
 
 type CaiFormValues = {
   nama_lengkap: string;
@@ -129,6 +130,7 @@ const stepSchemas = [
 
 const CaiRegistrationPage = () => {
   const navigate = useNavigate();
+  const { showZiswafCompletion } = useZiswafCompletion();
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingDaerah, setIsLoadingDaerah] = useState(true);
@@ -197,6 +199,10 @@ const CaiRegistrationPage = () => {
           "success",
           "Berhasil",
           response?.message ?? "Registrasi CAI berhasil disimpan.",
+        );
+        showZiswafCompletion(
+          "Registrasi CAI Selesai",
+          "Pendaftaran CAI telah berhasil disimpan. Salurkan zakat, infaq, atau sedekah melalui ZISWAF Digital.",
         );
         helpers.resetForm();
         setActiveStep(0);

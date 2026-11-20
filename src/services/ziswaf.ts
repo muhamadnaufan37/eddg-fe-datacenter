@@ -16,7 +16,7 @@ export const ziswafApi = axios.create({
   },
 });
 
-export type DonationType = "zakat" | "infaq" | "sedekah" | "wakaf";
+export type DonationType = "sodakoh";
 export type DonationStatus =
   | "processing"
   | "pending"
@@ -70,8 +70,7 @@ const isAxiosUnauthorized = (error: unknown) =>
 export const getZiswafErrorMessage = (error: unknown) => {
   if (axios.isAxiosError<{ message?: string }>(error)) {
     return (
-      error.response?.data?.message ??
-      "Permintaan gagal. Silakan coba lagi."
+      error.response?.data?.message ?? "Permintaan gagal. Silakan coba lagi."
     );
   }
   if (error instanceof Error) return error.message;
@@ -89,9 +88,8 @@ export const getRetryAfterSeconds = (error: unknown) => {
 };
 
 export const startZiswafSession = async () => {
-  const response = await ziswafApi.post<ApiEnvelope<ZiswafSession>>(
-    "/ziswaf/session",
-  );
+  const response =
+    await ziswafApi.post<ApiEnvelope<ZiswafSession>>("/ziswaf/session");
   if (
     !response.data.success ||
     !response.data.data?.user ||
@@ -120,7 +118,9 @@ export const createDonation = async (payload: {
   return response.data;
 };
 
-const getDonationResponse = (response: AxiosResponse<ApiEnvelope<Donation>>) => {
+const getDonationResponse = (
+  response: AxiosResponse<ApiEnvelope<Donation>>,
+) => {
   if (!response.data.success || !response.data.data) {
     throw new Error(response.data.message || "Data transaksi tidak tersedia.");
   }

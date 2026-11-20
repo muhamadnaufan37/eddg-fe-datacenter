@@ -21,6 +21,7 @@ import {
 } from "../../../services/dataCenter";
 import { showToast } from "../../../services/toast";
 import { resolveImageUrl } from "../../../utils/text";
+import { useZiswafCompletion } from "../../../contexts/ZiswafCompletionContext";
 
 type CaiAttendanceMode = "list" | "rfid";
 
@@ -585,6 +586,7 @@ const RfidTappingPanel = ({
 
 const PresensiPage = () => {
   const navigate = useNavigate();
+  const { showZiswafCompletion } = useZiswafCompletion();
   const [searchParams] = useSearchParams();
   const kodeKegiatanFromUrl = searchParams.get("no_kegiatan")?.trim() ?? "";
 
@@ -698,6 +700,10 @@ const PresensiPage = () => {
           "success",
           "Berhasil",
           response?.message ?? "Presensi berhasil disimpan.",
+        );
+        showZiswafCompletion(
+          "Presensi Selesai",
+          "Presensi Anda telah berhasil dicatat. Teruskan semangat berbagi lewat ZISWAF Digital.",
         );
 
         helpers.resetForm({
